@@ -1,0 +1,98 @@
+import "server-only";
+import OpenAI from "openai";
+import type { z } from "zod";
+
+/**
+ * Thin, swappable model adapter. The research pipeline only depends on this
+ * interface so the provider can be changed without touching pipeline logic.
+ *
+ * `structured` returns a zod-validated object or null. `research` performs a
+ * web-grounded call and returns text plus the provider's own URL citations;
+ * the pipeline independently verifies every URL before anything is stored.
+ */
+export interface ModelUsage {
+  inputTokens: number;
+  outputTokens: number;
+  estimatedCostUsd: number;
+}
+
+export interface ResearchModel {
+  readonly name: string;
+  structured<T>(args: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number }): Promise<T | null>;
+  research(args: { system: string; input: string; maxOutputTokens?: number }): Promise<{ text: string; citations: { url: string; title: string }[]; usage: ModelUsage } | null>;
+  readonly usage: ModelUsage;
+}
+
+const DEFAULT_MODEL = process.env.RESEARCH_MODEL ?? "gpt-5-mini";
+// Rough list prices per 1M tokens for cost estimation only (configurable).
+const INPUT_PRICE = Number(process.env.RESEARCH_MODEL_INPUT_USD_PER_M ?? "0.25");
+const OUTPUT_PRICE = Number(process.env.RESEARCH_MODEL_OUTPUT_USD_PER_M ?? "2");
+
+class OpenAIResearchModel implements ResearchModel {
+  readonly name = DEFAULT_MODEL;
+  readonly usage: ModelUsage = { inputTokens: 0, outputTokens: 0, estimatedCostUsd: 0 };
+  private client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 120_000, maxRetries: 2 });
+
+  private track(u?: { input_tokens?: number; output_tokens?: number } | null) {
+    if (!u) return;
+    this.usage.inputTokens += u.input_tokens ?? 0;
+    this.usage.outputTokens += u.output_tokens ?? 0;
+    this.usage.estimatedCostUsd = (this.usage.inputTokens * INPUT_PRICE + this.usage.outputTokens * OUTPUT_PRICE) / 1_000_000;
+  }
+
+  async structured<T>({ schema, schemaName, system, input, maxOutputTokens = 4000 }: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number }): Promise<T | null> {
+    const { toJSONSchema } = await import("zod");
+    const jsonSchema = toJSONSchema(schema, { target: "draft-7" }) as Record<string, unknown>;
+    const res = await this.client.responses.create({
+      model: this.name,
+      instructions: system,
+      input,
+      max_output_tokens: maxOutputTokens,
+      text: { format: { type: "json_schema", name: schemaName, schema: jsonSchema, strict: false } },
+    });
+    this.track(res.usage);
+    const text = res.output_text;
+    if (!text) return null;
+    try {
+      const parsed = schema.safeParse(JSON.parse(text));
+      return parsed.success ? parsed.data : null;
+    } catch {
+      return null;
+    }
+  }
+
+  async research({ system, input, maxOutputTokens = 6000 }: { system: string; input: string; maxOutputTokens?: number }) {
+    const res = await this.client.responses.create({
+      model: this.name,
+      instructions: system,
+      input,
+      max_output_tokens: maxOutputTokens,
+      tools: [{ type: "web_search" }],
+      include: ["web_search_call.action.sources"],
+    });
+    this.track(res.usage);
+    const citations: { url: string; title: string }[] = [];
+    for (const item of res.output) {
+      if (item.type === "message") {
+        for (const part of item.content) {
+          if (part.type === "output_text") {
+            for (const a of part.annotations ?? []) {
+              if (a.type === "url_citation") citations.push({ url: a.url, title: a.title });
+            }
+          }
+        }
+      }
+    }
+    return { text: res.output_text ?? "", citations: dedupe(citations), usage: { ...this.usage } };
+  }
+}
+
+function dedupe(items: { url: string; title: string }[]) {
+  const seen = new Set<string>();
+  return items.filter((c) => (seen.has(c.url) ? false : (seen.add(c.url), true)));
+}
+
+export function getResearchModel(): ResearchModel {
+  if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
+  return new OpenAIResearchModel();
+}
