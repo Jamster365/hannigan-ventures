@@ -28,7 +28,7 @@ export function effectiveAccess(
 ): EffectiveAccess {
   const now = opts.now ?? new Date();
   const freshnessHours = opts.freshnessHours ?? ACCESS_FRESHNESS_HOURS;
-  const maxCheque = opts.maxChequeGbp ?? 100_000;
+  const maxCheque = opts.maxChequeGbp ?? 250_000;
   if (checks.length === 0) {
     return { status: "unknown", canInvestNow: false, reason: "No verified access route recorded.", check: null, isStale: false };
   }

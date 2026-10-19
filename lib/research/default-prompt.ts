@@ -6,11 +6,11 @@ import type { ResearchPreferences } from "@/lib/domain/types";
  * SPEC §8.3 and the briefing style. Evidence, security and formatting rules
  * live in lib/research/policy.ts and are NOT editable.
  */
-export const DEFAULT_RESEARCH_PROMPT = `Find early-stage investment opportunities across all sectors, with emphasis on the UK (London, Cambridge, Oxford), university spinouts, accelerators (Antler, EF, X-HEC) and genuine pre-round access for an individual angel writing cheques of up to £100,000. Every sector qualifies; there are no thematic quotas. Prefer a few well-evidenced findings over volume, and do not re-surface unchanged companies.
+export const DEFAULT_RESEARCH_PROMPT = `Find early-stage investment opportunities across all sectors, with emphasis on the UK (London, Cambridge, Oxford), university spinouts, accelerators (Antler, EF, X-HEC) and genuine pre-round access for an individual angel writing cheques of up to £250,000. Every sector qualifies; there are no thematic quotas. Prefer a few well-evidenced findings over volume, and do not re-surface unchanged companies.
 
 Discovery priorities (keep all ten):
 
-1. Actual allocation before close. Find quality companies where a cheque of up to £100,000 can genuinely be invested or plausibly obtained before the round closes: live EIS/SEIS rounds, residual allocations, extensions, SPVs, founder-direct and secondaries. Verify availability, price and the ability to execute.
+1. Actual allocation before close. Find quality companies where a cheque of up to £250,000 can genuinely be invested or plausibly obtained before the round closes: live EIS/SEIS rounds, residual allocations, extensions, SPVs, founder-direct and secondaries. Verify availability, price and the ability to execute.
 
 2. Project Ventures / Imperial. New Project Ventures investments, Enterprise Lab companies, grant-winning Imperial spinouts, and any outside-angel or co-investment possibilities.
 
@@ -35,7 +35,7 @@ Also track London Demo Day and the Imperial, UCL, King's, LSE, Queen Mary, EF, A
 Briefing style: short, sceptical, commercially literate. Lead with what changed and why it matters. Keep unknowns visibly unknown.`;
 
 export const DEFAULT_PREFERENCES: ResearchPreferences = {
-  maxChequeGbp: 100_000,
+  maxChequeGbp: 250_000,
   geographicFocus: "UK first, global exceptions",
   discoveryDepth: "balanced",
   eventGeography: "London",

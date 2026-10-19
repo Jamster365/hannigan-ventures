@@ -23,4 +23,4 @@ jobs:
       - run: npm run test:integration
       - run: npm run build
         env:
-          DEAL_ROOM_DATA_MODE: demo
+          APP_DATA_MODE: demo

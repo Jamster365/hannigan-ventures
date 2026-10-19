@@ -24,6 +24,6 @@ export default defineConfig({
         url: baseURL,
         reuseExistingServer: true,
         timeout: 120_000,
-        env: { DEAL_ROOM_DATA_MODE: "demo" },
+        env: { APP_DATA_MODE: "demo" },
       },
 });

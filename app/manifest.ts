@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "The Deal Room",
-    short_name: "Deal Room",
+    name: "Hannigan Ventures",
+    short_name: "Hannigan",
     description: "Family investment intelligence.",
     start_url: "/",
     display: "standalone",

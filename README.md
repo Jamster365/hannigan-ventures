@@ -1,4 +1,4 @@
-# The Deal Room
+# Hannigan Ventures
 
 A private family investment-discovery and research app for three household members. Mobile-first PWA built with Next.js 16, TypeScript, Tailwind CSS 4, Supabase (Postgres, Auth, RLS) and a server-side, source-grounded AI research pipeline. See `SPEC.md` for the product contract and `IMPLEMENTATION_STATUS.md` for what is done, deferred and known.
 

@@ -18,17 +18,17 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: {
-    default: "The Deal Room",
-    template: "%s · The Deal Room",
+    default: "Hannigan Ventures",
+    template: "%s · Hannigan Ventures",
   },
   description: "Family investment intelligence.",
-  applicationName: "The Deal Room",
+  applicationName: "Hannigan Ventures",
   manifest: "/manifest.webmanifest",
   // Private household application: never indexed, never previewed socially.
   robots: { index: false, follow: false, nocache: true },
   appleWebApp: {
     capable: true,
-    title: "The Deal Room",
+    title: "Hannigan Ventures",
     statusBarStyle: "default",
   },
   icons: {

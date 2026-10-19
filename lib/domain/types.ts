@@ -1,5 +1,5 @@
 /**
- * Domain types for The Deal Room.
+ * Domain types for Hannigan Ventures.
  *
  * These mirror the Supabase schema (supabase/migrations) and are the shape the
  * UI consumes regardless of whether data comes from Postgres or the labelled

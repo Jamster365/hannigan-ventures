@@ -22,7 +22,7 @@ if (!url || !key) {
   process.exit(1);
 }
 const emails = (process.env.SEED_MEMBER_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-const names = (process.env.SEED_MEMBER_NAMES ?? "Jamie,Brother,Dad").split(",").map((n) => n.trim());
+const names = (process.env.SEED_MEMBER_NAMES ?? "Jamie,George,Chris").split(",").map((n) => n.trim());
 if (emails.length === 0) {
   console.error("Set SEED_MEMBER_EMAILS (comma-separated; owner first). Emails are never stored in the repository.");
   process.exit(1);
@@ -38,9 +38,9 @@ function must<T>(res: { data: T | null; error: { message: string } | null }, wha
 
 async function main() {
   // 1. Household
-  const existingRes = await admin.from("households").select("id").eq("name", "The Deal Room household").maybeSingle<{ id: string }>();
+  const existingRes = await admin.from("households").select("id").eq("name", "Hannigan Ventures household").maybeSingle<{ id: string }>();
   if (existingRes.error) throw new Error(`household: ${existingRes.error.message}`);
-  const householdId = existingRes.data?.id ?? must(await admin.from("households").insert({ name: "The Deal Room household" }).select("id").single<{ id: string }>(), "create household").id;
+  const householdId = existingRes.data?.id ?? must(await admin.from("households").insert({ name: "Hannigan Ventures household" }).select("id").single<{ id: string }>(), "create household").id;
   console.log("household", householdId);
 
   // 2. Members (auth users created or reused; never public sign-up)
