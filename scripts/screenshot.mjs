@@ -19,7 +19,7 @@ const viewports = [
 mkdirSync(outDir, { recursive: true });
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
 for (const vp of viewports) {
-  const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, isMobile: vp.mobile, hasTouch: vp.mobile });
+  const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: Number(process.env.SCALE ?? 2), isMobile: vp.mobile, hasTouch: vp.mobile });
   const page = await context.newPage();
   for (const p of paths) {
     const file = path.join(outDir, `${vp.name}${p === "/" ? "-home" : "-" + p.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}.png`);
