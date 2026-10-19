@@ -1,0 +1,259 @@
+import { describe, expect, it } from "vitest";
+import type { z } from "zod";
+import { enforceAssessmentRules } from "@/lib/research/assess";
+import type { SafeFetcher } from "@/lib/research/fetch";
+import { classifyChanges } from "@/lib/research/materiality";
+import { MemoryResearchStore } from "@/lib/research/memory-store";
+import { runPipeline } from "@/lib/research/pipeline";
+import type { ModelUsage, ResearchModel } from "@/lib/research/provider";
+import { resolveCandidate } from "@/lib/research/resolve";
+import { assessmentSchema, candidateSchema, extractionSchema, homeStorySchema, type AssessmentOutput, type Candidate, type Extraction } from "@/lib/research/schemas";
+import { sanitiseCandidate } from "@/lib/research/verify";
+
+// ---------------------------------------------------------------------------
+// Fixtures: a fake model that "cites" pages, a fetcher that serves some of them
+// ---------------------------------------------------------------------------
+const PAGES: Record<string, string> = {
+  "https://example-company.test/": "<html><head><title>Example Photonics — retinal imaging</title></head><body>Example Photonics builds photonic-chip retinal scanners. We are raising a seed round. Apply via our investor page.</body></html>",
+  "https://example-company.test/investors": "<html><head><title>Invest in Example Photonics</title></head><body>Seed round open. Minimum ticket £10,000. Closes 31 October.</body></html>",
+  "https://news.example.test/example-photonics-seed": "<html><head><title>Example Photonics targets £2m seed</title><meta property=\"article:published_time\" content=\"2026-10-15T08:00:00Z\"></head><body>The Bristol company is targeting a £2m seed at a £9m pre-money valuation, led by Specialist Health Ventures.</body></html>",
+};
+
+const fetcher: SafeFetcher = async (url) => {
+  const html = PAGES[url];
+  if (!html) return { ok: false, status: 404, finalUrl: url, contentType: null, text: null, error: "HTTP 404" };
+  return { ok: true, status: 200, finalUrl: url, contentType: "text/html", text: html };
+};
+
+function candidate(overrides: Partial<Candidate> = {}): Candidate {
+  return candidateSchema.parse({
+    name: "Example Photonics",
+    website: "https://example-company.test/",
+    legalName: "Example Photonics Ltd",
+    sector: "Medtech",
+    subSector: "Ophthalmology",
+    city: "Bristol",
+    country: "UK",
+    stage: "Seed",
+    teaser: "Photonic-chip retinal scanners.",
+    description: "Builds photonic-chip retinal scanners.",
+    discoverySignal: "Investor page found",
+    researchRuleMatched: "Priority 1",
+    founders: [{ name: "A. Founder", role: "CEO", bio: "Photonics researcher.", profileUrl: null, sourceUrls: ["https://example-company.test/"], evidenceStatus: "official_company_claim" }],
+    round: {
+      stage: "Seed",
+      target: { amount: 2_000_000, currency: "GBP", asOf: "2026-10-15", sourceUrls: ["https://news.example.test/example-photonics-seed"], evidenceStatus: "third_party_report" },
+      preMoney: { amount: 9_000_000, currency: "GBP", asOf: "2026-10-15", sourceUrls: ["https://news.example.test/example-photonics-seed"], evidenceStatus: "third_party_report" },
+      postMoney: null,
+      reportedCommitted: { amount: 1_000_000, currency: "GBP", asOf: null, sourceUrls: ["https://nowhere.example.test/missing"], evidenceStatus: "third_party_report" },
+      claimedStatus: "open",
+      closesAt: "2026-10-31",
+      leadInvestors: ["Specialist Health Ventures"],
+      sourceUrls: ["https://news.example.test/example-photonics-seed"],
+      evidenceStatus: "third_party_report",
+    },
+    access: { status: "verified_open", routeType: "official_application", contactOrUrl: "https://example-company.test/investors", minCheque: 10_000, maxCheque: null, currency: "GBP", notes: "Investor page live with minimum ticket.", sourceUrls: ["https://example-company.test/investors"], evidenceStatus: "official_company_claim" },
+    eis: { status: "confirmed_documented", note: null, sourceUrls: [], evidenceStatus: "unknown" },
+    facts: [{ key: "team_size", label: "Team size", value: "8", currency: null, asOf: null, sourceUrls: ["https://nowhere.example.test/missing"], evidenceStatus: "third_party_report" }],
+    signals: [{ headline: "Seed round opened", summary: "Investor page shows an open round with a stated minimum.", type: "funding", materiality: "high", effectiveAt: "2026-10-15", sourceUrls: ["https://example-company.test/investors"], evidenceStatus: "official_company_claim" }],
+    openQuestions: ["Post-money?"],
+    ...overrides,
+  });
+}
+
+function fakeModel(extraction: Extraction, assessment: AssessmentOutput, opts: { citations?: { url: string; title: string }[]; costPerCall?: number } = {}): ResearchModel {
+  const usage: ModelUsage = { inputTokens: 0, outputTokens: 0, estimatedCostUsd: 0 };
+  const bump = () => {
+    usage.inputTokens += 1000;
+    usage.outputTokens += 500;
+    usage.estimatedCostUsd += opts.costPerCall ?? 0.01;
+  };
+  return {
+    name: "fixture-model",
+    usage,
+    async research() {
+      bump();
+      return { text: "Example Photonics is raising a seed round (see investor page). News coverage reports a £2m target.", citations: opts.citations ?? Object.keys(PAGES).map((url) => ({ url, title: url })), usage };
+    },
+    async structured<T>({ schema, schemaName }: { schema: z.ZodType<T>; schemaName: string }): Promise<T | null> {
+      bump();
+      if (schemaName === "research_extraction") return schema.parse(extraction);
+      if (schemaName === "company_assessment") return schema.parse(assessment);
+      if (schemaName === "home_stories") return schema.parse({ stories: [{ storyType: "access", companyName: "Example Photonics", headline: "Example Photonics: route verified", teaser: "Investor page live.", priority: 90, sourceUrl: null }] });
+      return null;
+    },
+  };
+}
+
+const goodAssessment = (): AssessmentOutput =>
+  assessmentSchema.parse({
+    aiPriority: "high",
+    aiScore: 7.4,
+    confidence: "medium",
+    summary: "Credible early-stage photonics play with a live route.",
+    whyInterested: ["Live application route."],
+    risks: ["Clinical validation early."],
+    bullCase: "Bull.",
+    bearCase: "Bear.",
+    whyNow: "Round open now.",
+    nextAction: "Request the deck.",
+    breakdown: [
+      { key: "team", label: "Team", score: 7, note: "ok", sourceUrls: [] },
+      { key: "product", label: "Product", score: 7, note: "ok", sourceUrls: [] },
+      { key: "traction", label: "Traction", score: 5, note: "ok", sourceUrls: [] },
+      { key: "market", label: "Market", score: 8, note: "ok", sourceUrls: [] },
+      { key: "valuation", label: "Valuation", score: 6, note: "pre-money stated", sourceUrls: [] },
+      { key: "access", label: "Access", score: 9, note: "verified", sourceUrls: [] },
+    ],
+    changeExplanation: null,
+  });
+
+// ---------------------------------------------------------------------------
+describe("evidence rules", () => {
+  it("drops claims whose only sources failed verification and never upgrades access", () => {
+    const verified = new Set(["https://example-company.test/", "https://example-company.test/investors", "https://news.example.test/example-photonics-seed"]);
+    const { candidate: c, removed } = sanitiseCandidate(candidate(), verified);
+    expect(c.round?.reportedCommitted?.amount).toBeNull(); // source missing → amount dropped
+    expect(c.round?.preMoney?.amount).toBe(9_000_000); // sourced → kept
+    expect(c.facts).toHaveLength(0); // unsourced fact removed
+    expect(c.eis.status).toBe("company_claimed"); // documented claim without evidence downgraded
+    expect(c.access.status).toBe("verified_open"); // sourced route kept
+    expect(removed.join("\n")).toMatch(/committed/);
+  });
+
+  it("downgrades a verified_open claim with no verified route", () => {
+    const { candidate: c } = sanitiseCandidate(candidate(), new Set(["https://news.example.test/example-photonics-seed"]));
+    expect(c.access.status).toBe("contactable");
+    expect(c.founders).toHaveLength(0);
+  });
+});
+
+describe("assessment rules", () => {
+  it("refuses a score with fewer than two verified sources and leaves valuation unrated when undisclosed", () => {
+    const c = candidate({ round: null });
+    const out = enforceAssessmentRules(goodAssessment(), c, 1);
+    expect(out.aiScore).toBeNull();
+    expect(out.aiPriority).toBe("insufficient_evidence");
+    expect(out.breakdown.find((d) => d.key === "valuation")?.score).toBeNull();
+  });
+  it("caps the access dimension without a live route", () => {
+    const c = candidate({ access: { ...candidate().access, status: "fundraising_reported" } });
+    const out = enforceAssessmentRules(goodAssessment(), c, 3);
+    expect(out.breakdown.find((d) => d.key === "access")?.score).toBe(6);
+    expect(out.aiScore).toBe(7.4);
+  });
+});
+
+describe("entity resolution", () => {
+  const known = [{ id: "k1", name: "Example Photonics", slug: "example-photonics", domain: "example-company.test", legalName: null, aliases: [] }];
+  it("matches on canonical domain", () => {
+    expect(resolveCandidate({ name: "Example Photonics Ltd", website: "https://www.example-company.test/about" }, known, new Set())).toMatchObject({ kind: "existing", companyId: "k1" });
+  });
+  it("never merges a different company that shares a name but not a domain", () => {
+    const r = resolveCandidate({ name: "Example Photonics", website: "https://other-example.test" }, known, new Set());
+    expect(r.kind).toBe("ambiguous");
+  });
+  it("flags similar names for review instead of merging", () => {
+    const r = resolveCandidate({ name: "Example Robotics", website: null }, known, new Set());
+    expect(r.kind).toBe("ambiguous");
+  });
+  it("creates a unique slug for genuinely new companies", () => {
+    const r = resolveCandidate({ name: "Quillon Verify", website: "https://quillon.test" }, known, new Set(["quillon-verify"]));
+    expect(r).toEqual({ kind: "new", slug: "quillon-verify-2" });
+  });
+});
+
+describe("materiality", () => {
+  it("notifies on first discovery and on access changes, not on routine re-checks", () => {
+    const c = candidate();
+    const first = classifyChanges(c, null);
+    expect(first.map((x) => x.notify)).toContain("new_company");
+    const unchanged = classifyChanges({ ...c, signals: [] }, { accessStatus: "verified_open", claimedRoundStatus: "open", preMoney: 9_000_000, targetAmount: 2_000_000, lastSignalHeadlines: ["Seed round opened"] });
+    expect(unchanged).toHaveLength(0);
+    const closed = classifyChanges({ ...c, signals: [], access: { ...c.access, status: "closed" } }, { accessStatus: "verified_open", claimedRoundStatus: "open", preMoney: 9_000_000, targetAmount: 2_000_000, lastSignalHeadlines: [] });
+    expect(closed[0]).toMatchObject({ notify: "round_closed", materiality: "high" });
+  });
+});
+
+describe("end-to-end pipeline with fixtures", () => {
+  const extraction = (): Extraction =>
+    extractionSchema.parse({
+      candidates: [candidate()],
+      events: [{ name: "Bristol Founders Night", organiser: "Example Angels", eventType: "Pitch night", startAtIso: "2026-11-05T18:00:00Z", endAtIso: null, venue: "Engine Shed", city: "Bristol", isOnline: false, registrationUrl: "https://example-company.test/", accessStatus: "open", audienceFit: "Angels", significance: "Two tracked companies pitching.", nextAction: "Register", sourceUrls: ["https://example-company.test/"], evidenceStatus: "official_company_claim" }],
+      executiveFindings: ["One new company with a live route."],
+    });
+
+  it("publishes a sourced company, verifies citations, records changes and notifies once", async () => {
+    const store = new MemoryResearchStore();
+    const model = fakeModel(extraction(), goodAssessment());
+    const result = await runPipeline({ model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") }, { householdId: "h1", runKind: "scheduled", triggeredBy: null });
+    expect(result.status).toBe("published");
+    expect(result.publishedCount).toBe(1);
+    expect(result.sourceCount).toBe(3);
+    expect(store.companies[0].candidate.round?.reportedCommitted?.amount).toBeNull();
+    expect(store.companies[0].assessment?.aiScore).toBe(7.4);
+    expect(store.reviews.some((r) => r.kind === "dropped_claims")).toBe(true);
+    expect(store.events).toHaveLength(1);
+    expect(store.stories.length).toBeGreaterThan(0);
+    const newCompanyNotes = store.notifications.filter((n) => n.type === "new_company");
+    expect(newCompanyNotes).toHaveLength(3); // one per member
+    expect(store.runs[0]).toMatchObject({ status: "published", estimatedCostUsd: expect.any(Number) });
+    expect(homeStorySchema.safeParse({ stories: [] }).success).toBe(true);
+  });
+
+  it("is idempotent for the same London day and skips unchanged companies on re-run", async () => {
+    const store = new MemoryResearchStore();
+    const model = fakeModel(extraction(), goodAssessment());
+    const first = await runPipeline({ model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") }, { householdId: "h1", runKind: "scheduled", triggeredBy: null });
+    expect(first.status).toBe("published");
+    const again = await runPipeline({ model, fetcher, store, now: new Date("2026-10-19T07:00:00Z") }, { householdId: "h1", runKind: "scheduled", triggeredBy: null });
+    expect(again.status).toBe("skipped");
+    expect(store.runs).toHaveLength(1);
+
+    // Next day, identical sources and no new signals → nothing re-published, no duplicate notifications.
+    const unchangedExtraction = extraction();
+    unchangedExtraction.candidates[0].signals = [];
+    const nextDay = await runPipeline({ model: fakeModel(unchangedExtraction, goodAssessment()), fetcher, store, now: new Date("2026-10-20T06:00:00Z") }, { householdId: "h1", runKind: "scheduled", triggeredBy: null });
+    expect(nextDay.status).toBe("no_new_research");
+    expect(store.companies).toHaveLength(1);
+    expect(store.notifications.filter((n) => n.type === "new_company")).toHaveLength(3);
+  });
+
+  it("publishes nothing when the provider returns no citations", async () => {
+    const store = new MemoryResearchStore();
+    const model = fakeModel(extraction(), goodAssessment(), { citations: [] });
+    const result = await runPipeline({ model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") }, { householdId: "h1", runKind: "scheduled", triggeredBy: null });
+    expect(result.status).toBe("no_new_research");
+    expect(store.companies).toHaveLength(0);
+  });
+
+  it("publishes nothing when every cited page fails verification", async () => {
+    const store = new MemoryResearchStore();
+    const model = fakeModel(extraction(), goodAssessment(), { citations: [{ url: "https://nowhere.example.test/missing", title: "missing" }] });
+    const result = await runPipeline({ model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") }, { householdId: "h1", runKind: "scheduled", triggeredBy: null });
+    expect(result.status).toBe("no_new_research");
+    expect(store.companies).toHaveLength(0);
+  });
+
+  it("stops and records a failure when the daily budget is exceeded", async () => {
+    const store = new MemoryResearchStore();
+    store.preferences = { ...store.preferences, dailyBudgetUsd: 0.015 };
+    const model = fakeModel(extraction(), goodAssessment(), { costPerCall: 0.01 });
+    const result = await runPipeline({ model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") }, { householdId: "h1", runKind: "manual", triggeredBy: "user-a" });
+    expect(result.status).toBe("failed");
+    expect(result.errorSummary).toMatch(/budget/);
+    expect(store.notifications.some((n) => n.type === "research_failed")).toBe(true);
+  });
+
+  it("does not merge a similarly named company; logs it for review", async () => {
+    const store = new MemoryResearchStore();
+    store.known = [{ id: "k1", name: "Example Robotics", slug: "example-robotics", domain: null, legalName: null, aliases: [] }];
+    const ex = extraction();
+    ex.candidates[0].website = null;
+    const model = fakeModel(ex, goodAssessment());
+    const result = await runPipeline({ model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") }, { householdId: "h1", runKind: "scheduled", triggeredBy: null });
+    expect(store.reviews.some((r) => r.kind === "ambiguous_entity")).toBe(true);
+    expect(store.companies).toHaveLength(0);
+    expect(result.status).toBe("no_new_research");
+  });
+});
