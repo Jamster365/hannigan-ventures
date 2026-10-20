@@ -16,9 +16,11 @@ export const getSessionContext = cache(async (): Promise<SessionContext | null> 
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: membership } = await supabase.from("household_members").select("household_id, user_id, role, status, joined_at").eq("user_id", user.id).eq("status", "active").order("joined_at").limit(1).maybeSingle<HouseholdMemberRow>();
+  const [{ data: membership }, { data: profile }] = await Promise.all([
+    supabase.from("household_members").select("household_id, user_id, role, status, joined_at").eq("user_id", user.id).eq("status", "active").order("joined_at").limit(1).maybeSingle<HouseholdMemberRow>(),
+    supabase.from("profiles").select("user_id, display_name, avatar_initial, accent").eq("user_id", user.id).maybeSingle<ProfileRow>(),
+  ]);
   if (!membership) return null;
-  const { data: profile } = await supabase.from("profiles").select("user_id, display_name, avatar_initial, accent").eq("user_id", user.id).maybeSingle<ProfileRow>();
   return {
     householdId: membership.household_id,
     member: {
