@@ -76,3 +76,17 @@ describe("salvageExtraction", () => {
     expect(out!.dropped[0]).toMatch(/candidate 2/);
   });
 });
+
+describe("extraction tidy-ups", () => {
+  it("treats a missing source list as empty (unsourced) instead of rejecting the company", () => {
+    const s = z.object({ name: z.string(), sourceUrls: z.array(z.string()) });
+    const r = repairToSchema(s, { name: "Sealeo", sourceUrls: null });
+    expect(r.ok && r.data.sourceUrls).toEqual([]);
+  });
+
+  it("turns placeholder text like 'Unknown' into a real unknown (null)", async () => {
+    const { clearPlaceholders } = await import("@/lib/research/discover");
+    const out = clearPlaceholders({ candidates: [{ city: "Unknown", country: "UK", stage: "N/A", subSector: "unspecified", legalName: "Acme Ltd" } as never], events: [], executiveFindings: [] });
+    expect(out.candidates[0]).toMatchObject({ city: null, country: "UK", stage: null, subSector: null, legalName: "Acme Ltd" });
+  });
+});
