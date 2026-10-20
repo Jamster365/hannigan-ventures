@@ -8,6 +8,11 @@ Read this first, then `IMPLEMENTATION_STATUS.md` (section "Live environment") an
 - **Vercel is deployed** at https://hannigan-ventures.vercel.app, project `hannigan-ventures` on team "Jamster365's projects" (`team_pCEVGQHNu7AQlEn5UMJxbDph`), production branch `claude/deal-room-build-ir9ris`. All env vars except `OPENAI_API_KEY` are set.
 - The previous session could not read the Vercel project (connector authorised before the project existed) and could not reach the vercel.app host from its container, so **the live deployment has not been verified yet**.
 
+## Findings on 20 October 2026 (second session)
+- The Vercel connector sees team `team_pCEVGQHNu7AQlEn5UMJxbDph` but lists zero projects, so deployment, build-log and runtime-error reads still fail (403/404). Jamie needs to reconnect it with access to the `hannigan-ventures` project.
+- Supabase logs show the live app is in Supabase mode: at 13:20 UTC it requested a magic link with `redirect_to=https://hannigan-ventures.vercel.app/auth/callback?next=/`. The link verified (`login`), but Supabase redirected to `http://localhost:3000` because the Site URL and redirect allow-list were not set yet.
+- Email templates can only be edited after custom SMTP is configured (Supabase free plan). Branded templates that use `token_hash` (so links work in any iPhone browser) are in `supabase/templates/`.
+
 ## Do next, in order
 1. Verify the deployment with the Vercel connector: latest deployment state and build log, runtime errors, then fetch `/auth/sign-in` and confirm it is the Supabase-mode sign-in page (no amber "Demo mode" banner).
 2. Confirm Supabase Auth settings with Jamie: Site URL `https://hannigan-ventures.vercel.app`, redirect allow-list includes `https://hannigan-ventures.vercel.app/auth/callback`, and "Allow new users to sign up" is off. Then have Jamie request a magic link and check `auth_logs` / `edge_logs` in Supabase to confirm the session and the Home page load.
