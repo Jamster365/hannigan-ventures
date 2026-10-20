@@ -27,6 +27,10 @@ const DEFAULT_MODEL = process.env.RESEARCH_MODEL ?? "gpt-5-mini";
 // Rough list prices per 1M tokens for cost estimation only (configurable).
 const INPUT_PRICE = Number(process.env.RESEARCH_MODEL_INPUT_USD_PER_M ?? "0.25");
 const OUTPUT_PRICE = Number(process.env.RESEARCH_MODEL_OUTPUT_USD_PER_M ?? "2");
+// Reasoning models spend output tokens on hidden reasoning (and on web searches)
+// before writing the answer. Callers size `maxOutputTokens` for the visible
+// answer; this headroom stops reasoning from consuming the whole allowance.
+const REASONING_HEADROOM = Number(process.env.RESEARCH_REASONING_HEADROOM_TOKENS ?? "20000");
 
 class OpenAIResearchModel implements ResearchModel {
   readonly name = DEFAULT_MODEL;
@@ -47,7 +51,7 @@ class OpenAIResearchModel implements ResearchModel {
       model: this.name,
       instructions: system,
       input,
-      max_output_tokens: maxOutputTokens,
+      max_output_tokens: maxOutputTokens + REASONING_HEADROOM,
       text: { format: { type: "json_schema", name: schemaName, schema: jsonSchema, strict: false } },
     });
     this.track(res.usage);
@@ -66,11 +70,14 @@ class OpenAIResearchModel implements ResearchModel {
       model: this.name,
       instructions: system,
       input,
-      max_output_tokens: maxOutputTokens,
+      max_output_tokens: maxOutputTokens + REASONING_HEADROOM,
       tools: [{ type: "web_search" }],
       include: ["web_search_call.action.sources"],
     });
     this.track(res.usage);
+    if (res.status === "incomplete" && !res.output_text) {
+      throw new Error(`Research response incomplete (${res.incomplete_details?.reason ?? "unknown reason"}) after ${res.usage?.output_tokens ?? "?"} output tokens.`);
+    }
     const citations: { url: string; title: string }[] = [];
     for (const item of res.output) {
       if (item.type === "message") {
