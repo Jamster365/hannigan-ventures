@@ -3,16 +3,17 @@ import { DEFAULT_PREFERENCES, DEFAULT_RESEARCH_PROMPT } from "./default-prompt";
 import type { MaterialChange, PreviousState } from "./materiality";
 import type { KnownCompany } from "./resolve";
 import type { AssessmentOutput, Candidate } from "./schemas";
-import type { PublishedCompany, ResearchStore, RunConfig, RunRecord } from "./store";
+import type { PublishedCompany, ResearchStore, RunConfig, RunRecord, RunStage } from "./store";
 import type { VerifiedSource } from "./verify";
 
 /**
  * In-memory ResearchStore for tests and dry runs. Mirrors the uniqueness rules
- * of the database (one run per household/date/kind, one source per URL,
+ * of the database (one scheduled/recheck run per household/date, one source per URL,
  * one notification per recipient/dedupe key).
  */
 export class MemoryResearchStore implements ResearchStore {
   runs: { id: string; householdId: string; localDate: string; runKind: string; status: string; summary: string; errorSummary: string | null; sourceCount: number; publishedCount: number; estimatedCostUsd: number }[] = [];
+  progressLog: { runId: string; stage: RunStage; detail: string }[] = [];
   sources = new Map<string, { id: string; companyId: string | null; url: string; hash: string | null }>();
   companies: { id: string; slug: string; name: string; candidate: Candidate; assessment: AssessmentOutput | null; runId: string }[] = [];
   updates: { companyId: string; change: MaterialChange }[] = [];
@@ -36,10 +37,14 @@ export class MemoryResearchStore implements ResearchStore {
     return { householdId, promptVersionId: "pv-1", promptText: this.promptText, preferences: this.preferences, known: this.known, memberIds: this.memberIds, seenHashes: new Set(this.seenHashes) };
   }
   async startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string }): Promise<RunRecord | null> {
-    if (this.runs.some((r) => r.householdId === input.householdId && r.localDate === input.localDate && r.runKind === input.runKind)) return null;
+    // Mirrors the DB: one scheduled/recheck run per day; manual runs may repeat.
+    if (input.runKind !== "manual" && this.runs.some((r) => r.householdId === input.householdId && r.localDate === input.localDate && r.runKind === input.runKind)) return null;
     const run = { id: this.id("run"), householdId: input.householdId, localDate: input.localDate, runKind: input.runKind, status: "running", summary: "", errorSummary: null, sourceCount: 0, publishedCount: 0, estimatedCostUsd: 0 };
     this.runs.push(run);
     return { id: run.id, localDate: run.localDate, runKind: input.runKind };
+  }
+  async progress(runId: string, stage: RunStage, detail: string) {
+    this.progressLog.push({ runId, stage, detail });
   }
   async finishRun(input: { runId: string; status: string; sourceCount: number; publishedCount: number; estimatedCostUsd: number; summary: string; errorSummary: string | null }) {
     const run = this.runs.find((r) => r.id === input.runId)!;

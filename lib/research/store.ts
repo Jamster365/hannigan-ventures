@@ -26,6 +26,9 @@ export interface RunRecord {
   runKind: "scheduled" | "manual" | "recheck";
 }
 
+/** Pipeline steps reported to the UI while a run is in progress. */
+export type RunStage = "searching" | "verifying" | "reading" | "assessing" | "publishing";
+
 export interface PublishedCompany {
   companyId: string;
   slug: string;
@@ -37,6 +40,8 @@ export interface ResearchStore {
   loadConfig(householdId: string): Promise<RunConfig>;
   /** Returns null if a run of this kind already exists for the local date (idempotency). */
   startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string; triggeredBy: string | null }): Promise<RunRecord | null>;
+  /** Best-effort live progress for the UI; must never fail the run. */
+  progress(runId: string, stage: RunStage, detail: string): Promise<void>;
   finishRun(input: { runId: string; status: "published" | "failed" | "no_new_research"; sourceCount: number; candidatesCount: number; publishedCount: number; estimatedCostUsd: number; summary: string; errorSummary: string | null }): Promise<void>;
   upsertSources(householdId: string, companyId: string | null, sources: VerifiedSource[], sourceTypeFor: (url: string) => "news" | "official" | "filing" | "research" | "media" | "other"): Promise<Map<string, string>>;
   previousState(companyId: string): Promise<PreviousState | null>;

@@ -68,6 +68,7 @@ export async function runPipeline(deps: PipelineDeps, input: PipelineInput): Pro
     const brief = discoveryBrief({ localDate, known: config.known, recheckCompanies: recheck, depth: config.preferences.discoveryDepth });
 
     // 2. Source discovery (web-grounded, cited)
+    await store.progress(run.id, "searching", recheck ? `Re-checking ${recheck.length} tracked compan${recheck.length === 1 ? "y" : "ies"} on the web` : "Searching the web for new companies, updates and events");
     const research = await discoverAndExtract(model, system, brief);
     if (!research || research.citations.length === 0) {
       return finish("no_new_research", "The research provider returned no cited findings; nothing was published.", research ? "No citations returned" : "Provider returned nothing");
@@ -75,6 +76,7 @@ export async function runPipeline(deps: PipelineDeps, input: PipelineInput): Pro
     if (overBudget(model, config.preferences.dailyBudgetUsd)) return finish("failed", "Stopped: daily research budget reached during discovery.", "budget exceeded");
 
     // 5a. Verify every cited URL ourselves
+    await store.progress(run.id, "verifying", `Opening and checking ${research.citations.length} cited page${research.citations.length === 1 ? "" : "s"}`);
     const citationTitles = new Map(research.citations.map((c) => [canonicaliseUrl(c.url), c.title]));
     const verification = await verifySources(
       research.citations.map((c) => c.url),
@@ -86,6 +88,7 @@ export async function runPipeline(deps: PipelineDeps, input: PipelineInput): Pro
     if (verified.length === 0) return finish("no_new_research", "None of the cited sources could be retrieved and verified; nothing was published.", `${verification.dropped.length} sources failed verification`);
 
     // 3. Structured extraction over research text + verified excerpts
+    await store.progress(run.id, "reading", `${verified.length} source${verified.length === 1 ? "" : "s"} verified · pulling out companies and evidence`);
     const extraction = await extractCandidates(model, system, research.text, verified);
     if (!extraction) return finish("failed", "Extraction output failed schema validation; nothing was published.", "invalid extraction");
     if (overBudget(model, config.preferences.dailyBudgetUsd)) return finish("failed", "Stopped: daily research budget reached during extraction.", "budget exceeded");
@@ -98,7 +101,8 @@ export async function runPipeline(deps: PipelineDeps, input: PipelineInput): Pro
     const summaryLines: string[] = [];
     const storyInputs: { storyType: "financing" | "access" | "deadline" | "signal" | "research"; companyId: string | null; headline: string; teaser: string; priority: number; sourceId: string | null }[] = [];
 
-    for (const raw of extraction.candidates) {
+    for (const [index, raw] of extraction.candidates.entries()) {
+      await store.progress(run.id, "assessing", `Checking ${raw.name} (${index + 1} of ${extraction.candidates.length})`);
       // 5b. Evidence rules
       const { candidate, removed } = sanitiseCandidate(raw, verifiedSet);
       const candidateUrls = collectUrls(candidate);
@@ -147,6 +151,7 @@ export async function runPipeline(deps: PipelineDeps, input: PipelineInput): Pro
       if (companyRecord.isNew) storyInputs.push({ storyType: "research", companyId: companyRecord.companyId, headline: `New: ${candidate.name}`, teaser: candidate.teaser, priority: 60, sourceId: sourceIds.get(candidateUrls[0]) ?? null });
     }
 
+    await store.progress(run.id, "publishing", "Saving companies, events and Home highlights");
     // Events (only with a verified source)
     const events = extraction.events
       .map((e) => ({ ...e, sourceUrls: e.sourceUrls.map(canonicaliseUrl).filter((u) => verifiedSet.has(u)) }))

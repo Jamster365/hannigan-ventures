@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_PREFERENCES } from "./default-prompt";
 import type { MaterialChange, PreviousState } from "./materiality";
 import { canonicaliseUrl } from "./fetch";
-import type { PublishedCompany, ResearchStore, RunConfig, RunRecord } from "./store";
+import type { PublishedCompany, ResearchStore, RunConfig, RunRecord, RunStage } from "./store";
 import type { VerifiedSource } from "./verify";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { ResearchPreferences } from "@/lib/domain/types";
@@ -48,6 +48,10 @@ class SupabaseResearchStore implements ResearchStore {
       throw new Error(`start run: ${error.message}`);
     }
     return { id: data.id, localDate: input.localDate, runKind: input.runKind };
+  }
+
+  async progress(runId: string, stage: RunStage, detail: string) {
+    await this.admin.from("research_runs").update({ progress_stage: stage, progress_detail: detail, progress_at: new Date().toISOString() }).eq("id", runId);
   }
 
   async finishRun(input: { runId: string; status: "published" | "failed" | "no_new_research"; sourceCount: number; candidatesCount: number; publishedCount: number; estimatedCostUsd: number; summary: string; errorSummary: string | null }) {

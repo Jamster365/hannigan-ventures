@@ -199,6 +199,18 @@ describe("end-to-end pipeline with fixtures", () => {
     expect(newCompanyNotes).toHaveLength(3); // one per member
     expect(store.runs[0]).toMatchObject({ status: "published", estimatedCostUsd: expect.any(Number) });
     expect(homeStorySchema.safeParse({ stories: [] }).success).toBe(true);
+    // Live progress walks every step in order for the UI tracker.
+    expect([...new Set(store.progressLog.map((p) => p.stage))]).toEqual(["searching", "verifying", "reading", "assessing", "publishing"]);
+  });
+
+  it("allows repeat manual runs on the same day while scheduled runs stay once per day", async () => {
+    const store = new MemoryResearchStore();
+    const now = new Date("2026-10-19T09:00:00Z");
+    const a = await runPipeline({ model: fakeModel(extraction(), goodAssessment()), fetcher, store, now }, { householdId: "h1", runKind: "manual", triggeredBy: "u1" });
+    const b = await runPipeline({ model: fakeModel(extraction(), goodAssessment()), fetcher, store, now }, { householdId: "h1", runKind: "manual", triggeredBy: "u1" });
+    expect(a.runId).not.toBeNull();
+    expect(b.runId).not.toBeNull();
+    expect(b.status).not.toBe("skipped");
   });
 
   it("is idempotent for the same London day and skips unchanged companies on re-run", async () => {
