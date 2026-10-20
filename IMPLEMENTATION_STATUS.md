@@ -38,8 +38,31 @@ Build date: 19 October 2026. Branch `claude/deal-room-build-ir9ris`.
 - **Imagery.** No licensed company images exist for the sample data, so every card uses the designed typographic fallback. `company_media` records rights status and attribution for real assets.
 - **Member count.** The 2-of-3 threshold is a named constant (`SHORTLIST_THRESHOLD`) in TypeScript and a literal in the SQL trigger; both are documented for a future migration.
 
+## Live environment (set up 20 October 2026)
+
+**Supabase** project `kqvuqtpeyosyvhezjxvy` (eu-west-2), URL `https://kqvuqtpeyosyvhezjxvy.supabase.co`.
+- Migrations `0001_init.sql` and `0002_harden_function_grants.sql` applied and verified (28 tables, 45 RLS policies, 5 triggers).
+- Household **Hannigan Ventures household** (`4ddcccb4-d611-4d58-af2d-9ed5496df283`) with one owner, Jamie (the principal's email), default research instructions v1 (cheque ceiling £250,000), 12 angel networks and the 10 labelled, fictional demo companies with their sources, assessments, stories and events. Only Jamie's sample votes/comments were carried over; George and Chris join via **More → Account → Invitations** once the app is deployed.
+- Seeding was done with `scripts/demo-sql.ts`, which now emits plain, delete-free, idempotent SQL (the hosted SQL runner holds `DELETE` statements for confirmation).
+- Security advisor: the remaining warnings are the intentional `SECURITY DEFINER` RPCs (`activate_prompt_version`, `redeem_invitation`) and the RLS helper functions, which policies need to call as the signed-in role, plus "leaked password protection", which does not apply to magic-link sign-in.
+- Still to do in the Supabase dashboard (no API for these): Authentication → Providers → Email → disable **Allow new users to sign up**; add the Vercel URL and `https://<vercel-url>/auth/callback` to the redirect allow-list; copy the **service role** key into Vercel.
+
+**Vercel**: the connector in this session can read but not create projects (403 on every attempt), so no project or preview URL exists yet. Import `Jamster365/hannigan-ventures` in the Vercel dashboard as project **hannigan-ventures** (framework preset Next.js; the repository has no `main` branch, so set the production branch to `claude/deal-room-build-ir9ris` or create `main` from it), then add these environment variables for Production and Preview:
+
+| Variable | Value |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://kqvuqtpeyosyvhezjxvy.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | the project's anon / publishable key (Supabase → Settings → API) |
+| `SUPABASE_SERVICE_ROLE_KEY` | the service role key (Supabase → Settings → API, server-only) |
+| `NEXT_PUBLIC_SITE_URL` | the Vercel URL, e.g. `https://hannigan-ventures.vercel.app` |
+| `RESEARCH_HOUSEHOLD_ID` | `4ddcccb4-d611-4d58-af2d-9ed5496df283` |
+| `CRON_SECRET` | any long random string |
+| `OPENAI_API_KEY` | later, when research runs should start |
+
+Leave `APP_DATA_MODE` unset so the deployment uses Supabase; set it to `demo` on a preview to review the sample data without signing in.
+
 ## Not done / needs the principal
-- **Live Supabase and Vercel deployment.** No credentials were available in this session, so nothing was deployed and no preview URL exists. Follow README → Supabase setup and Deploy. The Supabase repository and research store are written against the migration but have only been exercised through the SQL-level integration tests, not against a hosted project.
+- **Vercel project and preview URL.** Blocked by connector permissions as above; everything else for deployment is ready.
 - **Research runs against the live web.** Require `OPENAI_API_KEY`; the first real runs should be reviewed in Research history, and the audit log shows dropped claims and ambiguous entities for human review.
 - **Real-device review** on iPhone Safari / iPad Safari and the family's visual sign-off (SPEC Milestone A approval gate).
 - **Supabase Storage** for permitted images: the schema and image policy are in place; the upload/optimisation path is not built because no licensed assets exist yet.

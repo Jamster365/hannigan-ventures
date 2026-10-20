@@ -37,6 +37,7 @@ In this container Playwright uses the pre-installed browser: `CHROMIUM_PATH=/opt
    # add --no-demo-companies to skip the fictional sample companies
    ```
    The seed creates confirmed auth users for those emails, so each member signs in by requesting a magic link at `/auth/sign-in`. Further invitations are sent by the owner from **More → Account** and expire after 7 days.
+   Without the service-role key locally, `npx tsx scripts/demo-sql.ts <household_id> <owner_user_id>` prints equivalent plain SQL for the sample companies that can be pasted into the Supabase SQL editor; it is idempotent and contains no `DELETE` statements.
 5. Run `npm run dev`. Votes, comments, bookmarks, notifications and prompt versions now persist; family stage transitions are computed by Postgres triggers.
 
 ### Row Level Security
