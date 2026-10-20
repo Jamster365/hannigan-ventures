@@ -46,7 +46,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-GB" className={`${inter.variable} ${fraunces.variable} h-full`}>
+    <html lang="en-GB" className={`${inter.variable} ${fraunces.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
