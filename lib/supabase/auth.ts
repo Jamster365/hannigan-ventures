@@ -24,6 +24,10 @@ export async function sendMagicLink(email: string): Promise<{ ok: true } | { ok:
   });
   // Do not reveal whether the email is registered.
   if (error && !/signups not allowed|user not found/i.test(error.message)) {
+    // The built-in Supabase sender allows only a few emails per hour for the whole project.
+    if (error.code === "over_email_send_rate_limit" || error.status === 429) {
+      return { ok: false, error: "Too many sign-in emails have been sent in the last hour. Try again in about an hour." };
+    }
     return { ok: false, error: "Could not send a sign-in link right now. Try again in a minute." };
   }
   return { ok: true };
