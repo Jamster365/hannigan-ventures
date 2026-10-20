@@ -2,6 +2,7 @@ import "server-only";
 import OpenAI from "openai";
 import type { z } from "zod";
 import { linksInText } from "./links";
+import { repairToSchema } from "./repair";
 
 /**
  * Thin, swappable model adapter. The research pipeline only depends on this
@@ -32,7 +33,15 @@ export type ResearchCheck = { state: "pending" } | { state: "failed"; error: str
 
 export interface ResearchModel {
   readonly name: string;
-  structured<T>(args: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number; reasoningEffort?: "low" | "medium" | "high" }): Promise<T | null>;
+  /**
+   * Returns schema-valid output or null. Presentation slips are repaired first
+   * (see repair.ts); `salvage` may then keep the valid parts of an otherwise
+   * invalid result. On null, `lastError` says why.
+   */
+  structured<T>(args: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number; reasoningEffort?: "low" | "medium" | "high"; salvage?: (raw: unknown) => { data: T; dropped: string[] } | null }): Promise<T | null>;
+  /** Why the last structured call returned null, and what was repaired or dropped on the last success. */
+  lastError?: string | null;
+  lastNotes?: string[];
   /** Starts a web-grounded research job in the background; returns its handle. */
   startResearch(args: { system: string; input: string; maxOutputTokens?: number }): Promise<string>;
   /** Polls a research job; usage is counted once, when it completes. */
@@ -64,7 +73,12 @@ class OpenAIResearchModel implements ResearchModel {
     this.usage.estimatedCostUsd = (this.usage.inputTokens * INPUT_PRICE + this.usage.outputTokens * OUTPUT_PRICE) / 1_000_000 + this.usage.webSearchCalls * SEARCH_CALL_PRICE;
   }
 
-  async structured<T>({ schema, schemaName, system, input, maxOutputTokens = 4000, reasoningEffort }: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number; reasoningEffort?: "low" | "medium" | "high" }): Promise<T | null> {
+  lastError: string | null = null;
+  lastNotes: string[] = [];
+
+  async structured<T>({ schema, schemaName, system, input, maxOutputTokens = 4000, reasoningEffort, salvage }: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number; reasoningEffort?: "low" | "medium" | "high"; salvage?: (raw: unknown) => { data: T; dropped: string[] } | null }): Promise<T | null> {
+    this.lastError = null;
+    this.lastNotes = [];
     const { toJSONSchema } = await import("zod");
     const jsonSchema = toJSONSchema(schema, { target: "draft-7" }) as Record<string, unknown>;
     const res = await this.client.responses.create({
@@ -77,13 +91,29 @@ class OpenAIResearchModel implements ResearchModel {
     });
     this.track(res.usage);
     const text = res.output_text;
-    if (!text) return null;
-    try {
-      const parsed = schema.safeParse(JSON.parse(text));
-      return parsed.success ? parsed.data : null;
-    } catch {
+    if (!text) {
+      this.lastError = `${schemaName}: empty output (${res.status}${res.incomplete_details?.reason ? `, ${res.incomplete_details.reason}` : ""}, ${res.usage?.output_tokens ?? "?"} output tokens)`;
       return null;
     }
+    let raw: unknown;
+    try {
+      raw = JSON.parse(text);
+    } catch {
+      this.lastError = `${schemaName}: output was not complete JSON (${res.status}${res.incomplete_details?.reason ? `, ${res.incomplete_details.reason}` : ""}, ${text.length} chars)`;
+      return null;
+    }
+    const repaired = repairToSchema(schema, raw);
+    if (repaired.ok) {
+      this.lastNotes = repaired.repairs;
+      return repaired.data;
+    }
+    const kept = salvage?.(raw);
+    if (kept) {
+      this.lastNotes = [...kept.dropped.map((d) => `dropped ${d}`)];
+      return kept.data;
+    }
+    this.lastError = `${schemaName}: ${repaired.reason}`;
+    return null;
   }
 
   async startResearch({ system, input, maxOutputTokens = 8000 }: { system: string; input: string; maxOutputTokens?: number }) {

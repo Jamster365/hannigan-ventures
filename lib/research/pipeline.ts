@@ -156,7 +156,8 @@ async function processDiscovery(deps: PipelineDeps, run: { id: string; household
   await store.progress(run.id, "reading", `${verified.length} source${verified.length === 1 ? "" : "s"} verified · pulling out companies and evidence`);
   // Room for up to ~3k tokens of structured output per allowed company.
   const extraction = await extractCandidates(model, system, research.text, verified, { maxOutputTokens: Math.max(12_000, newCompanyLimit * 3_000) });
-  if (!extraction) return finish("failed", "Extraction output failed schema validation; nothing was published.", "invalid extraction");
+  if (!extraction) return finish("failed", "Extraction output failed schema validation; nothing was published.", `invalid extraction: ${model.lastError ?? "unknown reason"}`);
+  if (model.lastNotes?.length) await store.audit({ householdId: run.householdId, runId: run.id, action: "research.extraction_repairs", objectType: "research_run", objectId: run.id, after: { notes: model.lastNotes.slice(0, 50) } });
   if (overBudget(model, budgetUsd)) return finish("failed", "Stopped: daily research budget reached during extraction.", "budget exceeded");
 
   const verifiedSet = new Set(verified.map((s) => s.url));

@@ -29,7 +29,7 @@ export const candidateSchema = z.object({
   country: z.string().max(60).nullable(),
   stage: z.string().max(40).nullable(),
   teaser: z.string().min(1).max(160),
-  description: z.string().max(800),
+  description: z.string().max(2000),
   discoverySignal: z.string().max(300),
   researchRuleMatched: z.string().max(200),
   tags: z.array(z.string().max(40)).max(6).default([]),
