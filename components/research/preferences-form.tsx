@@ -46,7 +46,7 @@ export function PreferencesForm({ active }: { active: PromptVersion }) {
           </select>
         </Field>
         <Field label="Daily budget (USD)" hint="Research stops for the day when reached.">
-          <input type="number" min={0} step={1} value={prefs.dailyBudgetUsd} onChange={(e) => set("dailyBudgetUsd", Number(e.target.value))} className={inputCls} />
+          <input type="number" min={0} step={0.5} value={prefs.dailyBudgetUsd} onChange={(e) => set("dailyBudgetUsd", Number(e.target.value))} className={inputCls} />
         </Field>
         <Field label="Sectors to include" hint="Comma-separated. Empty = every sector qualifies.">
           <input value={prefs.sectorsInclude.join(", ")} onChange={(e) => set("sectorsInclude", splitList(e.target.value))} className={inputCls} />

@@ -42,5 +42,5 @@ export const DEFAULT_PREFERENCES: ResearchPreferences = {
   researchTimeLocal: "07:00",
   sectorsInclude: [],
   sectorsExclude: [],
-  dailyBudgetUsd: 8,
+  dailyBudgetUsd: 2,
 };

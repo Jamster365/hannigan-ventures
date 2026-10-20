@@ -87,4 +87,4 @@ npm run build
 ## Operating costs (estimates)
 - Supabase Free/Pro: free tier is sufficient for three users and daily runs.
 - Vercel Hobby/Pro: cron requires a plan that allows two daily crons; the research route runs up to 300 s.
-- Model: with `gpt-5-mini` at the configured list prices a balanced daily run is roughly $0.10–$1; the daily budget (default $8) caps spend.
+- Model: with `gpt-5-mini` at the configured list prices a balanced daily run is roughly $0.10–$1 including web-search call fees (counted at $0.01 per call, `RESEARCH_WEB_SEARCH_USD_PER_CALL`); the daily budget (default $2, editable in Preferences) caps spend across all runs that day.

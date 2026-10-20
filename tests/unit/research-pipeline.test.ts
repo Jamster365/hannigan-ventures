@@ -62,7 +62,7 @@ function candidate(overrides: Partial<Candidate> = {}): Candidate {
 }
 
 function fakeModel(extraction: Extraction, assessment: AssessmentOutput, opts: { citations?: { url: string; title: string }[]; costPerCall?: number } = {}): ResearchModel {
-  const usage: ModelUsage = { inputTokens: 0, outputTokens: 0, estimatedCostUsd: 0 };
+  const usage: ModelUsage = { inputTokens: 0, outputTokens: 0, webSearchCalls: 0, estimatedCostUsd: 0 };
   const bump = () => {
     usage.inputTokens += 1000;
     usage.outputTokens += 500;

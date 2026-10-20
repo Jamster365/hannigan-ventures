@@ -13,6 +13,7 @@ import type { z } from "zod";
 export interface ModelUsage {
   inputTokens: number;
   outputTokens: number;
+  webSearchCalls: number;
   estimatedCostUsd: number;
 }
 
@@ -30,18 +31,20 @@ const OUTPUT_PRICE = Number(process.env.RESEARCH_MODEL_OUTPUT_USD_PER_M ?? "2");
 // Reasoning models spend output tokens on hidden reasoning (and on web searches)
 // before writing the answer. Callers size `maxOutputTokens` for the visible
 // answer; this headroom stops reasoning from consuming the whole allowance.
+// Web search calls are billed per call on top of tokens (rough list price, configurable).
+const SEARCH_CALL_PRICE = Number(process.env.RESEARCH_WEB_SEARCH_USD_PER_CALL ?? "0.01");
 const REASONING_HEADROOM = Number(process.env.RESEARCH_REASONING_HEADROOM_TOKENS ?? "20000");
 
 class OpenAIResearchModel implements ResearchModel {
   readonly name = DEFAULT_MODEL;
-  readonly usage: ModelUsage = { inputTokens: 0, outputTokens: 0, estimatedCostUsd: 0 };
+  readonly usage: ModelUsage = { inputTokens: 0, outputTokens: 0, webSearchCalls: 0, estimatedCostUsd: 0 };
   private client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 120_000, maxRetries: 2 });
 
-  private track(u?: { input_tokens?: number; output_tokens?: number } | null) {
-    if (!u) return;
-    this.usage.inputTokens += u.input_tokens ?? 0;
-    this.usage.outputTokens += u.output_tokens ?? 0;
-    this.usage.estimatedCostUsd = (this.usage.inputTokens * INPUT_PRICE + this.usage.outputTokens * OUTPUT_PRICE) / 1_000_000;
+  private track(u?: { input_tokens?: number; output_tokens?: number } | null, searchCalls = 0) {
+    this.usage.inputTokens += u?.input_tokens ?? 0;
+    this.usage.outputTokens += u?.output_tokens ?? 0;
+    this.usage.webSearchCalls += searchCalls;
+    this.usage.estimatedCostUsd = (this.usage.inputTokens * INPUT_PRICE + this.usage.outputTokens * OUTPUT_PRICE) / 1_000_000 + this.usage.webSearchCalls * SEARCH_CALL_PRICE;
   }
 
   async structured<T>({ schema, schemaName, system, input, maxOutputTokens = 4000 }: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number }): Promise<T | null> {
@@ -74,7 +77,7 @@ class OpenAIResearchModel implements ResearchModel {
       tools: [{ type: "web_search" }],
       include: ["web_search_call.action.sources"],
     });
-    this.track(res.usage);
+    this.track(res.usage, res.output.filter((item) => item.type === "web_search_call").length);
     if (res.status === "incomplete" && !res.output_text) {
       throw new Error(`Research response incomplete (${res.incomplete_details?.reason ?? "unknown reason"}) after ${res.usage?.output_tokens ?? "?"} output tokens.`);
     }
