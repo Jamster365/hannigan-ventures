@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Wordmark } from "./logo";
 
+const MAIN_TABS = new Set(["/", "/discover", "/shortlist", "/updates"]);
+
 const groups = [
   {
     items: [
@@ -53,6 +55,8 @@ export function Sidebar({ unread, lastRunLabel }: { unread: number; lastRunLabel
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      // Fully prefetch the main tabs (data included), as the bottom nav does on phones.
+                      prefetch={MAIN_TABS.has(item.href) ? true : undefined}
                       aria-current={active ? "page" : undefined}
                       className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors", active ? "bg-white/12 text-white" : "text-white/70 hover:bg-white/8 hover:text-white")}
                     >

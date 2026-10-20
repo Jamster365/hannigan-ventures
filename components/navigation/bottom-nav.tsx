@@ -29,6 +29,8 @@ export function BottomNav({ unread }: { unread: number }) {
             <li key={item.href} className="flex flex-1">
               <Link
                 href={item.href}
+                // Fully prefetch the main tabs (data included) so switching tabs is instant.
+                prefetch
                 aria-current={active ? "page" : undefined}
                 className={cn("relative flex min-w-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium", active ? "text-ink" : "text-tertiary hover:text-secondary")}
               >

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { DemoBanner } from "@/components/navigation/demo-banner";
+import { LaunchSplash } from "@/components/navigation/launch-splash";
 import { Sidebar } from "@/components/navigation/sidebar";
 import { getCurrentMember } from "@/lib/auth/current-member";
 import { getRepository } from "@/lib/data";
@@ -20,6 +21,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-dvh w-full">
+      <LaunchSplash />
       <Sidebar unread={unread} lastRunLabel={lastRunLabel} />
       <div className="flex min-w-0 flex-1 flex-col">
         {repo.mode === "demo" ? <DemoBanner members={members} current={member} /> : null}

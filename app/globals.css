@@ -206,3 +206,51 @@ h3,
     transform: none;
   }
 }
+
+/* Launch splash: the two peaks rise in, then the name; the whole screen fades away */
+html[data-launched] .launch-splash {
+  display: none;
+}
+.launch-peak {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: launch-peak 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.launch-peak-2 {
+  animation-delay: 0.15s;
+}
+.launch-word {
+  animation: launch-word 0.5s ease-out 0.35s both;
+}
+.launch-word-2 {
+  animation-delay: 0.5s;
+}
+.launch-splash-leave {
+  animation: launch-leave 0.4s ease-in both;
+}
+@keyframes launch-peak {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scaleY(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes launch-word {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes launch-leave {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
