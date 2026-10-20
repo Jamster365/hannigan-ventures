@@ -175,3 +175,15 @@ describe("invitation redemption", () => {
     await expect(h.as(newcomer, (q) => q.query("select redeem_invitation('hash1')"))).rejects.toThrow(/expired|invalid/);
   });
 });
+
+describe("deleting a company", () => {
+  it("removes its votes, comments and stories with it (the vote trigger stands aside)", async () => {
+    const doomed = (await h.admin.query<{ id: string }>("insert into companies (household_id, name, slug, is_demo) values ($1, 'Sample Co', 'sample-co', true) returning id", [household]))[0].id;
+    await h.as(jamie, (q) => q.query("insert into member_votes (company_id, user_id, vote, score) values ($1, $2, 'interested', 8)", [doomed, jamie]));
+    await h.as(brother, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'interested')", [doomed, brother]));
+    await h.as(dad, (q) => q.query("insert into comments (company_id, author_user_id, body) values ($1, $2, 'Test')", [doomed, dad]));
+    await h.admin.query("delete from companies where id = $1", [doomed]);
+    const left = await h.admin.query<{ n: number }>("select (select count(*) from member_votes where company_id = $1) + (select count(*) from comments where company_id = $1) + (select count(*) from notifications where company_id = $1) as n", [doomed]);
+    expect(Number(left[0].n)).toBe(0);
+  });
+});
