@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { RunNowButton } from "./run-now";
 
 export const metadata = { title: "Research settings" };
+// "Run research now" executes as a server action on this page; give it the same budget as the cron route.
+export const maxDuration = 300;
 
 export default async function ResearchSettingsPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
