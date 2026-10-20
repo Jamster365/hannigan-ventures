@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/navigation/bottom-nav";
 import { DemoBanner } from "@/components/navigation/demo-banner";
 import { LaunchSplash } from "@/components/navigation/launch-splash";
 import { Sidebar } from "@/components/navigation/sidebar";
+import { WarmLinks } from "@/components/navigation/warm-links";
 import { getCurrentMember } from "@/lib/auth/current-member";
 import { getRepository } from "@/lib/data";
 import { formatDateTime } from "@/lib/domain/format";
@@ -22,6 +23,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh w-full">
       <LaunchSplash />
+      <WarmLinks />
       <Sidebar unread={unread} lastRunLabel={lastRunLabel} />
       <div className="flex min-w-0 flex-1 flex-col">
         {repo.mode === "demo" ? <DemoBanner members={members} current={member} /> : null}

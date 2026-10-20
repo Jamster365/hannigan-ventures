@@ -3,9 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   experimental: {
-    // Keep visited pages in the client router cache for 30s, so tapping back
-    // to a screen is instant. Server actions that change data still refresh it.
-    staleTimes: { dynamic: 30 },
+    // Client router cache: visited pages stay instant for 30s; fully prefetched
+    // pages (main tabs, company pages warmed from the current screen) for 5 min.
+    // Server actions that change data (votes, comments) still refresh it.
+    staleTimes: { dynamic: 30, static: 300 },
   },
   // Company imagery is served from Supabase Storage (licensed/permitted assets only)
   // or from local /public fallbacks. No blind hotlinking of third-party images.
