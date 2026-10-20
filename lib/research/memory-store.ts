@@ -3,7 +3,7 @@ import { DEFAULT_PREFERENCES, DEFAULT_RESEARCH_PROMPT } from "./default-prompt";
 import type { MaterialChange, PreviousState } from "./materiality";
 import type { KnownCompany } from "./resolve";
 import type { AssessmentOutput, Candidate } from "./schemas";
-import type { PublishedCompany, ResearchStore, RunConfig, RunRecord, RunStage } from "./store";
+import type { PublishedCompany, ResearchStore, RunConfig, RunRecord, RunStage, StoredRun } from "./store";
 import type { VerifiedSource } from "./verify";
 import type { FoundImage } from "./imagery";
 
@@ -13,7 +13,7 @@ import type { FoundImage } from "./imagery";
  * one notification per recipient/dedupe key).
  */
 export class MemoryResearchStore implements ResearchStore {
-  runs: { id: string; householdId: string; localDate: string; runKind: string; status: string; summary: string; errorSummary: string | null; sourceCount: number; publishedCount: number; estimatedCostUsd: number }[] = [];
+  runs: StoredRun[] = [];
   progressLog: { runId: string; stage: RunStage; detail: string }[] = [];
   imagery: { companyId: string; kind: "hero" | "logo"; originUrl: string }[] = [];
   sources = new Map<string, { id: string; companyId: string | null; url: string; hash: string | null }>();
@@ -41,9 +41,25 @@ export class MemoryResearchStore implements ResearchStore {
   async startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string }): Promise<RunRecord | null> {
     // Mirrors the DB: one scheduled/recheck run per day; manual runs may repeat.
     if (input.runKind !== "manual" && this.runs.some((r) => r.householdId === input.householdId && r.localDate === input.localDate && r.runKind === input.runKind)) return null;
-    const run = { id: this.id("run"), householdId: input.householdId, localDate: input.localDate, runKind: input.runKind, status: "running", summary: "", errorSummary: null, sourceCount: 0, publishedCount: 0, estimatedCostUsd: 0 };
+    const run: StoredRun = { id: this.id("run"), householdId: input.householdId, localDate: input.localDate, runKind: input.runKind, status: "running", phase: null, responseHandle: null, startedAt: new Date().toISOString(), progressAt: null, summary: "", errorSummary: null, sourceCount: 0, candidatesCount: 0, publishedCount: 0, estimatedCostUsd: 0 };
     this.runs.push(run);
     return { id: run.id, localDate: run.localDate, runKind: input.runKind };
+  }
+  async setDiscovery(runId: string, handle: string) {
+    Object.assign(this.runs.find((r) => r.id === runId)!, { phase: "discovering", responseHandle: handle });
+  }
+  async getRun(runId: string) {
+    const run = this.runs.find((r) => r.id === runId);
+    return run ? { ...run } : null;
+  }
+  async listActiveRuns(householdId: string) {
+    return this.runs.filter((r) => r.householdId === householdId && r.status === "running").map((r) => ({ ...r }));
+  }
+  async claimProcessing(runId: string) {
+    const run = this.runs.find((r) => r.id === runId);
+    if (!run || run.phase !== "discovering") return false;
+    run.phase = "processing";
+    return true;
   }
   async progress(runId: string, stage: RunStage, detail: string) {
     this.progressLog.push({ runId, stage, detail });
@@ -55,9 +71,9 @@ export class MemoryResearchStore implements ResearchStore {
     for (const img of input.images) this.imagery.push({ companyId: input.companyId, kind: img.kind, originUrl: img.originUrl });
     return input.images.length;
   }
-  async finishRun(input: { runId: string; status: string; sourceCount: number; publishedCount: number; estimatedCostUsd: number; summary: string; errorSummary: string | null }) {
+  async finishRun(input: { runId: string; status: StoredRun["status"]; sourceCount: number; candidatesCount: number; publishedCount: number; estimatedCostUsd: number; summary: string; errorSummary: string | null }) {
     const run = this.runs.find((r) => r.id === input.runId)!;
-    Object.assign(run, { status: input.status, summary: input.summary, errorSummary: input.errorSummary, sourceCount: input.sourceCount, publishedCount: input.publishedCount, estimatedCostUsd: input.estimatedCostUsd });
+    Object.assign(run, { status: input.status, summary: input.summary, errorSummary: input.errorSummary, sourceCount: input.sourceCount, candidatesCount: input.candidatesCount, publishedCount: input.publishedCount, estimatedCostUsd: input.estimatedCostUsd });
   }
   async upsertSources(_hid: string, companyId: string | null, sources: VerifiedSource[]) {
     const out = new Map<string, string>();

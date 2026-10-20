@@ -4,7 +4,7 @@ import { enforceAssessmentRules } from "@/lib/research/assess";
 import type { SafeFetcher } from "@/lib/research/fetch";
 import { classifyChanges } from "@/lib/research/materiality";
 import { MemoryResearchStore } from "@/lib/research/memory-store";
-import { runPipeline } from "@/lib/research/pipeline";
+import { advancePipeline, beginPipeline, runPipeline } from "@/lib/research/pipeline";
 import type { ModelUsage, ResearchModel } from "@/lib/research/provider";
 import { resolveCandidate } from "@/lib/research/resolve";
 import { assessmentSchema, candidateSchema, extractionSchema, homeStorySchema, type AssessmentOutput, type Candidate, type Extraction } from "@/lib/research/schemas";
@@ -61,7 +61,8 @@ function candidate(overrides: Partial<Candidate> = {}): Candidate {
   });
 }
 
-function fakeModel(extraction: Extraction, assessment: AssessmentOutput, opts: { citations?: { url: string; title: string }[]; costPerCall?: number } = {}): ResearchModel {
+function fakeModel(extraction: Extraction, assessment: AssessmentOutput, opts: { citations?: { url: string; title: string }[]; costPerCall?: number; pendingChecks?: number; jobFails?: boolean } = {}): ResearchModel & { checks: number } {
+  let pending = opts.pendingChecks ?? 0;
   const usage: ModelUsage = { inputTokens: 0, outputTokens: 0, webSearchCalls: 0, estimatedCostUsd: 0 };
   const bump = () => {
     usage.inputTokens += 1000;
@@ -71,9 +72,19 @@ function fakeModel(extraction: Extraction, assessment: AssessmentOutput, opts: {
   return {
     name: "fixture-model",
     usage,
-    async research() {
+    checks: 0,
+    async startResearch() {
+      return "job-1";
+    },
+    async checkResearch() {
+      this.checks += 1;
+      if (pending > 0) {
+        pending -= 1;
+        return { state: "pending" as const };
+      }
       bump();
-      return { text: "Example Photonics is raising a seed round (see investor page). News coverage reports a £2m target.", citations: opts.citations ?? Object.keys(PAGES).map((url) => ({ url, title: url })), usage };
+      if (opts.jobFails) return { state: "failed" as const, error: "Research job failed: provider error" };
+      return { state: "done" as const, text: "Example Photonics is raising a seed round (see investor page). News coverage reports a £2m target.", citations: opts.citations ?? Object.keys(PAGES).map((url) => ({ url, title: url })) };
     },
     async structured<T>({ schema, schemaName }: { schema: z.ZodType<T>; schemaName: string }): Promise<T | null> {
       bump();
@@ -229,6 +240,44 @@ describe("end-to-end pipeline with fixtures", () => {
     expect(nextDay.status).toBe("no_new_research");
     expect(store.companies).toHaveLength(1);
     expect(store.notifications.filter((n) => n.type === "new_company")).toHaveLength(3);
+  });
+
+  it("starts research as a background job and publishes only once it has finished", async () => {
+    const store = new MemoryResearchStore();
+    const model = fakeModel(extraction(), goodAssessment(), { pendingChecks: 2 });
+    const deps = { model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") };
+    const begun = await beginPipeline(deps, { householdId: "h1", runKind: "scheduled", triggeredBy: null });
+    expect(begun.status).toBe("running");
+    expect(store.runs[0]).toMatchObject({ status: "running", phase: "discovering", responseHandle: "job-1" });
+    expect((await advancePipeline(deps, begun.runId!)).status).toBe("running");
+    expect((await advancePipeline(deps, begun.runId!)).status).toBe("running");
+    expect(store.companies).toHaveLength(0);
+    const done = await advancePipeline(deps, begun.runId!);
+    expect(done.status).toBe("published");
+    expect(store.companies).toHaveLength(1);
+    // Advancing a finished run just reports it again; nothing is re-processed.
+    const again = await advancePipeline(deps, begun.runId!);
+    expect(again).toMatchObject({ status: "published", publishedCount: 1 });
+    expect(store.companies).toHaveLength(1);
+  });
+
+  it("lets only one caller process a finished research job", async () => {
+    const store = new MemoryResearchStore();
+    const model = fakeModel(extraction(), goodAssessment());
+    const deps = { model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") };
+    const begun = await beginPipeline(deps, { householdId: "h1", runKind: "manual", triggeredBy: "u1" });
+    const [a, b] = await Promise.all([advancePipeline(deps, begun.runId!), advancePipeline(deps, begun.runId!)]);
+    expect([a.status, b.status].sort()).toEqual(["published", "running"]);
+    expect(store.companies).toHaveLength(1);
+    expect(store.notifications.filter((n) => n.type === "new_company")).toHaveLength(3);
+  });
+
+  it("records a failed research job as a failed run and tells the family", async () => {
+    const store = new MemoryResearchStore();
+    const model = fakeModel(extraction(), goodAssessment(), { jobFails: true });
+    const result = await runPipeline({ model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") }, { householdId: "h1", runKind: "manual", triggeredBy: "u1" });
+    expect(result).toMatchObject({ status: "failed", errorSummary: "Research job failed: provider error" });
+    expect(store.notifications.some((n) => n.type === "research_failed")).toBe(true);
   });
 
   it("publishes nothing when the provider returns no citations", async () => {

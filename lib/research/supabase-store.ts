@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_PREFERENCES } from "./default-prompt";
 import type { MaterialChange, PreviousState } from "./materiality";
 import { canonicaliseUrl } from "./fetch";
-import type { PublishedCompany, ResearchStore, RunConfig, RunRecord, RunStage } from "./store";
+import type { PublishedCompany, ResearchStore, RunConfig, RunRecord, RunStage, StoredRun } from "./store";
 import type { VerifiedSource } from "./verify";
 import type { FoundImage } from "./imagery";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -49,6 +49,25 @@ class SupabaseResearchStore implements ResearchStore {
       throw new Error(`start run: ${error.message}`);
     }
     return { id: data.id, localDate: input.localDate, runKind: input.runKind };
+  }
+
+  async setDiscovery(runId: string, handle: string) {
+    this.must(await this.admin.from("research_runs").update({ phase: "discovering", provider_response_id: handle }).eq("id", runId), "set discovery");
+  }
+
+  async getRun(runId: string) {
+    const { data } = await this.admin.from("research_runs").select(RUN_COLUMNS).eq("id", runId).maybeSingle<RunRow>();
+    return data ? mapRun(data) : null;
+  }
+
+  async listActiveRuns(householdId: string) {
+    const { data } = await this.admin.from("research_runs").select(RUN_COLUMNS).eq("household_id", householdId).eq("status", "running").order("started_at").returns<RunRow[]>();
+    return (data ?? []).map(mapRun);
+  }
+
+  async claimProcessing(runId: string) {
+    const { data } = await this.admin.from("research_runs").update({ phase: "processing", progress_at: new Date().toISOString() }).eq("id", runId).eq("phase", "discovering").eq("status", "running").select("id");
+    return (data?.length ?? 0) === 1;
   }
 
   async progress(runId: string, stage: RunStage, detail: string) {
@@ -230,4 +249,11 @@ function hash(s: string): number {
 
 export function createSupabaseResearchStore(): ResearchStore {
   return new SupabaseResearchStore(createSupabaseAdminClient());
+}
+
+const RUN_COLUMNS = "id, household_id, local_date, run_kind, status, phase, provider_response_id, started_at, progress_at, source_count, candidates_count, published_count, estimated_cost, summary, error_summary";
+type RunRow = { id: string; household_id: string; local_date: string; run_kind: StoredRun["runKind"]; status: StoredRun["status"]; phase: StoredRun["phase"]; provider_response_id: string | null; started_at: string; progress_at: string | null; source_count: number; candidates_count: number; published_count: number; estimated_cost: string | number | null; summary: string; error_summary: string | null };
+
+function mapRun(r: RunRow): StoredRun {
+  return { id: r.id, householdId: r.household_id, localDate: r.local_date, runKind: r.run_kind, status: r.status, phase: r.phase, responseHandle: r.provider_response_id, startedAt: r.started_at, progressAt: r.progress_at, sourceCount: r.source_count, candidatesCount: r.candidates_count, publishedCount: r.published_count, estimatedCostUsd: Number(r.estimated_cost ?? 0), summary: r.summary, errorSummary: r.error_summary };
 }

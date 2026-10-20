@@ -6,9 +6,12 @@ import type { z } from "zod";
  * Thin, swappable model adapter. The research pipeline only depends on this
  * interface so the provider can be changed without touching pipeline logic.
  *
- * `structured` returns a zod-validated object or null. `research` performs a
- * web-grounded call and returns text plus the provider's own URL citations;
- * the pipeline independently verifies every URL before anything is stored.
+ * `structured` returns a zod-validated object or null. Web research is long,
+ * so it runs in the provider's background mode: `startResearch` returns a
+ * handle at once and `checkResearch` later returns text plus the provider's
+ * own URL citations (the pipeline independently verifies every URL before
+ * anything is stored). This keeps every app request well inside the hosting
+ * time limit however long the search takes.
  */
 export interface ModelUsage {
   inputTokens: number;
@@ -17,10 +20,15 @@ export interface ModelUsage {
   estimatedCostUsd: number;
 }
 
+export type ResearchCheck = { state: "pending" } | { state: "failed"; error: string } | { state: "done"; text: string; citations: { url: string; title: string }[] };
+
 export interface ResearchModel {
   readonly name: string;
-  structured<T>(args: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number }): Promise<T | null>;
-  research(args: { system: string; input: string; maxOutputTokens?: number }): Promise<{ text: string; citations: { url: string; title: string }[]; usage: ModelUsage } | null>;
+  structured<T>(args: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number; reasoningEffort?: "low" | "medium" | "high" }): Promise<T | null>;
+  /** Starts a web-grounded research job in the background; returns its handle. */
+  startResearch(args: { system: string; input: string; maxOutputTokens?: number }): Promise<string>;
+  /** Polls a research job; usage is counted once, when it completes. */
+  checkResearch(handle: string): Promise<ResearchCheck>;
   readonly usage: ModelUsage;
 }
 
@@ -38,7 +46,8 @@ const REASONING_HEADROOM = Number(process.env.RESEARCH_REASONING_HEADROOM_TOKENS
 class OpenAIResearchModel implements ResearchModel {
   readonly name = DEFAULT_MODEL;
   readonly usage: ModelUsage = { inputTokens: 0, outputTokens: 0, webSearchCalls: 0, estimatedCostUsd: 0 };
-  private client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 120_000, maxRetries: 2 });
+  // Structured calls must finish inside one request; background research jobs are polled instead.
+  private client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 200_000, maxRetries: 1 });
 
   private track(u?: { input_tokens?: number; output_tokens?: number } | null, searchCalls = 0) {
     this.usage.inputTokens += u?.input_tokens ?? 0;
@@ -47,7 +56,7 @@ class OpenAIResearchModel implements ResearchModel {
     this.usage.estimatedCostUsd = (this.usage.inputTokens * INPUT_PRICE + this.usage.outputTokens * OUTPUT_PRICE) / 1_000_000 + this.usage.webSearchCalls * SEARCH_CALL_PRICE;
   }
 
-  async structured<T>({ schema, schemaName, system, input, maxOutputTokens = 4000 }: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number }): Promise<T | null> {
+  async structured<T>({ schema, schemaName, system, input, maxOutputTokens = 4000, reasoningEffort }: { schema: z.ZodType<T>; schemaName: string; system: string; input: string; maxOutputTokens?: number; reasoningEffort?: "low" | "medium" | "high" }): Promise<T | null> {
     const { toJSONSchema } = await import("zod");
     const jsonSchema = toJSONSchema(schema, { target: "draft-7" }) as Record<string, unknown>;
     const res = await this.client.responses.create({
@@ -55,6 +64,7 @@ class OpenAIResearchModel implements ResearchModel {
       instructions: system,
       input,
       max_output_tokens: maxOutputTokens + REASONING_HEADROOM,
+      ...(reasoningEffort ? { reasoning: { effort: reasoningEffort } } : {}),
       text: { format: { type: "json_schema", name: schemaName, schema: jsonSchema, strict: false } },
     });
     this.track(res.usage);
@@ -68,18 +78,26 @@ class OpenAIResearchModel implements ResearchModel {
     }
   }
 
-  async research({ system, input, maxOutputTokens = 6000 }: { system: string; input: string; maxOutputTokens?: number }) {
+  async startResearch({ system, input, maxOutputTokens = 8000 }: { system: string; input: string; maxOutputTokens?: number }) {
     const res = await this.client.responses.create({
       model: this.name,
       instructions: system,
       input,
+      background: true,
       max_output_tokens: maxOutputTokens + REASONING_HEADROOM,
       tools: [{ type: "web_search" }],
       include: ["web_search_call.action.sources"],
     });
+    return res.id;
+  }
+
+  async checkResearch(handle: string): Promise<ResearchCheck> {
+    const res = await this.client.responses.retrieve(handle);
+    if (res.status === "queued" || res.status === "in_progress") return { state: "pending" };
     this.track(res.usage, res.output.filter((item) => item.type === "web_search_call").length);
+    if (res.status === "failed" || res.status === "cancelled") return { state: "failed", error: `Research job ${res.status}${res.error?.message ? `: ${res.error.message}` : ""}` };
     if (res.status === "incomplete" && !res.output_text) {
-      throw new Error(`Research response incomplete (${res.incomplete_details?.reason ?? "unknown reason"}) after ${res.usage?.output_tokens ?? "?"} output tokens.`);
+      return { state: "failed", error: `Research response incomplete (${res.incomplete_details?.reason ?? "unknown reason"}) after ${res.usage?.output_tokens ?? "?"} output tokens.` };
     }
     const citations: { url: string; title: string }[] = [];
     for (const item of res.output) {
@@ -93,7 +111,7 @@ class OpenAIResearchModel implements ResearchModel {
         }
       }
     }
-    return { text: res.output_text ?? "", citations: dedupe(citations), usage: { ...this.usage } };
+    return { state: "done", text: res.output_text ?? "", citations: dedupe(citations) };
   }
 }
 

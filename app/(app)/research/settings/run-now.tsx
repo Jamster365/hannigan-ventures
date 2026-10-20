@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { runResearchNowAction } from "@/lib/actions/run-research";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { advanceResearchAction, runResearchNowAction } from "@/lib/actions/run-research";
 import { Button } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 
@@ -16,32 +17,78 @@ const STEPS = [
 type Progress = { stage: string | null; detail: string | null };
 
 export function RunNowButton({ mode }: { mode: "demo" | "supabase" }) {
-  const [pending, start] = useTransition();
+  const router = useRouter();
   const [confirm, setConfirm] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
   const [progress, setProgress] = useState<Progress>({ stage: null, detail: null });
-  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [active, setActive] = useState<{ runId: string; startedAt: number } | null>(null);
+
+  // Pick up a run that is already in progress (started earlier, by someone else, or by the schedule).
+  useEffect(() => {
+    if (mode !== "supabase") return;
+    let cancelled = false;
+    fetch("/api/research/progress", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((body: { run: { id: string; status: string; startedAt: string } | null } | null) => {
+        const run = body?.run;
+        if (!cancelled && run?.status === "running" && Date.now() - Date.parse(run.startedAt) < 3 * 60 * 60_000) setActive({ runId: run.id, startedAt: Date.parse(run.startedAt) });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [mode]);
+
+  // While a run is active, keep advancing it: each call returns quickly while the
+  // web research is still going, and does the verifying/publishing once it is done.
+  useEffect(() => {
+    if (!active) return;
+    let cancelled = false;
+    (async () => {
+      for (;;) {
+        let r: Awaited<ReturnType<typeof advanceResearchAction>>;
+        try {
+          r = await advanceResearchAction(active.runId);
+        } catch {
+          r = { done: false };
+        }
+        if (cancelled) return;
+        if (r.done) {
+          setResult({ ok: r.ok, text: r.message });
+          setActive(null);
+          router.refresh();
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 6000));
+        if (cancelled) return;
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [active, router]);
+
   if (mode === "demo") return <p className="text-[13px] text-tertiary">Manual runs need Supabase and a research API key. See README for setup.</p>;
 
-  const run = () => {
+  const run = async () => {
     setResult(null);
     setProgress({ stage: null, detail: null });
-    setStartedAt(Date.now());
     setConfirm(false);
-    start(async () => {
-      const r = await runResearchNowAction();
-      setResult(r.ok ? { ok: true, text: r.message } : { ok: false, text: r.error });
-      setStartedAt(null);
-    });
+    setStarting(true);
+    const r = await runResearchNowAction().catch(() => ({ ok: false as const, error: "Could not start the run. Try again." }));
+    setStarting(false);
+    if (r.ok) setActive({ runId: r.runId, startedAt: Date.now() });
+    else setResult({ ok: false, text: r.error });
   };
 
   return (
     <div className="space-y-3">
-      {pending && startedAt ? (
-        <RunProgress startedAt={startedAt} progress={progress} onProgress={setProgress} />
+      {active ? (
+        <RunProgress startedAt={active.startedAt} progress={progress} onProgress={setProgress} />
       ) : !confirm ? (
-        <Button variant="outline" onClick={() => setConfirm(true)}>
-          Run research now
+        <Button variant="outline" disabled={starting} onClick={() => setConfirm(true)}>
+          {starting ? "Starting…" : "Run research now"}
         </Button>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
@@ -60,9 +107,9 @@ export function RunNowButton({ mode }: { mode: "demo" | "supabase" }) {
 }
 
 /**
- * Live run tracker. The run itself is one long server action, so progress is
- * read from the run's own record (written by the pipeline at each step) via a
- * plain GET route; server actions from one client are queued and could not poll.
+ * Live run tracker. Progress is read from the run's own record (written by the
+ * pipeline at each step) via a plain GET route, independently of the advance
+ * loop, whose server actions are queued per client and can take a while.
  */
 // `onProgress` is a state setter, so it is stable and safe as an effect dependency.
 function RunProgress({ startedAt, progress, onProgress }: { startedAt: number; progress: Progress; onProgress: (p: Progress) => void }) {
@@ -110,7 +157,7 @@ function RunProgress({ startedAt, progress, onProgress }: { startedAt: number; p
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-serif text-[17px] font-semibold text-ink">Researching</p>
-          <p className="text-[12px] text-secondary">Usually 1–5 minutes. Keep this screen open.</p>
+          <p className="text-[12px] text-secondary">A thorough search can take 5–15 minutes. You can leave; it finishes on its own.</p>
         </div>
         <span className="tnum text-[13px] font-medium text-secondary">{clock}</span>
       </div>

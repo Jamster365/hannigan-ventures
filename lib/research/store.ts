@@ -30,6 +30,26 @@ export interface RunRecord {
 /** Pipeline steps reported to the UI while a run is in progress. */
 export type RunStage = "searching" | "verifying" | "reading" | "assessing" | "publishing";
 
+/** A run as stored, for advancing it across requests. */
+export interface StoredRun {
+  id: string;
+  householdId: string;
+  localDate: string;
+  runKind: RunRecord["runKind"];
+  status: "queued" | "running" | "published" | "failed" | "no_new_research";
+  /** "discovering": waiting on the provider's background research job; "processing": claimed by one caller. */
+  phase: "discovering" | "processing" | null;
+  responseHandle: string | null;
+  startedAt: string;
+  progressAt: string | null;
+  sourceCount: number;
+  candidatesCount: number;
+  publishedCount: number;
+  estimatedCostUsd: number;
+  summary: string;
+  errorSummary: string | null;
+}
+
 export interface PublishedCompany {
   companyId: string;
   slug: string;
@@ -41,6 +61,13 @@ export interface ResearchStore {
   loadConfig(householdId: string): Promise<RunConfig>;
   /** Returns null if a run of this kind already exists for the local date (idempotency). */
   startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string; triggeredBy: string | null }): Promise<RunRecord | null>;
+  /** Records the provider's background research handle; the run is now "discovering". */
+  setDiscovery(runId: string, handle: string): Promise<void>;
+  getRun(runId: string): Promise<StoredRun | null>;
+  /** Runs still in progress for a household (oldest first). */
+  listActiveRuns(householdId: string): Promise<StoredRun[]>;
+  /** Atomically moves a run from "discovering" to "processing"; false if someone else already did. */
+  claimProcessing(runId: string): Promise<boolean>;
   /** Best-effort live progress for the UI; must never fail the run. */
   progress(runId: string, stage: RunStage, detail: string): Promise<void>;
   finishRun(input: { runId: string; status: "published" | "failed" | "no_new_research"; sourceCount: number; candidatesCount: number; publishedCount: number; estimatedCostUsd: number; summary: string; errorSummary: string | null }): Promise<void>;
