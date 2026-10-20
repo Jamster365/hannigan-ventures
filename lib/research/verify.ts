@@ -28,7 +28,7 @@ export async function verifySources(urls: string[], fetcher: SafeFetcher, opts: 
   const unique = [...new Set(urls.map(canonicaliseUrl))];
   const sources = new Map<string, VerifiedSource>();
   const dropped: { url: string; reason: string }[] = [];
-  const concurrency = opts.concurrency ?? 4;
+  const concurrency = opts.concurrency ?? 8;
   let i = 0;
   async function worker() {
     while (i < unique.length) {

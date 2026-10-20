@@ -84,7 +84,7 @@ function fakeModel(extraction: Extraction, assessment: AssessmentOutput, opts: {
       }
       bump();
       if (opts.jobFails) return { state: "failed" as const, error: "Research job failed: provider error" };
-      return { state: "done" as const, text: "Example Photonics is raising a seed round (see investor page). News coverage reports a £2m target.", citations: opts.citations ?? Object.keys(PAGES).map((url) => ({ url, title: url })) };
+      return { state: "done" as const, text: "Example Photonics is raising a seed round (see investor page). News coverage reports a £2m target.", citations: (opts.citations ?? Object.keys(PAGES).map((url) => ({ url, title: url }))).map((c) => ({ ...c, origin: "cited" as const })), searchCalls: 3 };
     },
     async structured<T>({ schema, schemaName }: { schema: z.ZodType<T>; schemaName: string }): Promise<T | null> {
       bump();

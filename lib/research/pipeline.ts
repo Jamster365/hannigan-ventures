@@ -122,10 +122,14 @@ function finisher(deps: PipelineDeps, run: { id: string; householdId: string }, 
   };
 }
 
-async function processDiscovery(deps: PipelineDeps, run: { id: string; householdId: string }, config: RunConfig, research: { text: string; citations: { url: string; title: string }[] }, finish: Finish): Promise<PipelineResult> {
+async function processDiscovery(deps: PipelineDeps, run: { id: string; householdId: string }, config: RunConfig, research: Extract<ResearchCheck, { state: "done" }>, finish: Finish): Promise<PipelineResult> {
   const { model, fetcher, store } = deps;
   const system = composeSystemPrompt(config.promptText, config.preferences);
-  if (!research.text.trim() || research.citations.length === 0) {
+  // Keep the provider's write-up and where its URLs came from, for review in the audit log.
+  const origins = { cited: 0, linked: 0, searched: 0 };
+  for (const c of research.citations) origins[c.origin] += 1;
+  await store.audit({ householdId: run.householdId, runId: run.id, action: "research.discovery", objectType: "research_run", objectId: run.id, after: { searchCalls: research.searchCalls, urls: origins, writeUp: research.text.slice(0, 6000) } });
+  if (research.citations.length === 0) {
     return finish("no_new_research", "The research provider returned no cited findings; nothing was published.", research.text.trim() ? "No citations returned" : "Provider returned nothing");
   }
   if (overBudget(model, config.preferences.dailyBudgetUsd)) return finish("failed", "Stopped: daily research budget reached during discovery.", "budget exceeded");

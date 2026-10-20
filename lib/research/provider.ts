@@ -1,6 +1,7 @@
 import "server-only";
 import OpenAI from "openai";
 import type { z } from "zod";
+import { linksInText } from "./links";
 
 /**
  * Thin, swappable model adapter. The research pipeline only depends on this
@@ -20,7 +21,14 @@ export interface ModelUsage {
   estimatedCostUsd: number;
 }
 
-export type ResearchCheck = { state: "pending" } | { state: "failed"; error: string } | { state: "done"; text: string; citations: { url: string; title: string }[] };
+export interface ResearchCitation {
+  url: string;
+  title: string;
+  /** How the provider pointed at it: an inline citation, a link written in the text, or a page the search returned/opened. */
+  origin: "cited" | "linked" | "searched";
+}
+
+export type ResearchCheck = { state: "pending" } | { state: "failed"; error: string } | { state: "done"; text: string; citations: ResearchCitation[]; searchCalls: number };
 
 export interface ResearchModel {
   readonly name: string;
@@ -92,30 +100,42 @@ class OpenAIResearchModel implements ResearchModel {
   }
 
   async checkResearch(handle: string): Promise<ResearchCheck> {
-    const res = await this.client.responses.retrieve(handle);
+    // Source lists are only returned when asked for again on retrieval.
+    const res = await this.client.responses.retrieve(handle, { include: ["web_search_call.action.sources"] });
     if (res.status === "queued" || res.status === "in_progress") return { state: "pending" };
     this.track(res.usage, res.output.filter((item) => item.type === "web_search_call").length);
     if (res.status === "failed" || res.status === "cancelled") return { state: "failed", error: `Research job ${res.status}${res.error?.message ? `: ${res.error.message}` : ""}` };
     if (res.status === "incomplete" && !res.output_text) {
       return { state: "failed", error: `Research response incomplete (${res.incomplete_details?.reason ?? "unknown reason"}) after ${res.usage?.output_tokens ?? "?"} output tokens.` };
     }
-    const citations: { url: string; title: string }[] = [];
+    const text = res.output_text ?? "";
+    const cited: ResearchCitation[] = [];
+    const searched: ResearchCitation[] = [];
     for (const item of res.output) {
       if (item.type === "message") {
         for (const part of item.content) {
           if (part.type === "output_text") {
             for (const a of part.annotations ?? []) {
-              if (a.type === "url_citation") citations.push({ url: a.url, title: a.title });
+              if (a.type === "url_citation") cited.push({ url: a.url, title: a.title, origin: "cited" });
             }
           }
         }
       }
+      if (item.type === "web_search_call") {
+        const action = item.action as { type?: string; url?: string | null; sources?: { url: string }[] } | undefined;
+        if (action?.type === "open_page" && action.url) searched.push({ url: action.url, title: action.url, origin: "searched" });
+        for (const src of action?.sources ?? []) searched.push({ url: src.url, title: src.url, origin: "searched" });
+      }
     }
-    return { state: "done", text: res.output_text ?? "", citations: dedupe(citations) };
+    const linked = linksInText(text).map((url) => ({ url, title: url, origin: "linked" as const }));
+    // Best evidence first; the pipeline verifies every URL itself before any of it can support a claim.
+    return { state: "done", text, citations: dedupe([...cited, ...linked, ...searched]).slice(0, MAX_RESEARCH_URLS), searchCalls: res.output.filter((item) => item.type === "web_search_call").length };
   }
 }
 
-function dedupe(items: { url: string; title: string }[]) {
+const MAX_RESEARCH_URLS = 40;
+
+function dedupe<T extends { url: string }>(items: T[]): T[] {
   const seen = new Set<string>();
   return items.filter((c) => (seen.has(c.url) ? false : (seen.add(c.url), true)));
 }

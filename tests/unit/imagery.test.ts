@@ -86,3 +86,11 @@ describe("company imagery", () => {
     expect(await findCompanyImagery({ website: "https://acme.example", verifiedUrls: ["https://acme.example/"] }, fetcher)).toEqual([]);
   });
 });
+
+describe("links in research write-ups", () => {
+  it("finds markdown and bare links and trims trailing punctuation", async () => {
+    const { linksInText } = await import("@/lib/research/links");
+    const text = "Acme raised a seed round ([Sifted](https://sifted.eu/articles/acme-seed)). See https://acme.example/investors. Also (https://www.ox.ac.uk/news/acme)!";
+    expect(linksInText(text)).toEqual(["https://sifted.eu/articles/acme-seed", "https://acme.example/investors", "https://www.ox.ac.uk/news/acme"]);
+  });
+});
