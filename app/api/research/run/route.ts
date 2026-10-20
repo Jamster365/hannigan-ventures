@@ -12,12 +12,14 @@ export const maxDuration = 300;
  * (correct across BST/GMT) and at most once per London day.
  *
  * `?force=1` (still secret-protected) starts the scheduled run regardless of the hour.
+ * `?first_fill=1` (secret-protected) starts a one-off deep manual run allowing up to 8 new companies.
  */
 export async function GET(request: NextRequest) {
   if (!(await authorisedSchedulerRequest(request))) return NextResponse.json({ error: "unauthorised" }, { status: 401 });
   if (!isResearchConfigured()) return NextResponse.json({ skipped: true, reason: "research not configured (Supabase + OPENAI_API_KEY required)" }, { status: 200 });
   const { tickResearch } = await import("@/lib/research/run");
-  return NextResponse.json(await tickResearch({ forceStart: request.nextUrl.searchParams.get("force") === "1" }));
+  const params = request.nextUrl.searchParams;
+  return NextResponse.json(await tickResearch({ forceStart: params.get("force") === "1", firstFill: params.get("first_fill") === "1" }));
 }
 
 export const POST = GET;

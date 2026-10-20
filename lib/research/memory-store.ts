@@ -38,10 +38,10 @@ export class MemoryResearchStore implements ResearchStore {
   async loadConfig(householdId: string): Promise<RunConfig> {
     return { householdId, promptVersionId: "pv-1", promptText: this.promptText, preferences: this.preferences, known: this.known, memberIds: this.memberIds, seenHashes: new Set(this.seenHashes) };
   }
-  async startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string }): Promise<RunRecord | null> {
+  async startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string; newCompanyLimit?: number }): Promise<RunRecord | null> {
     // Mirrors the DB: one scheduled/recheck run per day; manual runs may repeat.
     if (input.runKind !== "manual" && this.runs.some((r) => r.householdId === input.householdId && r.localDate === input.localDate && r.runKind === input.runKind)) return null;
-    const run: StoredRun = { id: this.id("run"), householdId: input.householdId, localDate: input.localDate, runKind: input.runKind, status: "running", phase: null, responseHandle: null, startedAt: new Date().toISOString(), progressAt: null, summary: "", errorSummary: null, sourceCount: 0, candidatesCount: 0, publishedCount: 0, estimatedCostUsd: 0 };
+    const run: StoredRun = { id: this.id("run"), householdId: input.householdId, localDate: input.localDate, runKind: input.runKind, status: "running", phase: null, responseHandle: null, newCompanyLimit: input.newCompanyLimit ?? null, startedAt: new Date().toISOString(), progressAt: null, summary: "", errorSummary: null, sourceCount: 0, candidatesCount: 0, publishedCount: 0, estimatedCostUsd: 0 };
     this.runs.push(run);
     return { id: run.id, localDate: run.localDate, runKind: input.runKind };
   }

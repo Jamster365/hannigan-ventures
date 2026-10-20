@@ -280,6 +280,22 @@ describe("end-to-end pipeline with fixtures", () => {
     expect(store.notifications.some((n) => n.type === "research_failed")).toBe(true);
   });
 
+  it("a first-fill run searches deeper and allows up to 8 new companies; daily runs keep the default", async () => {
+    const store = new MemoryResearchStore();
+    let brief = "";
+    const model = fakeModel(extraction(), goodAssessment());
+    const start = model.startResearch.bind(model);
+    model.startResearch = async (args) => ((brief = args.input), start(args));
+    const deps = { model, fetcher, store, now: new Date("2026-10-19T06:00:00Z") };
+    const first = await beginPipeline(deps, { householdId: "h1", runKind: "manual", triggeredBy: null, firstFill: true });
+    expect(store.runs.find((r) => r.id === first.runId)?.newCompanyLimit).toBe(8);
+    expect(brief).toMatch(/up to 8 genuinely new/);
+    expect(brief).toMatch(/first research run/);
+    const daily = await beginPipeline(deps, { householdId: "h1", runKind: "scheduled", triggeredBy: null });
+    expect(store.runs.find((r) => r.id === daily.runId)?.newCompanyLimit).toBeNull();
+    expect(brief).not.toMatch(/first research run/);
+  });
+
   it("publishes nothing when the provider returns no citations", async () => {
     const store = new MemoryResearchStore();
     const model = fakeModel(extraction(), goodAssessment(), { citations: [] });

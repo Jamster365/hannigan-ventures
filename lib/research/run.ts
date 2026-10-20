@@ -21,9 +21,9 @@ function householdFromEnv(householdId?: string): string {
   return id;
 }
 
-export async function beginResearch(input: { runKind: ResearchRun["runKind"]; triggeredBy: string | null; householdId?: string; companyIds?: string[] }): Promise<PipelineResult> {
+export async function beginResearch(input: { runKind: ResearchRun["runKind"]; triggeredBy: string | null; householdId?: string; companyIds?: string[]; firstFill?: boolean }): Promise<PipelineResult> {
   const deps = await productionDeps();
-  return beginPipeline(deps, { householdId: householdFromEnv(input.householdId), runKind: input.runKind, triggeredBy: input.triggeredBy, companyIds: input.companyIds });
+  return beginPipeline(deps, { householdId: householdFromEnv(input.householdId), runKind: input.runKind, triggeredBy: input.triggeredBy, companyIds: input.companyIds, firstFill: input.firstFill });
 }
 
 export async function advanceResearch(runId: string): Promise<PipelineResult> {
@@ -52,7 +52,7 @@ export function staleReason(run: StoredRun, now: Date): string | null {
  * research may have finished, and starts the day's scheduled run in the
  * configured Europe/London hour (the database allows one per day).
  */
-export async function tickResearch(opts: { now?: Date; forceStart?: boolean } = {}) {
+export async function tickResearch(opts: { now?: Date; forceStart?: boolean; firstFill?: boolean } = {}) {
   const now = opts.now ?? new Date();
   const householdId = householdFromEnv();
   const { createSupabaseResearchStore } = await import("./supabase-store");
@@ -68,6 +68,12 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean } = 
     }
     const result = await advanceResearch(run.id);
     report.advanced.push({ runId: run.id, status: result.status });
+  }
+
+  // Operator-triggered one-off first fill: a manual run with deep discovery and a larger cap.
+  if (opts.firstFill) {
+    report.started = await beginResearch({ runKind: "manual", triggeredBy: null, householdId, firstFill: true });
+    return report;
   }
 
   const config = await store.loadConfig(householdId);

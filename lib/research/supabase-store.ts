@@ -42,8 +42,8 @@ class SupabaseResearchStore implements ResearchStore {
     };
   }
 
-  async startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string; triggeredBy: string | null }): Promise<RunRecord | null> {
-    const { data, error } = await this.admin.from("research_runs").insert({ household_id: input.householdId, local_date: input.localDate, run_kind: input.runKind, prompt_version_id: input.promptVersionId, status: "running", model: input.model, triggered_by: input.triggeredBy }).select("id").single<{ id: string }>();
+  async startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string; triggeredBy: string | null; newCompanyLimit?: number }): Promise<RunRecord | null> {
+    const { data, error } = await this.admin.from("research_runs").insert({ household_id: input.householdId, local_date: input.localDate, run_kind: input.runKind, prompt_version_id: input.promptVersionId, status: "running", model: input.model, triggered_by: input.triggeredBy, new_company_limit: input.newCompanyLimit ?? null }).select("id").single<{ id: string }>();
     if (error) {
       if (error.code === "23505") return null; // unique (household, date, kind): already ran
       throw new Error(`start run: ${error.message}`);
@@ -251,9 +251,9 @@ export function createSupabaseResearchStore(): ResearchStore {
   return new SupabaseResearchStore(createSupabaseAdminClient());
 }
 
-const RUN_COLUMNS = "id, household_id, local_date, run_kind, status, phase, provider_response_id, started_at, progress_at, source_count, candidates_count, published_count, estimated_cost, summary, error_summary";
-type RunRow = { id: string; household_id: string; local_date: string; run_kind: StoredRun["runKind"]; status: StoredRun["status"]; phase: StoredRun["phase"]; provider_response_id: string | null; started_at: string; progress_at: string | null; source_count: number; candidates_count: number; published_count: number; estimated_cost: string | number | null; summary: string; error_summary: string | null };
+const RUN_COLUMNS = "id, household_id, local_date, run_kind, status, phase, provider_response_id, new_company_limit, started_at, progress_at, source_count, candidates_count, published_count, estimated_cost, summary, error_summary";
+type RunRow = { id: string; household_id: string; local_date: string; run_kind: StoredRun["runKind"]; status: StoredRun["status"]; phase: StoredRun["phase"]; provider_response_id: string | null; new_company_limit: number | null; started_at: string; progress_at: string | null; source_count: number; candidates_count: number; published_count: number; estimated_cost: string | number | null; summary: string; error_summary: string | null };
 
 function mapRun(r: RunRow): StoredRun {
-  return { id: r.id, householdId: r.household_id, localDate: r.local_date, runKind: r.run_kind, status: r.status, phase: r.phase, responseHandle: r.provider_response_id, startedAt: r.started_at, progressAt: r.progress_at, sourceCount: r.source_count, candidatesCount: r.candidates_count, publishedCount: r.published_count, estimatedCostUsd: Number(r.estimated_cost ?? 0), summary: r.summary, errorSummary: r.error_summary };
+  return { id: r.id, householdId: r.household_id, localDate: r.local_date, runKind: r.run_kind, status: r.status, phase: r.phase, responseHandle: r.provider_response_id, newCompanyLimit: r.new_company_limit, startedAt: r.started_at, progressAt: r.progress_at, sourceCount: r.source_count, candidatesCount: r.candidates_count, publishedCount: r.published_count, estimatedCostUsd: Number(r.estimated_cost ?? 0), summary: r.summary, errorSummary: r.error_summary };
 }

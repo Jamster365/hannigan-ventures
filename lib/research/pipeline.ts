@@ -24,6 +24,8 @@ export interface PipelineInput {
   runKind: "scheduled" | "manual" | "recheck";
   triggeredBy: string | null;
   companyIds?: string[];
+  /** One-off first run: deep discovery, a longer write-up and up to FIRST_FILL_NEW_DOSSIERS new companies. */
+  firstFill?: boolean;
 }
 
 export interface PipelineResult {
@@ -40,6 +42,9 @@ export interface PipelineResult {
 }
 
 const MAX_NEW_DOSSIERS = 3;
+const FIRST_FILL_NEW_DOSSIERS = 8;
+/** The one-off first fill gets its own spend ceiling (at least this), separate from the daily budget. */
+const FIRST_FILL_BUDGET_USD = 5;
 
 /**
  * The daily research pipeline (SPEC §8.2), in two steps so no single request
@@ -63,7 +68,7 @@ export async function beginPipeline(deps: PipelineDeps, input: PipelineInput): P
   const { model, store, now } = deps;
   const localDate = londonDate(now);
   const config = await store.loadConfig(input.householdId);
-  const run = await store.startRun({ householdId: input.householdId, localDate, runKind: input.runKind, promptVersionId: config.promptVersionId, model: model.name, triggeredBy: input.triggeredBy });
+  const run = await store.startRun({ householdId: input.householdId, localDate, runKind: input.runKind, promptVersionId: config.promptVersionId, model: model.name, triggeredBy: input.triggeredBy, newCompanyLimit: input.firstFill ? FIRST_FILL_NEW_DOSSIERS : undefined });
   if (!run) {
     return { status: "skipped", runId: null, promptVersionId: config.promptVersionId, sourceCount: 0, candidatesCount: 0, publishedCount: 0, estimatedCostUsd: 0, summary: `A ${input.runKind} run already exists for ${localDate}.`, errorSummary: null };
   }
@@ -71,10 +76,10 @@ export async function beginPipeline(deps: PipelineDeps, input: PipelineInput): P
   try {
     const system = composeSystemPrompt(config.promptText, config.preferences);
     const recheck = input.companyIds?.length ? config.known.filter((k) => input.companyIds!.includes(k.id)) : undefined;
-    const brief = discoveryBrief({ localDate, known: config.known, recheckCompanies: recheck, depth: config.preferences.discoveryDepth });
+    const brief = discoveryBrief({ localDate, known: config.known, recheckCompanies: recheck, depth: input.firstFill ? "deep" : config.preferences.discoveryDepth, firstFill: input.firstFill });
     // 2. Source discovery (web-grounded, cited), as a background job
     await store.progress(run.id, "searching", recheck ? `Re-checking ${recheck.length} tracked compan${recheck.length === 1 ? "y" : "ies"} on the web` : "Searching the web for new companies, updates and events");
-    const handle = await model.startResearch({ system, input: brief });
+    const handle = await model.startResearch({ system, input: brief, maxOutputTokens: input.firstFill ? 16_000 : undefined });
     await store.setDiscovery(run.id, handle);
     return { ...emptyCounts(run.id, config.promptVersionId), status: "running", summary: "Searching the web.", errorSummary: null };
   } catch (e) {
@@ -103,7 +108,7 @@ export async function advancePipeline(deps: PipelineDeps, runId: string): Promis
   const finish = finisher(deps, run, config);
   try {
     if (check.state === "failed") return finish("failed", "The web research job failed; nothing was published.", check.error);
-    return await processDiscovery(deps, run, config, check, finish);
+    return await processDiscovery(deps, run, config, check, finish, run.newCompanyLimit ?? MAX_NEW_DOSSIERS);
   } catch (e) {
     return finish("failed", "Research run failed; no new research was published.", errorText(e));
   }
@@ -122,9 +127,10 @@ function finisher(deps: PipelineDeps, run: { id: string; householdId: string }, 
   };
 }
 
-async function processDiscovery(deps: PipelineDeps, run: { id: string; householdId: string }, config: RunConfig, research: Extract<ResearchCheck, { state: "done" }>, finish: Finish): Promise<PipelineResult> {
+async function processDiscovery(deps: PipelineDeps, run: { id: string; householdId: string }, config: RunConfig, research: Extract<ResearchCheck, { state: "done" }>, finish: Finish, newCompanyLimit: number): Promise<PipelineResult> {
   const { model, fetcher, store } = deps;
   const system = composeSystemPrompt(config.promptText, config.preferences);
+  const budgetUsd = newCompanyLimit > MAX_NEW_DOSSIERS ? Math.max(config.preferences.dailyBudgetUsd, FIRST_FILL_BUDGET_USD) : config.preferences.dailyBudgetUsd;
   // Keep the provider's write-up and where its URLs came from, for review in the audit log.
   const origins = { cited: 0, linked: 0, searched: 0 };
   for (const c of research.citations) origins[c.origin] += 1;
@@ -132,7 +138,7 @@ async function processDiscovery(deps: PipelineDeps, run: { id: string; household
   if (research.citations.length === 0) {
     return finish("no_new_research", "The research provider returned no cited findings; nothing was published.", research.text.trim() ? "No citations returned" : "Provider returned nothing");
   }
-  if (overBudget(model, config.preferences.dailyBudgetUsd)) return finish("failed", "Stopped: daily research budget reached during discovery.", "budget exceeded");
+  if (overBudget(model, budgetUsd)) return finish("failed", "Stopped: daily research budget reached during discovery.", "budget exceeded");
 
   // 5a. Verify every cited URL ourselves
   await store.progress(run.id, "verifying", `Opening and checking ${research.citations.length} cited page${research.citations.length === 1 ? "" : "s"}`);
@@ -148,9 +154,10 @@ async function processDiscovery(deps: PipelineDeps, run: { id: string; household
 
   // 3. Structured extraction over research text + verified excerpts
   await store.progress(run.id, "reading", `${verified.length} source${verified.length === 1 ? "" : "s"} verified · pulling out companies and evidence`);
-  const extraction = await extractCandidates(model, system, research.text, verified);
+  // Room for up to ~3k tokens of structured output per allowed company.
+  const extraction = await extractCandidates(model, system, research.text, verified, { maxOutputTokens: Math.max(12_000, newCompanyLimit * 3_000) });
   if (!extraction) return finish("failed", "Extraction output failed schema validation; nothing was published.", "invalid extraction");
-  if (overBudget(model, config.preferences.dailyBudgetUsd)) return finish("failed", "Stopped: daily research budget reached during extraction.", "budget exceeded");
+  if (overBudget(model, budgetUsd)) return finish("failed", "Stopped: daily research budget reached during extraction.", "budget exceeded");
 
   const verifiedSet = new Set(verified.map((s) => s.url));
   const taken = new Set(config.known.map((k) => k.slug));
@@ -170,7 +177,7 @@ async function processDiscovery(deps: PipelineDeps, run: { id: string; household
   const worthAssessing = prepared.filter((c) => c.candidateUrls.length > 0 && resolveCandidate(c.candidate, config.known, new Set(config.known.map((k) => k.slug))).kind !== "ambiguous");
   await store.progress(run.id, "assessing", `Assessing ${worthAssessing.length} compan${worthAssessing.length === 1 ? "y" : "ies"} against the evidence`);
   const assessments = new Map(await Promise.all(worthAssessing.map(async (c) => [c.raw, await assessCandidate(model, system, c.candidate, c.candidateSources, null)] as const)));
-  if (overBudget(model, config.preferences.dailyBudgetUsd)) return finish("failed", "Stopped: daily research budget reached during assessment.", "budget exceeded", { candidatesCount: extraction.candidates.length, sourceCount: verified.length });
+  if (overBudget(model, budgetUsd)) return finish("failed", "Stopped: daily research budget reached during assessment.", "budget exceeded", { candidatesCount: extraction.candidates.length, sourceCount: verified.length });
 
   for (const [index, { raw, candidate, removed, candidateUrls, candidateSources }] of prepared.entries()) {
     await store.progress(run.id, "publishing", `Saving ${candidate.name} (${index + 1} of ${prepared.length})`);
@@ -185,7 +192,7 @@ async function processDiscovery(deps: PipelineDeps, run: { id: string; household
       await store.logReview({ householdId: run.householdId, runId: run.id, kind: "ambiguous_entity", detail: { name: candidate.name, website: candidate.website, ...resolution } });
       continue;
     }
-    if (resolution.kind === "new" && newDossiers >= MAX_NEW_DOSSIERS) {
+    if (resolution.kind === "new" && newDossiers >= newCompanyLimit) {
       await store.logReview({ householdId: run.householdId, runId: run.id, kind: "rejected_candidate", detail: { name: candidate.name, reason: "daily new-dossier limit reached" } });
       continue;
     }

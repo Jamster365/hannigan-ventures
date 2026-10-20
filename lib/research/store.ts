@@ -40,6 +40,8 @@ export interface StoredRun {
   /** "discovering": waiting on the provider's background research job; "processing": claimed by one caller. */
   phase: "discovering" | "processing" | null;
   responseHandle: string | null;
+  /** Cap on new company dossiers for this run (null: the default of 3). */
+  newCompanyLimit: number | null;
   startedAt: string;
   progressAt: string | null;
   sourceCount: number;
@@ -60,7 +62,7 @@ export interface PublishedCompany {
 export interface ResearchStore {
   loadConfig(householdId: string): Promise<RunConfig>;
   /** Returns null if a run of this kind already exists for the local date (idempotency). */
-  startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string; triggeredBy: string | null }): Promise<RunRecord | null>;
+  startRun(input: { householdId: string; localDate: string; runKind: RunRecord["runKind"]; promptVersionId: string; model: string; triggeredBy: string | null; newCompanyLimit?: number }): Promise<RunRecord | null>;
   /** Records the provider's background research handle; the run is now "discovering". */
   setDiscovery(runId: string, handle: string): Promise<void>;
   getRun(runId: string): Promise<StoredRun | null>;
