@@ -6,10 +6,11 @@ import { cn } from "@/lib/utils";
  *
  * If licensed media exists (rightsStatus permitted/attributed, url set) it is
  * rendered. Otherwise we draw the "premium typographic fallback": a designed
- * editorial gradient with an abstract motif and the company wordmark. This is
- * never a photorealistic image and never pretends to show a real product.
+ * editorial gradient with an abstract motif and the company wordmark, carrying
+ * the company's real logo when we have one. This is never a photorealistic
+ * image and never pretends to show a real product.
  */
-export function CompanyArtwork({ company, media, className, variant = "card", priority: _priority }: { company: Company; media: CompanyMedia | null; className?: string; variant?: "card" | "hero" | "thumb"; priority?: boolean }) {
+export function CompanyArtwork({ company, media, logo = null, className, variant = "card", priority: _priority }: { company: Company; media: CompanyMedia | null; logo?: CompanyMedia | null; className?: string; variant?: "card" | "hero" | "thumb"; priority?: boolean }) {
   if (media?.url && media.rightsStatus !== "fallback") {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -38,7 +39,8 @@ export function CompanyArtwork({ company, media, className, variant = "card", pr
         <rect width="400" height="260" fill={`url(#${id}-r)`} />
         <Motif motif={motif} color={c3} />
       </svg>
-      {variant === "card" ? (
+      {logo?.url ? <LogoTile logo={logo} variant={variant} /> : null}
+      {variant === "thumb" && logo?.url ? null : variant === "card" ? (
         <div className="absolute inset-x-0 bottom-0 p-4">
           <p className="font-serif text-[22px] font-semibold leading-none text-white/95 drop-shadow-sm">{company.name}</p>
           <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/70">{company.subSector ?? company.sector}</p>
@@ -54,6 +56,15 @@ export function CompanyArtwork({ company, media, className, variant = "card", pr
       )}
     </div>
   );
+}
+
+function LogoTile({ logo, variant }: { logo: CompanyMedia; variant: "card" | "hero" | "thumb" }) {
+  const img = (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={logo.url!} alt={logo.altText} className="h-full w-full object-contain" loading={variant === "hero" ? "eager" : "lazy"} />
+  );
+  if (variant === "thumb") return <div className="absolute inset-0 flex items-center justify-center bg-white p-1.5">{img}</div>;
+  return <div className={cn("absolute left-4 rounded-[14px] bg-white p-2 shadow-sm", variant === "hero" ? "top-1/2 size-[72px] -translate-y-1/2 sm:size-[88px]" : "top-4 size-14")}>{img}</div>;
 }
 
 function Motif({ motif, color }: { motif: Company["artwork"]["motif"]; color: string }) {

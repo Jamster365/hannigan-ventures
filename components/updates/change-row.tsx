@@ -46,7 +46,7 @@ export function ChangeRow({ update, summary, showCompany = true }: { update: Com
         </span>
         {showCompany ? (
           <span className="hidden h-12 w-12 shrink-0 overflow-hidden rounded-[10px] bg-ink sm:block">
-            <CompanyArtwork company={summary.company} media={summary.primaryMedia} variant="thumb" />
+            <CompanyArtwork company={summary.company} media={summary.primaryMedia} logo={summary.logoMedia} variant="thumb" />
           </span>
         ) : null}
       </Link>

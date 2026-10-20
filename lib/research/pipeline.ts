@@ -3,6 +3,7 @@ import { assessCandidate } from "./assess";
 import { discoverAndExtract, discoveryBrief, extractCandidates } from "./discover";
 import type { SafeFetcher } from "./fetch";
 import { canonicaliseUrl } from "./fetch";
+import { findCompanyImagery } from "./imagery";
 import { classifyChanges } from "./materiality";
 import { POLICY_VERSION, composeSystemPrompt } from "./policy";
 import type { ResearchModel } from "./provider";
@@ -138,6 +139,15 @@ export async function runPipeline(deps: PipelineDeps, input: PipelineInput): Pro
         taken.add(companyRecord.slug);
         // Sources inserted before the company existed now get linked.
         await store.upsertSources(input.householdId, companyRecord.companyId, candidateSources, sourceTypeFor);
+      }
+      // Imagery from the company's own (verified) website; never blocks publishing.
+      if (candidate.website && !(await store.hasImagery(companyRecord.companyId))) {
+        try {
+          const images = await findCompanyImagery({ website: candidate.website, verifiedUrls: candidateSources.map((s) => s.url) }, fetcher);
+          if (images.length) await store.saveImagery({ householdId: input.householdId, companyId: companyRecord.companyId, companyName: candidate.name, images });
+        } catch {
+          // Best-effort: the designed artwork remains the fallback.
+        }
       }
       // 9–10. Materiality → timeline, notifications
       const changes = classifyChanges(candidate, previous);

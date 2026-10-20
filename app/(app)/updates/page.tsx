@@ -95,7 +95,7 @@ export default async function UpdatesPage({ searchParams }: { searchParams: Sear
                           </span>
                           {s ? (
                             <span className="hidden h-11 w-11 shrink-0 overflow-hidden rounded-[10px] bg-ink sm:block">
-                              <CompanyArtwork company={s.company} media={s.primaryMedia} variant="thumb" />
+                              <CompanyArtwork company={s.company} media={s.primaryMedia} logo={s.logoMedia} variant="thumb" />
                             </span>
                           ) : null}
                         </Link>

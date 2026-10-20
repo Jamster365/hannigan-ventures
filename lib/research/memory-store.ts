@@ -5,6 +5,7 @@ import type { KnownCompany } from "./resolve";
 import type { AssessmentOutput, Candidate } from "./schemas";
 import type { PublishedCompany, ResearchStore, RunConfig, RunRecord, RunStage } from "./store";
 import type { VerifiedSource } from "./verify";
+import type { FoundImage } from "./imagery";
 
 /**
  * In-memory ResearchStore for tests and dry runs. Mirrors the uniqueness rules
@@ -14,6 +15,7 @@ import type { VerifiedSource } from "./verify";
 export class MemoryResearchStore implements ResearchStore {
   runs: { id: string; householdId: string; localDate: string; runKind: string; status: string; summary: string; errorSummary: string | null; sourceCount: number; publishedCount: number; estimatedCostUsd: number }[] = [];
   progressLog: { runId: string; stage: RunStage; detail: string }[] = [];
+  imagery: { companyId: string; kind: "hero" | "logo"; originUrl: string }[] = [];
   sources = new Map<string, { id: string; companyId: string | null; url: string; hash: string | null }>();
   companies: { id: string; slug: string; name: string; candidate: Candidate; assessment: AssessmentOutput | null; runId: string }[] = [];
   updates: { companyId: string; change: MaterialChange }[] = [];
@@ -45,6 +47,13 @@ export class MemoryResearchStore implements ResearchStore {
   }
   async progress(runId: string, stage: RunStage, detail: string) {
     this.progressLog.push({ runId, stage, detail });
+  }
+  async hasImagery(companyId: string) {
+    return this.imagery.some((i) => i.companyId === companyId);
+  }
+  async saveImagery(input: { householdId: string; companyId: string; companyName: string; images: FoundImage[] }) {
+    for (const img of input.images) this.imagery.push({ companyId: input.companyId, kind: img.kind, originUrl: img.originUrl });
+    return input.images.length;
   }
   async finishRun(input: { runId: string; status: string; sourceCount: number; publishedCount: number; estimatedCostUsd: number; summary: string; errorSummary: string | null }) {
     const run = this.runs.find((r) => r.id === input.runId)!;

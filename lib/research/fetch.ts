@@ -13,11 +13,13 @@ export interface FetchResult {
   finalUrl: string;
   contentType: string | null;
   text: string | null;
+  /** Raw body, only when requested with `binary: true` (text is then null). */
+  bytes?: Uint8Array;
   error?: string;
 }
 
 export interface SafeFetcher {
-  (url: string, opts?: { maxBytes?: number; timeoutMs?: number; method?: "GET" | "HEAD" }): Promise<FetchResult>;
+  (url: string, opts?: { maxBytes?: number; timeoutMs?: number; method?: "GET" | "HEAD"; binary?: boolean }): Promise<FetchResult>;
 }
 
 const BLOCKED_HOSTS = new Set(["localhost", "metadata.google.internal", "169.254.169.254"]);
@@ -71,7 +73,7 @@ export const safeFetch: SafeFetcher = async (raw, opts = {}) => {
       method: opts.method ?? "GET",
       redirect: "manual",
       signal: controller.signal,
-      headers: { "user-agent": "DealRoomResearch/1.0 (+private household research; respects robots and terms)", accept: "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.5" },
+      headers: { "user-agent": "DealRoomResearch/1.0 (+private household research; respects robots and terms)", accept: opts.binary ? "image/avif,image/webp,image/png,image/jpeg,image/gif;q=0.9" : "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.5" },
     });
     if (res.status >= 300 && res.status < 400) {
       const loc = res.headers.get("location");
@@ -86,6 +88,7 @@ export const safeFetch: SafeFetcher = async (raw, opts = {}) => {
     const reader = res.body?.getReader();
     let received = 0;
     const chunks: Uint8Array[] = [];
+    let truncated = false;
     if (reader) {
       for (;;) {
         const { done, value } = await reader.read();
@@ -93,6 +96,7 @@ export const safeFetch: SafeFetcher = async (raw, opts = {}) => {
         if (value) {
           received += value.byteLength;
           if (received > maxBytes) {
+            truncated = true;
             await reader.cancel();
             break;
           }
@@ -100,6 +104,8 @@ export const safeFetch: SafeFetcher = async (raw, opts = {}) => {
         }
       }
     }
+    // A truncated binary file is unusable; a truncated page still has its <head>.
+    if (opts.binary) return truncated ? { ok: false, status: res.status, finalUrl: url.href, contentType, text: null, error: "file too large" } : { ok: res.ok, status: res.status, finalUrl: url.href, contentType, text: null, bytes: concat(chunks) };
     const text = new TextDecoder("utf-8", { fatal: false }).decode(concat(chunks));
     return { ok: res.ok, status: res.status, finalUrl: url.href, contentType, text };
   } catch (e) {

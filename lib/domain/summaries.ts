@@ -5,6 +5,8 @@ import type { Assessment, Company, CompanyBundle, CompanyMedia, CompanyUpdate, F
 export interface CompanySummary {
   company: Company;
   primaryMedia: CompanyMedia | null;
+  /** The company's real logo, used on the designed artwork when there is no hero image. */
+  logoMedia: CompanyMedia | null;
   currentRound: FundingRound | null;
   access: EffectiveAccess;
   assessment: Pick<Assessment, "aiPriority" | "aiScore" | "confidence" | "summary" | "createdAt"> | null;
@@ -42,6 +44,7 @@ export function summarise(bundle: CompanyBundle, opts: { now?: Date; maxChequeGb
   return {
     company,
     primaryMedia: media.find((m) => m.isPrimary) ?? media[0] ?? null,
+    logoMedia: media.find((m) => m.kind === "logo" && m.url && m.rightsStatus !== "fallback") ?? null,
     currentRound: rounds.find((r) => r.isCurrent) ?? null,
     access: effectiveAccess(accessChecks, { now, maxChequeGbp: opts.maxChequeGbp }),
     assessment: assessment

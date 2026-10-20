@@ -60,7 +60,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pa
     <article className="mx-auto w-full max-w-[1200px] xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-8 xl:px-6 xl:pt-6">
       <div className="min-w-0">
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-ink sm:aspect-[16/9] xl:aspect-[21/9] xl:rounded-[var(--radius-lg)]">
-          <CompanyArtwork company={company} media={primary} variant="hero" priority />
+          <CompanyArtwork company={company} media={primary} logo={media.find((m) => m.kind === "logo" && m.url && m.rightsStatus !== "fallback") ?? null} variant="hero" priority />
           <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
             <BackLink href="/" className="bg-white/90 shadow-sm backdrop-blur hover:bg-white" />
             <div className="flex gap-2">

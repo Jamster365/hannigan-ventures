@@ -23,7 +23,7 @@ export function CompanyCard({ summary, members, currentUserId, className, imageC
     <Card as="article" className={cn("relative flex flex-col overflow-hidden", className)}>
       <Link href={companyHref(summary)} className="absolute inset-0 z-[1] rounded-[inherit]" aria-label={`Open ${company.name}`} />
       <div className={cn("relative w-full overflow-hidden bg-ink", imageClass)}>
-        <CompanyArtwork company={company} media={summary.primaryMedia} />
+        <CompanyArtwork company={company} media={summary.primaryMedia} logo={summary.logoMedia} />
         <div className="absolute left-3 top-3 z-[2] flex gap-1.5">
           <CardFlag summary={summary} />
         </div>
@@ -70,7 +70,7 @@ export function CompactCompanyCard({ summary, members, className }: { summary: C
     <Card as="article" className={cn("relative flex gap-3 p-3", className)}>
       <Link href={companyHref(summary, "family")} className="absolute inset-0 z-[1] rounded-[inherit]" aria-label={`Open ${company.name}`} />
       <div className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-[12px] bg-ink">
-        <CompanyArtwork company={company} media={summary.primaryMedia} variant="thumb" />
+        <CompanyArtwork company={company} media={summary.primaryMedia} logo={summary.logoMedia} variant="thumb" />
       </div>
       <div className="min-w-0 flex-1">
         <h3 className="truncate font-serif text-[16px] font-semibold text-ink">{company.name}</h3>
@@ -94,7 +94,7 @@ export function ShortlistCard({ summary, members, currentUserId }: { summary: Co
       <Link href={companyHref(summary)} className="absolute inset-0 z-[1] rounded-[inherit]" aria-label={`Open ${company.name}`} />
       <div className="flex gap-3 p-3">
         <div className="h-[96px] w-[96px] shrink-0 overflow-hidden rounded-[14px] bg-ink">
-          <CompanyArtwork company={company} media={summary.primaryMedia} variant="thumb" />
+          <CompanyArtwork company={company} media={summary.primaryMedia} logo={summary.logoMedia} variant="thumb" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
@@ -140,7 +140,7 @@ export function CompanyRow({ summary, members }: { summary: CompanySummary; memb
       <td className="py-2.5 pl-4 pr-2">
         <Link href={companyHref(summary)} className="flex items-center gap-3">
           <span className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-ink">
-            <CompanyArtwork company={company} media={summary.primaryMedia} variant="thumb" />
+            <CompanyArtwork company={company} media={summary.primaryMedia} logo={summary.logoMedia} variant="thumb" />
           </span>
           <span className="min-w-0">
             <span className="block truncate text-[14px] font-semibold text-ink">{company.name}</span>

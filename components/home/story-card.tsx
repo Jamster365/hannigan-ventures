@@ -37,7 +37,7 @@ export function StoryCard({ story, company }: { story: HomeStory; company: Compa
       </div>
       {company ? (
         <div className="w-[88px] shrink-0 bg-ink">
-          <CompanyArtwork company={company.company} media={company.primaryMedia} variant="thumb" />
+          <CompanyArtwork company={company.company} media={company.primaryMedia} logo={company.logoMedia} variant="thumb" />
         </div>
       ) : null}
     </Card>

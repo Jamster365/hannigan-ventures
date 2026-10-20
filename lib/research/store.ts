@@ -4,6 +4,7 @@ import type { AssessmentOutput, Candidate } from "./schemas";
 import type { MaterialChange } from "./materiality";
 import type { PreviousState } from "./materiality";
 import type { VerifiedSource } from "./verify";
+import type { FoundImage } from "./imagery";
 
 /**
  * Persistence boundary for the research pipeline. The pipeline never touches
@@ -50,6 +51,10 @@ export interface ResearchStore {
   publishStories(input: { householdId: string; runId: string; stories: { storyType: "financing" | "access" | "deadline" | "signal" | "research"; companyId: string | null; headline: string; teaser: string; priority: number; sourceId: string | null }[] }): Promise<void>;
   publishEvents(input: { householdId: string; events: { name: string; organiser: string; eventType: string; startAt: string; endAt: string | null; venue: string | null; city: string; isOnline: boolean; registrationUrl: string | null; accessStatus: "open" | "invitation_only" | "waitlist" | "closed" | "unknown"; audienceFit: string; significance: string; nextAction: string; sourceId: string | null }[] }): Promise<void>;
   notifyMembers(input: { householdId: string; memberIds: string[]; type: NotificationType; title: string; body: string; importance: "high" | "normal"; href: string; dedupeKey: string; companyId?: string | null }): Promise<void>;
+  /** True when the company already has real (non-fallback) imagery. */
+  hasImagery(companyId: string): Promise<boolean>;
+  /** Store copies of the company's own images with origin and attribution. */
+  saveImagery(input: { householdId: string; companyId: string; companyName: string; images: FoundImage[] }): Promise<number>;
   logReview(input: { householdId: string; runId: string; kind: "ambiguous_entity" | "rejected_candidate" | "dropped_claims"; detail: unknown }): Promise<void>;
   audit(input: { householdId: string; runId: string; action: string; objectType: string; objectId: string; after?: unknown }): Promise<void>;
 }

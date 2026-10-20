@@ -5,6 +5,7 @@ import type { MaterialChange, PreviousState } from "./materiality";
 import { canonicaliseUrl } from "./fetch";
 import type { PublishedCompany, ResearchStore, RunConfig, RunRecord, RunStage } from "./store";
 import type { VerifiedSource } from "./verify";
+import type { FoundImage } from "./imagery";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { ResearchPreferences } from "@/lib/domain/types";
 
@@ -52,6 +53,44 @@ class SupabaseResearchStore implements ResearchStore {
 
   async progress(runId: string, stage: RunStage, detail: string) {
     await this.admin.from("research_runs").update({ progress_stage: stage, progress_detail: detail, progress_at: new Date().toISOString() }).eq("id", runId);
+  }
+
+  async hasImagery(companyId: string) {
+    const { count } = await this.admin.from("company_media").select("id", { count: "exact", head: true }).eq("company_id", companyId).neq("rights_status", "fallback").not("url", "is", null);
+    return (count ?? 0) > 0;
+  }
+
+  async saveImagery(input: { householdId: string; companyId: string; companyName: string; images: FoundImage[] }) {
+    const { createHash } = await import("node:crypto");
+    let saved = 0;
+    for (const img of input.images) {
+      const ext = img.type === "jpeg" ? "jpg" : img.type;
+      const path = `${input.householdId}/${input.companyId}/${img.kind}-${createHash("sha1").update(img.bytes).digest("hex").slice(0, 16)}.${ext}`;
+      const up = await this.admin.storage.from("company-media").upload(path, img.bytes, { contentType: `image/${img.type}`, upsert: true, cacheControl: "604800" });
+      if (up.error) continue;
+      const url = this.admin.storage.from("company-media").getPublicUrl(path).data.publicUrl;
+      const host = new URL(img.pageUrl).hostname.replace(/^www\./, "");
+      if (img.kind === "hero") await this.admin.from("company_media").update({ is_primary: false }).eq("company_id", input.companyId);
+      this.must(
+        await this.admin.from("company_media").insert({
+          company_id: input.companyId,
+          kind: img.kind,
+          storage_path: path,
+          url,
+          is_primary: img.kind === "hero",
+          rights_status: "attributed",
+          origin_url: img.originUrl,
+          creator_or_owner: input.companyName,
+          license_or_permission: img.kind === "hero" ? "Published by the company on its website for link previews; shown with attribution" : "Company logo from its own website; shown with attribution",
+          attribution: `Image: ${host}`,
+          alt_text: img.kind === "hero" ? `${input.companyName}, image from ${host}` : `${input.companyName} logo`,
+          checked_at: new Date().toISOString(),
+        }),
+        "media",
+      );
+      saved += 1;
+    }
+    return saved;
   }
 
   async finishRun(input: { runId: string; status: "published" | "failed" | "no_new_research"; sourceCount: number; candidatesCount: number; publishedCount: number; estimatedCostUsd: number; summary: string; errorSummary: string | null }) {
