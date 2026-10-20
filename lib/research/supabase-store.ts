@@ -25,7 +25,8 @@ class SupabaseResearchStore implements ResearchStore {
   async loadConfig(householdId: string): Promise<RunConfig> {
     const prompt = this.must(await this.admin.from("research_prompts").select("id, prompt_text, config_jsonb").eq("household_id", householdId).eq("active", true).maybeSingle<{ id: string; prompt_text: string; config_jsonb: Partial<ResearchPreferences> }>(), "active prompt");
     if (!prompt) throw new Error("No active research instructions for this household");
-    const companies = this.must(await this.admin.from("companies").select("id, name, slug, domain, legal_name").eq("household_id", householdId).returns<{ id: string; name: string; slug: string; domain: string | null; legal_name: string | null }[]>(), "companies") ?? [];
+    // Labelled sample companies are fictional: never research them or match real findings onto them.
+    const companies = this.must(await this.admin.from("companies").select("id, name, slug, domain, legal_name").eq("household_id", householdId).eq("is_demo", false).returns<{ id: string; name: string; slug: string; domain: string | null; legal_name: string | null }[]>(), "companies") ?? [];
     const aliases = this.must(await this.admin.from("company_aliases").select("company_id, alias").in("company_id", companies.map((c) => c.id)).returns<{ company_id: string; alias: string }[]>(), "aliases") ?? [];
     const members = this.must(await this.admin.from("household_members").select("user_id").eq("household_id", householdId).eq("status", "active").returns<{ user_id: string }[]>(), "members") ?? [];
     const hashes = this.must(await this.admin.from("sources").select("content_hash").eq("household_id", householdId).not("content_hash", "is", null).returns<{ content_hash: string }[]>(), "hashes") ?? [];
