@@ -13,6 +13,8 @@ Read this first, then `IMPLEMENTATION_STATUS.md` (section "Live environment") an
 - Supabase logs show the live app is in Supabase mode: at 13:20 UTC it requested a magic link with `redirect_to=https://hannigan-ventures.vercel.app/auth/callback?next=/`. The link verified (`login`), but Supabase redirected to `http://localhost:3000` because the Site URL and redirect allow-list were not set yet.
 - Email templates can only be edited after custom SMTP is configured (Supabase free plan). Branded templates that use `token_hash` (so links work in any iPhone browser) are in `supabase/templates/`.
 
+- Later that day: Jamie signed in successfully on iPhone (14:00 UTC) and Home loaded live data. Chris hit Supabase's built-in email limit (`over_email_send_rate_limit`) and will retry after an hour. Jamie chose **not** to set up custom SMTP for now (three users, long-lived sessions); revisit only if the limit keeps getting in the way. If it does, use Resend on `puzzleroyale.co.uk` (DNS at Cloudflare), then paste `supabase/templates/`.
+
 ## Do next, in order
 1. Verify the deployment with the Vercel connector: latest deployment state and build log, runtime errors, then fetch `/auth/sign-in` and confirm it is the Supabase-mode sign-in page (no amber "Demo mode" banner).
 2. Confirm Supabase Auth settings with Jamie: Site URL `https://hannigan-ventures.vercel.app`, redirect allow-list includes `https://hannigan-ventures.vercel.app/auth/callback`, and "Allow new users to sign up" is off. Then have Jamie request a magic link and check `auth_logs` / `edge_logs` in Supabase to confirm the session and the Home page load.
