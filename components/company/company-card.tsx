@@ -24,29 +24,19 @@ export function CompanyCard({ summary, members, currentUserId, className, imageC
       <Link href={companyHref(summary)} className="absolute inset-0 z-[1] rounded-[inherit]" aria-label={`Open ${company.name}`} />
       <div className={cn("relative w-full overflow-hidden bg-ink", imageClass)}>
         <CompanyArtwork company={company} media={summary.primaryMedia} logo={summary.logoMedia} />
-        <div className="absolute left-3 top-3 z-[2] flex gap-1.5">
-          <CardFlag summary={summary} />
-        </div>
-        <div className="absolute right-3 top-3 z-[2]">
-          <BookmarkButton companyId={company.id} slug={company.slug} bookmarked={bookmarked} />
-        </div>
       </div>
+      {/* Labels and the bookmark sit below the image so they never cover text inside company imagery. */}
       <div className="flex flex-1 flex-col px-4 pb-4 pt-3">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-serif text-[19px] font-semibold leading-tight text-ink">{company.name}</h3>
-          {priorityText ? (
-            <Pill tone="green" className="relative z-[2] shrink-0">
-              {priorityText}
-            </Pill>
-          ) : summary.familyStage === "shortlisted" ? (
-            <Pill tone="green" className="shrink-0">
-              Shortlisted
-            </Pill>
-          ) : null}
+          <h3 className="pt-1.5 font-serif text-[19px] font-semibold leading-tight text-ink">{company.name}</h3>
+          <div className="relative z-[2] -mr-2 -mt-0.5 shrink-0">
+            <BookmarkButton companyId={company.id} slug={company.slug} bookmarked={bookmarked} variant="plain" />
+          </div>
         </div>
         <p className="mt-0.5 text-[12px] text-secondary">
           {company.sector} · {company.city} · {company.stage}
         </p>
+        <CardLabels summary={summary} priorityText={priorityText} />
         <p className="mt-2 text-[14px] leading-snug text-text clamp-2">{company.teaser}</p>
         <div className="mt-3 flex items-center justify-between gap-2">
           <AiInline priority={summary.assessment?.aiPriority ?? null} />
@@ -60,6 +50,18 @@ export function CompanyCard({ summary, members, currentUserId, className, imageC
         ) : null}
       </div>
     </Card>
+  );
+}
+
+function CardLabels({ summary, priorityText }: { summary: CompanySummary; priorityText: string | null }) {
+  const flag = CardFlag({ summary });
+  const stage = priorityText ? <Pill tone="green">{priorityText}</Pill> : summary.familyStage === "shortlisted" ? <Pill tone="green">Shortlisted</Pill> : null;
+  if (!flag && !stage) return null;
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {flag}
+      {stage}
+    </div>
   );
 }
 

@@ -59,18 +59,19 @@ export default async function CompanyPage({ params, searchParams }: { params: Pa
   return (
     <article className="mx-auto w-full max-w-[1200px] xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-8 xl:px-6 xl:pt-6">
       <div className="min-w-0">
+        {/* Controls sit above the image, never on it: company imagery often carries its own headline text. */}
+        <div className="flex items-center justify-between px-2 pb-1 xl:px-0 xl:pb-2" style={{ paddingTop: "max(4px, env(safe-area-inset-top))" }}>
+          <BackLink href="/" />
+          <div className="flex gap-1">
+            <BookmarkButton companyId={company.id} slug={company.slug} bookmarked={bookmarked} variant="plain" />
+            <CompanyMenu company={company} sources={bundle.sources} whatsNew={whatsNew} />
+          </div>
+        </div>
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-ink sm:aspect-[16/9] xl:aspect-[21/9] xl:rounded-[var(--radius-lg)]">
           <CompanyArtwork company={company} media={primary} logo={media.find((m) => m.kind === "logo" && m.url && m.rightsStatus !== "fallback") ?? null} variant="hero" priority />
-          <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
-            <BackLink href="/" className="bg-white/90 shadow-sm backdrop-blur hover:bg-white" />
-            <div className="flex gap-2">
-              <BookmarkButton companyId={company.id} slug={company.slug} bookmarked={bookmarked} />
-              <CompanyMenu company={company} sources={bundle.sources} whatsNew={whatsNew} overlay />
-            </div>
-          </div>
-          {primary?.attribution ? <span className="absolute bottom-2 right-3 rounded-full bg-black/40 px-2 py-0.5 text-[10px] text-white/90">{primary.attribution}</span> : null}
           {company.isDemo ? <span className="absolute right-3 bottom-3 rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-white/90">Sample company</span> : null}
         </div>
+        {primary?.attribution ? <p className="px-4 pt-1.5 text-right text-[11px] text-tertiary xl:px-0">{primary.attribution}</p> : null}
 
         <header className="px-4 pt-4">
           <div className="flex items-start justify-between gap-3">
