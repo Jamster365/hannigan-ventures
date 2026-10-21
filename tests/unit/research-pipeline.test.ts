@@ -296,6 +296,22 @@ describe("end-to-end pipeline with fixtures", () => {
     expect(brief).not.toMatch(/first research run/);
   });
 
+  it("skips a company that fails to save, logs why, and still publishes the others", async () => {
+    const store = new MemoryResearchStore();
+    const two = extraction();
+    two.candidates.push({ ...two.candidates[0], name: "Second Photonics", website: "https://second-photonics.test" });
+    const publish = store.publishCompany.bind(store);
+    store.publishCompany = async (input) => {
+      if (input.candidate.name === "Example Photonics") throw new Error('invalid input syntax for type date: "2024-11"');
+      return publish(input);
+    };
+    const result = await runPipeline({ model: fakeModel(two, goodAssessment()), fetcher, store, now: new Date("2026-10-19T06:00:00Z") }, { householdId: "h1", runKind: "manual", triggeredBy: "u1" });
+    expect(result.status).toBe("published");
+    expect(store.companies.map((c) => c.candidate.name)).toEqual(["Second Photonics"]);
+    expect(store.reviews.some((r) => r.kind === "rejected_candidate" && JSON.stringify(r.detail).includes("could not be saved"))).toBe(true);
+    expect(result.summary).toMatch(/Skipped: Example Photonics/);
+  });
+
   it("publishes nothing when the provider returns no citations", async () => {
     const store = new MemoryResearchStore();
     const model = fakeModel(extraction(), goodAssessment(), { citations: [] });

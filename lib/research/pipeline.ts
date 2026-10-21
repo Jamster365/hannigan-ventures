@@ -206,7 +206,15 @@ async function processDiscovery(deps: PipelineDeps, run: { id: string; household
     const companyIdForSources = resolution.kind === "existing" ? resolution.companyId : null;
     const sourceIds = await store.upsertSources(run.householdId, companyIdForSources, candidateSources, sourceTypeFor);
     const assessment = assessments.get(raw) ?? null;
-    const companyRecord = await store.publishCompany({ householdId: run.householdId, runId: run.id, candidate, resolution, sourceIds, assessment, policyVersion: POLICY_VERSION, model: model.name, promptVersion: config.promptVersionId });
+    let companyRecord: Awaited<ReturnType<typeof store.publishCompany>>;
+    try {
+      companyRecord = await store.publishCompany({ householdId: run.householdId, runId: run.id, candidate, resolution, sourceIds, assessment, policyVersion: POLICY_VERSION, model: model.name, promptVersion: config.promptVersionId });
+    } catch (e) {
+      // One company failing to save must not stop the others (the store removes any half-written new company).
+      await store.logReview({ householdId: run.householdId, runId: run.id, kind: "rejected_candidate", detail: { name: candidate.name, reason: `could not be saved: ${errorText(e)}` } });
+      summaryLines.push(`Skipped: ${candidate.name} (could not be saved)`);
+      continue;
+    }
     if (resolution.kind === "new") {
       newDossiers += 1;
       known.push({ id: companyRecord.companyId, name: candidate.name, slug: companyRecord.slug, domain: candidate.website, legalName: candidate.legalName, aliases: [] });
@@ -255,7 +263,7 @@ async function processDiscovery(deps: PipelineDeps, run: { id: string; household
     await store.publishStories({ householdId: run.householdId, runId: run.id, stories: stories.length ? stories : storyInputs.slice(0, 4) });
   }
 
-  const summary = published === 0 ? "Research ran but nothing new or material was verified; no companies published." : `${published} compan${published === 1 ? "y" : "ies"} published (${newDossiers} new). ${summaryLines.slice(0, 5).join("; ")}.`;
+  const summary = published === 0 ? `Research ran but nothing new or material was verified; no companies published.${summaryLines.length ? ` ${summaryLines.join("; ")}.` : ""}` : `${published} compan${published === 1 ? "y" : "ies"} published (${newDossiers} new). ${summaryLines.slice(0, 8).join("; ")}.`;
   await store.audit({ householdId: run.householdId, runId: run.id, action: "research.publish", objectType: "research_run", objectId: run.id, after: { published, newDossiers, policyVersion: POLICY_VERSION, findings: extraction.executiveFindings } });
   return finish(published === 0 ? "no_new_research" : "published", summary, null, { sourceCount: verified.length, candidatesCount: extraction.candidates.length, publishedCount: published });
 }

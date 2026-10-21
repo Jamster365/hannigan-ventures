@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_PREFERENCES } from "./default-prompt";
 import type { MaterialChange, PreviousState } from "./materiality";
+import { toIsoDate } from "./dates";
 import { canonicaliseUrl } from "./fetch";
 import type { PublishedCompany, ResearchStore, RunConfig, RunRecord, RunStage, StoredRun } from "./store";
 import type { VerifiedSource } from "./verify";
@@ -177,15 +178,27 @@ class SupabaseResearchStore implements ResearchStore {
       isNew = true;
       this.must(await this.admin.from("company_media").insert({ company_id: companyId, kind: "hero", url: null, is_primary: true, rights_status: "fallback", alt_text: `${c.name} artwork`, checked_at: now }), "media");
     }
+    try {
+      await this.writeCompanyDetail(input, companyId, now, src);
+    } catch (e) {
+      // Never leave a half-written new company behind; the run logs the reason and carries on.
+      if (isNew) await this.admin.from("companies").delete().eq("id", companyId);
+      throw e;
+    }
+    return { companyId, slug, name: c.name, isNew };
+  }
+
+  private async writeCompanyDetail(input: Parameters<ResearchStore["publishCompany"]>[0], companyId: string, now: string, src: (urls: string[] | undefined) => string | null) {
+    const { candidate: c, sourceIds } = input;
 
     // Facts: supersede, never delete.
     for (const f of c.facts) {
       await this.admin.from("company_facts").update({ effective_to: now }).eq("company_id", companyId).eq("field_key", f.key).is("effective_to", null);
-      this.must(await this.admin.from("company_facts").insert({ company_id: companyId, field_key: f.key, label: f.label, value_jsonb: f.value, currency: f.currency, as_of_date: f.asOf?.slice(0, 10) ?? null, evidence_status: f.evidenceStatus, source_id: src(f.sourceUrls) }), "fact");
+      this.must(await this.admin.from("company_facts").insert({ company_id: companyId, field_key: f.key, label: f.label, value_jsonb: f.value, currency: f.currency, as_of_date: toIsoDate(f.asOf), evidence_status: f.evidenceStatus, source_id: src(f.sourceUrls) }), "fact");
     }
     if (c.round) {
       await this.admin.from("funding_rounds").update({ is_current: false }).eq("company_id", companyId).eq("is_current", true);
-      this.must(await this.admin.from("funding_rounds").insert({ company_id: companyId, stage: c.round.stage ?? c.stage ?? "Unknown", target_amount: c.round.target?.amount ?? null, currency: c.round.target?.currency ?? c.round.preMoney?.currency ?? null, pre_money: c.round.preMoney?.amount ?? null, post_money: c.round.postMoney?.amount ?? null, reported_committed: c.round.reportedCommitted?.amount ?? null, closes_at: c.round.closesAt, claimed_status: c.round.claimedStatus, lead_investors: c.round.leadInvestors, evidence_status: c.round.evidenceStatus, source_id: src(c.round.sourceUrls), is_current: true }), "round");
+      this.must(await this.admin.from("funding_rounds").insert({ company_id: companyId, stage: c.round.stage ?? c.stage ?? "Unknown", target_amount: c.round.target?.amount ?? null, currency: c.round.target?.currency ?? c.round.preMoney?.currency ?? null, pre_money: c.round.preMoney?.amount ?? null, post_money: c.round.postMoney?.amount ?? null, reported_committed: c.round.reportedCommitted?.amount ?? null, closes_at: toIsoDate(c.round.closesAt), claimed_status: c.round.claimedStatus, lead_investors: c.round.leadInvestors, evidence_status: c.round.evidenceStatus, source_id: src(c.round.sourceUrls), is_current: true }), "round");
     }
     this.must(await this.admin.from("investment_access_checks").insert({ company_id: companyId, access_status: c.access.status, route_type: c.access.routeType, contact_or_url: c.access.contactOrUrl, min_cheque: c.access.minCheque, max_cheque: c.access.maxCheque, currency: c.access.currency, checked_at: now, expires_at: c.access.status === "verified_open" || c.access.status === "closing_soon" ? new Date(Date.now() + 48 * 3600_000).toISOString() : null, verifier: `research ${input.model}`, source_id: src(c.access.sourceUrls), notes: c.access.notes }), "access check");
     if (c.founders.length) {
@@ -196,7 +209,6 @@ class SupabaseResearchStore implements ResearchStore {
       const a = input.assessment;
       this.must(await this.admin.from("company_assessments").insert({ company_id: companyId, run_id: input.runId, ai_priority: a.aiPriority, ai_score: a.aiScore, confidence: a.confidence, summary: a.summary, why_interested: a.whyInterested, risks: a.risks, bull_case: a.bullCase, bear_case: a.bearCase, why_now: a.whyNow, assumptions: a.assumptions, open_questions: [...a.openQuestions, ...c.openQuestions].slice(0, 8), diligence_checklist: a.diligenceChecklist, next_action: a.nextAction, score_breakdown_jsonb: a.breakdown.map((d) => ({ key: d.key, label: d.label, score: d.score, note: d.note, sourceIds: d.sourceUrls.map((u) => sourceIds.get(canonicaliseUrl(u))).filter(Boolean) })), source_ids: [...sourceIds.values()], model_version: `${input.model} · ${input.policyVersion}`, prompt_version: input.promptVersion }), "assessment");
     }
-    return { companyId, slug, name: c.name, isNew };
   }
 
   async recordChanges(input: Parameters<ResearchStore["recordChanges"]>[0]) {
