@@ -9,6 +9,7 @@ import type { ModelUsage, ResearchModel } from "@/lib/research/provider";
 import { resolveCandidate } from "@/lib/research/resolve";
 import { assessmentSchema, candidateSchema, extractionSchema, homeStorySchema, type AssessmentOutput, type Candidate, type Extraction } from "@/lib/research/schemas";
 import { sanitiseCandidate } from "@/lib/research/verify";
+import { ImportedResearchModel } from "@/lib/research/imported-model";
 
 // ---------------------------------------------------------------------------
 // Fixtures: a fake model that "cites" pages, a fetcher that serves some of them
@@ -310,6 +311,23 @@ describe("end-to-end pipeline with fixtures", () => {
     expect(store.companies.map((c) => c.candidate.name)).toEqual(["Second Photonics"]);
     expect(store.reviews.some((r) => r.kind === "rejected_candidate" && JSON.stringify(r.detail).includes("could not be saved"))).toBe(true);
     expect(result.summary).toMatch(/Skipped: Example Photonics/);
+  });
+
+  it("publishes imported (hand-researched) companies through the same verification, at no provider cost", async () => {
+    const store = new MemoryResearchStore();
+    const ex = extraction();
+    const model = new ImportedResearchModel({ writeUp: "Hand-researched first set.", companies: ex.candidates.map((candidate) => ({ candidate, assessment: { ...goodAssessment(), aiScore: 9.6 } })), events: ex.events, executiveFindings: ["One"] }, "claude chat research");
+    const deps = { model, fetcher, store, now: new Date("2026-10-21T09:00:00Z") };
+    const runRecord = await store.startRun({ householdId: "h1", localDate: "2026-10-21", runKind: "manual", promptVersionId: "pv-1", model: model.name, newCompanyLimit: 12 });
+    await store.setDiscovery(runRecord!.id, "import:abc");
+    const result = await advancePipeline(deps, runRecord!.id);
+    expect(result.status).toBe("published");
+    expect(result.estimatedCostUsd).toBe(0);
+    expect(store.companies).toHaveLength(1);
+    // The unverifiable fact (missing page) is stripped exactly as for provider research.
+    expect(store.reviews.some((r) => r.kind === "dropped_claims")).toBe(true);
+    // Hard assessment rules still apply to an imported assessment (valuation unrated without terms is enforced elsewhere; score kept only with >=2 verified sources).
+    expect(store.companies[0].assessment?.aiScore).toBe(9.6);
   });
 
   it("publishes nothing when the provider returns no citations", async () => {

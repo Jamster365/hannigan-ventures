@@ -10,9 +10,20 @@ import type { StoredRun } from "./store";
  * adapter, SSRF-safe fetcher, Supabase service-role store) into the pipeline.
  * A fresh model per call keeps each run's cost accounting separate.
  */
-async function productionDeps(now = new Date()): Promise<PipelineDeps> {
+async function productionDeps(now = new Date(), model?: PipelineDeps["model"]): Promise<PipelineDeps> {
   const [{ getResearchModel }, { safeFetch }, { createSupabaseResearchStore }] = await Promise.all([import("./provider"), import("./fetch"), import("./supabase-store")]);
-  return { model: getResearchModel(), fetcher: safeFetch, store: createSupabaseResearchStore(), now };
+  return { model: model ?? getResearchModel(), fetcher: safeFetch, store: createSupabaseResearchStore(), now };
+}
+
+const IMPORT_PREFIX = "import:";
+
+/** Runs whose handle is "import:<id>" read prepared research from research_imports instead of calling the provider. */
+async function importedModelFor(run: StoredRun | null): Promise<PipelineDeps["model"] | undefined> {
+  if (!run?.responseHandle?.startsWith(IMPORT_PREFIX)) return undefined;
+  const [{ createSupabaseAdminClient }, { ImportedResearchModel }] = await Promise.all([import("@/lib/supabase/admin"), import("./imported-model")]);
+  const { data } = await createSupabaseAdminClient().from("research_imports").select("label, payload").eq("id", run.responseHandle.slice(IMPORT_PREFIX.length)).maybeSingle<{ label: string; payload: import("./imported-model").ResearchImportPayload }>();
+  if (!data) throw new Error("Imported research payload not found");
+  return new ImportedResearchModel(data.payload, data.label);
 }
 
 function householdFromEnv(householdId?: string): string {
@@ -27,7 +38,8 @@ export async function beginResearch(input: { runKind: ResearchRun["runKind"]; tr
 }
 
 export async function advanceResearch(runId: string): Promise<PipelineResult> {
-  return advancePipeline(await productionDeps(), runId);
+  const model = await importedModelFor(await getResearchRun(runId));
+  return advancePipeline(await productionDeps(new Date(), model), runId);
 }
 
 export async function getResearchRun(runId: string): Promise<StoredRun | null> {
