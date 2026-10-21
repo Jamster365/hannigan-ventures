@@ -15,6 +15,14 @@ Read this first, then `IMPLEMENTATION_STATUS.md` (section "Live environment") an
 
 - Later that day: Jamie signed in successfully on iPhone (14:00 UTC) and Home loaded live data. Chris hit Supabase's built-in email limit (`over_email_send_rate_limit`) and will retry after an hour. Jamie chose **not** to set up custom SMTP for now (three users, long-lived sessions); revisit only if the limit keeps getting in the way. If it does, use Resend on `puzzleroyale.co.uk` (DNS at Cloudflare), then paste `supabase/templates/`.
 
+## First set of real companies (21 October 2026)
+- All sample data has been deleted from the live database; the app currently has **no companies** (empty states render correctly).
+- Jamie chose to build the first set by researching **in a Claude chat** (Max plan, no API cost), not via OpenAI. The daily 07:00 OpenAI run stays as the ongoing top-up ($2/day budget, max 3 new companies/run).
+- Chat research needs the cloud environment's **Network access** widened (title bar → environment → Edit): this session could search but every page fetch was denied by the network policy. Once pages can be opened:
+  1. Research per `docs/research-brief.md` (areas: Imperial/London spinouts, Cambridge/Oxford, live angel-access rounds, Antler/EF/frontier founders; ~8–10 companies). Leads from search only (unconfirmed): Certain Energy (Imperial, £10m Series A Aug 2026), Pfentech (AI TCR design), Stateful Robotics (Oxford), Semarion (Cambridge, £2.1m seed), Sealeo, Arti, Orbion Connect, PLAYBACK, Find Care Compare.
+  2. `npx tsx scripts/check-research-import.ts out.json "Claude chat research" "<write-up>" area1.json …` to validate shape.
+  3. Insert `{label, payload}` into `research_imports`, then a `research_runs` row with `phase='discovering'`, `provider_response_id='import:<id>'`, `new_company_limit=12`, `status='running'`, `run_kind='manual'`; nudge `/api/research/tick` via `net.http_post` with the Vault secret. The normal pipeline verifies every URL, strips unverified claims, applies assessment rules, fetches imagery, publishes. Zero provider cost.
+
 ## Do next, in order
 1. Verify the deployment with the Vercel connector: latest deployment state and build log, runtime errors, then fetch `/auth/sign-in` and confirm it is the Supabase-mode sign-in page (no amber "Demo mode" banner).
 2. Confirm Supabase Auth settings with Jamie: Site URL `https://hannigan-ventures.vercel.app`, redirect allow-list includes `https://hannigan-ventures.vercel.app/auth/callback`, and "Allow new users to sign up" is off. Then have Jamie request a magic link and check `auth_logs` / `edge_logs` in Supabase to confirm the session and the Home page load.
