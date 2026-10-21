@@ -76,6 +76,16 @@ Notes:
 - Leads dropped: HVN Labs, Lambda agri, Exact Comms, Metal Morph, Sorted Technologies (rounds closed or no citable raising page); Lunor Pay (press release 403).
 - Housekeeping: the hosted SQL tool held `UPDATE` statements as well as `DELETE`s, so the payload was loaded as insert-only staging rows labelled "staging (not a run input) raising-now 21 Oct" / "staging chunk raising-now 21 Oct (not a run input) 02–05". They are unused and safe to delete. One of them (`6d028e54-…`, chunk 04) has a malformed tail typed by mistake; only its verified first 19,406 characters went into the import, which was checked by md5 against the validated file.
 
+## Staying signed in (21 October 2026)
+Jamie asked for members to stay signed in for weeks without a new magic link. The app already allows that: `@supabase/ssr` sets the session cookies for 400 days (fixed by the library), Supabase sessions never expire on this plan, and `proxy.ts` refreshes the session on each visit.
+
+The early sign-outs come from Supabase's refresh-token reuse detection. Auth logs on 21 Oct show a normal refresh for George at 14:17, then the browser presenting the old refresh token at 14:22 and 14:54 (`refresh_token_already_used`, "Possible abuse attempt"), which revoked the session; Jamie then needed a new link at 14:55. This happens when a refreshed token never reaches the browser, usually because a phone request (often a prefetch) is cancelled after the server has already rotated the token. Supabase's own docs describe this as a cause of "sudden and unexpected session termination".
+
+Fix (Supabase dashboard, Jamie; no tool in this session can change Auth settings):
+1. Authentication → Sessions (Advanced): turn **off** "Detect and revoke potentially compromised refresh tokens". This alone stops the sign-outs.
+2. Optional: raise the access token (JWT) expiry from 3600 s to 86400 s (1 day), so tokens are refreshed far less often. The trade-off: a removed member's access token keeps working for up to a day.
+Leave "Time-box user sessions" and "Inactivity timeout" unset (they are paid-plan features anyway). After the change, check `auth_logs` for `refresh_token_already_used` over the following days.
+
 ## Do next, in order
 1. Verify the deployment with the Vercel connector: latest deployment state and build log, runtime errors, then fetch `/auth/sign-in` and confirm it is the Supabase-mode sign-in page (no amber "Demo mode" banner).
 2. Confirm Supabase Auth settings with Jamie: Site URL `https://hannigan-ventures.vercel.app`, redirect allow-list includes `https://hannigan-ventures.vercel.app/auth/callback`, and "Allow new users to sign up" is off. Then have Jamie request a magic link and check `auth_logs` / `edge_logs` in Supabase to confirm the session and the Home page load.
