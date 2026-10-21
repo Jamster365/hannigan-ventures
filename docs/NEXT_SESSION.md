@@ -95,6 +95,10 @@ Still to do: delete the 21 unused rows in `research_imports` (the hosted SQL too
 `delete from research_imports i where not exists (select 1 from research_runs r where r.provider_response_id = 'import:' || i.id);`
 This keeps the two imports runs used (`950b1459-…`, `ddca488a-…`).
 
+## Home-screen app sign-in hand-off (21 October 2026)
+On iPhone, email links open in the default browser (Jamie: Chrome), never in the home-screen app, which has its own cookies, so the link signed in Chrome and the app stayed on the sign-in page. Fix (commit `5563db5`, migration `0011_auth_handoffs.sql`, applied live): the requesting screen gets a hand-off id, a secret (kept on that device only) and a 3-digit code, and polls `/auth/handoff`. The email link goes `/auth/callback` → `/auth/confirm`, which shows the same code; after the member taps "It matches: sign in there", the session is stored on the hand-off row and the waiting screen claims it (row deleted) and signs in. A link opened in the same browser signs in directly; "Use this browser instead" signs in the link's browser. Rows expire after an hour and are pruned on the next request. Checked live: inspect / claim / wrong secret / fake tokens / cross-origin all behave. A real end-to-end test on Jamie's iPhone is still to be confirmed.
+A 6-digit code typed into the app would be simpler, but needs a custom email template, which needs custom SMTP.
+
 ## Do next, in order
 1. Verify the deployment with the Vercel connector: latest deployment state and build log, runtime errors, then fetch `/auth/sign-in` and confirm it is the Supabase-mode sign-in page (no amber "Demo mode" banner).
 2. Confirm Supabase Auth settings with Jamie: Site URL `https://hannigan-ventures.vercel.app`, redirect allow-list includes `https://hannigan-ventures.vercel.app/auth/callback`, and "Allow new users to sign up" is off. Then have Jamie request a magic link and check `auth_logs` / `edge_logs` in Supabase to confirm the session and the Home page load.
