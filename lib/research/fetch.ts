@@ -73,7 +73,7 @@ export const safeFetch: SafeFetcher = async (raw, opts = {}) => {
       method: opts.method ?? "GET",
       redirect: "manual",
       signal: controller.signal,
-      headers: { "user-agent": "DealRoomResearch/1.0 (+private household research; respects robots and terms)", accept: opts.binary ? "image/avif,image/webp,image/png,image/jpeg,image/gif;q=0.9" : "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.5" },
+      headers: { "user-agent": "Mozilla/5.0 (compatible; HanniganVenturesResearch/1.0; +https://hannigan-ventures.vercel.app; private household research, low volume)", "accept-language": "en-GB,en;q=0.9", accept: opts.binary ? "image/avif,image/webp,image/png,image/jpeg,image/gif;q=0.9" : "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.5" },
     });
     if (res.status >= 300 && res.status < 400) {
       const loc = res.headers.get("location");

@@ -55,6 +55,11 @@ export function repairToSchema<T>(schema: z.ZodType<T>, input: unknown, maxPasse
         container[key] = [];
         repairs.push(`empty list for ${at}`);
         changed = true;
+      } else if (i.code === "invalid_type" && i.expected === "string" && (current === null || current === undefined)) {
+        // "Not stated" text becomes empty text; required text (min length) still fails afterwards.
+        container[key] = "";
+        repairs.push(`empty text for ${at}`);
+        changed = true;
       } else if (i.code === "invalid_type" && i.expected === "string" && (typeof current === "number" || typeof current === "boolean")) {
         container[key] = String(current);
         repairs.push(`stringified ${at}`);

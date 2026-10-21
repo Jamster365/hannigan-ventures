@@ -90,3 +90,13 @@ describe("extraction tidy-ups", () => {
     expect(out.candidates[0]).toMatchObject({ city: null, country: "UK", stage: null, subSector: null, legalName: "Acme Ltd" });
   });
 });
+
+describe("missing text", () => {
+  it("treats a null optional text field (e.g. a founder bio) as empty, but still rejects missing required text", () => {
+    const s = z.object({ name: z.string().min(1), bio: z.string().max(400) });
+    const ok = repairToSchema(s, { name: "Isaac", bio: null });
+    expect(ok.ok && ok.data.bio).toBe("");
+    const bad = repairToSchema(s, { name: null, bio: null });
+    expect(bad.ok).toBe(false);
+  });
+});
