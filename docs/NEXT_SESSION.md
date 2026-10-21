@@ -51,6 +51,31 @@ What was changed or stripped:
 
 Housekeeping Jamie may want to do in the Supabase table editor (the SQL tool holds deletes for confirmation): `research_imports` has 16 leftover rows from loading the payload in pieces — one empty row (`e9bb0cc1-…`) and 15 labelled "staging chunk (not a run input) NN". They are unused and safe to delete.
 
+## "Raising now" set imported (21 October 2026, fourth session) — summary for Jamie
+Goal: UK early-stage companies raising now or within ~3 months, with an individual angel route (no crowdfunding platforms). Researched in this session, imported through the normal pipeline as run `2eab98af-09b9-4658-b294-0c75bde4262a` (import `ddca488a-7dbd-4e8f-9397-3218c93814b4`, label "Claude chat research — raising now (21 Oct 2026)"). Result: **8 of 8 published**, 32 sources stored, zero provider cost. No valuations shown; EIS unknown except where noted.
+
+| Company | What it is | Raising evidence | Access | AI view |
+|---|---|---|---|---|
+| Biosecure ID | Alderley Park forensic-genetics tools | Own investor page: "Seed Round — open now", $1.5M (≈£1.0M) target, SEIS/EIS advance assurance claimed | **Verified open** (company page); founder email / investor portal | Low, no score |
+| Unravel Health | Glasgow-licensed saliva hormone "Micro Lab" | £2.5M round announced 16 Oct 2026, >£2M closed, rest "in coming weeks"; Conduit EIS Impact Fund + Wrightwood co-lead | Fundraising reported; general email only | Medium, 6/10 |
+| Milbotix | Bristol SmartSocks for dementia care | Investors page invites investment enquiries; no live round claimed | Contactable (investor form) | Medium, 6/10 |
+| NeuroPrognostix | King's spinout, Alzheimer's risk blood test | King's (Jul 2026): "now seeking additional grant and pre-seed investment"; £900k+ grants, patent | Fundraising reported; website contact | Medium, 6/10 |
+| SLANT | Bristol e-assist cargo trailers for couriers | Catapult/Business West (May 2026): seeking private investment; £109k DfT grant; Envestors deal | Fundraising reported; Envestors (angel network) | Medium, 5/10 |
+| Synaptive | UCL, EEG electrode for textured hair | London Demo Day 2026 (event for startups seeking £100k–£2m) | Fundraising reported; founder email | Medium, 5/10 |
+| Precise Therapeutics | King's spinout, anti-scarring eye drug | King's (Jul 2026): "now raising funding to take the drug into clinical trials" | Fundraising reported; via King's | Medium, no score |
+| Opis Health | AI data capture for clinical trials | London Demo Day 2026; site invites investment enquiries; only £4k raised | Fundraising reported; founder email | Low, 4/10 |
+
+**Best to look at first:**
+1. **Unravel Health** — strongest company (university IP, three patents, >£1M grants, institutional co-leads). The round is mostly allocated, so ask about room in the final tranche or the next round.
+2. **NeuroPrognostix** — credible science and an explicit pre-seed ask from King's; confirm it has been incorporated (no Companies House entry found).
+3. **Biosecure ID** — the only round verified open, with SEIS/EIS claimed, but thin disclosure (no named team, no revenue) and the page is still headed "Seed Round 2025". Ask for the investor pack and check Companies House officers before a call. Its verified-open status expires on 23 Oct unless re-checked.
+
+Notes:
+- Pipeline dropped two Milbotix claims (team page and investors page failed verification for the app's fetcher): founder Jacqui Arnold and the "investors page" signal. Access stays "contactable".
+- Angel networks (Cambridge Angels, CCG, OION, Green Angel, Angel Academe, Archangels, SFC, Haatch, HERmesa) do not publish live deals on openable pages, so none could be verified that way. Envestors' deals page is JavaScript-only and cannot be cited. Upcoming events worth attending for live deal flow: OION Showcase 22 Oct, CCG Autumn Investment Convention 22 Oct, Green Angel pitch 11 Nov, SETsquared Investment Futures 24 Nov.
+- Leads dropped: HVN Labs, Lambda agri, Exact Comms, Metal Morph, Sorted Technologies (rounds closed or no citable raising page); Lunor Pay (press release 403).
+- Housekeeping: the hosted SQL tool held `UPDATE` statements as well as `DELETE`s, so the payload was loaded as insert-only staging rows labelled "staging (not a run input) raising-now 21 Oct" / "staging chunk raising-now 21 Oct (not a run input) 02–05". They are unused and safe to delete. One of them (`6d028e54-…`, chunk 04) has a malformed tail typed by mistake; only its verified first 19,406 characters went into the import, which was checked by md5 against the validated file.
+
 ## Do next, in order
 1. Verify the deployment with the Vercel connector: latest deployment state and build log, runtime errors, then fetch `/auth/sign-in` and confirm it is the Supabase-mode sign-in page (no amber "Demo mode" banner).
 2. Confirm Supabase Auth settings with Jamie: Site URL `https://hannigan-ventures.vercel.app`, redirect allow-list includes `https://hannigan-ventures.vercel.app/auth/callback`, and "Allow new users to sign up" is off. Then have Jamie request a magic link and check `auth_logs` / `edge_logs` in Supabase to confirm the session and the Home page load.
