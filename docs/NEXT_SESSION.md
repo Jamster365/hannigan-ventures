@@ -84,7 +84,7 @@ The early sign-outs come from Supabase's refresh-token reuse detection. Auth log
 Fix (Supabase dashboard, Jamie; no tool in this session can change Auth settings):
 1. Authentication → Sessions (Advanced): turn **off** "Detect and revoke potentially compromised refresh tokens". This alone stops the sign-outs.
 2. Optional: raise the access token (JWT) expiry from 3600 s to 86400 s (1 day), so tokens are refreshed far less often. The trade-off: a removed member's access token keeps working for up to a day.
-Leave "Time-box user sessions" and "Inactivity timeout" unset (they are paid-plan features anyway). After the change, check `auth_logs` for `refresh_token_already_used` over the following days.
+Done 21 Oct 2026: Jamie turned off step 1 (reuse detection); step 2 not changed. Leave "Time-box user sessions" and "Inactivity timeout" unset (they are paid-plan features anyway). After the change, check `auth_logs` for `refresh_token_already_used` over the following days.
 
 ## Do next, in order
 1. Verify the deployment with the Vercel connector: latest deployment state and build log, runtime errors, then fetch `/auth/sign-in` and confirm it is the Supabase-mode sign-in page (no amber "Demo mode" banner).
