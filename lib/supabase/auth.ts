@@ -17,17 +17,18 @@ export async function siteUrl(): Promise<string> {
  * invitation flow) can sign in. The caller shows the same neutral message
  * either way.
  */
-export async function sendMagicLink(email: string): Promise<{ ok: true } | { ok: false; error: string }> {
+export async function sendMagicLink(email: string, handoffId?: string): Promise<{ ok: true } | { ok: false; error: string }> {
   // Implicit flow, not PKCE: the link carries the session itself, so it works
   // in whichever browser opens the email (on iPhone that is often not the one
   // that asked for it, and PKCE then fails with "invalid or expired").
-  // /auth/callback hands the tokens to /auth/session, which sets the cookies.
+  // /auth/callback passes them to /auth/confirm, which signs in that browser
+  // or, with a hand-off id, the device that asked (see lib/supabase/handoff.ts).
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser: false, emailRedirectTo: `${await siteUrl()}/auth/callback?next=/` },
+    options: { shouldCreateUser: false, emailRedirectTo: `${await siteUrl()}/auth/callback?next=/${handoffId ? `&handoff=${handoffId}` : ""}` },
   });
   // Do not reveal whether the email is registered.
   if (error && !/signups not allowed|user not found/i.test(error.message)) {

@@ -6,8 +6,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
  * Secure auth callback: exchanges the PKCE code (or verifies a token hash)
  * for a session, then continues to an app-local path only. Links that carry
  * their tokens in the URL fragment (magic links and invites) arrive with
- * neither, so the server cannot see them: it returns a tiny page that hands
- * the fragment to /auth/session instead.
+ * neither, so the server cannot see them: they go on to /auth/confirm,
+ * which reads the fragment in the browser.
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type");
   const next = safeNextPath(searchParams.get("next"));
 
-  if (!code && !(tokenHash && type)) return fragmentPage(next);
+  if (!code && !(tokenHash && type)) return toConfirmPage(origin, next, searchParams.get("handoff"));
 
   const supabase = await createSupabaseServerClient();
   let error: { message: string } | null = null;
@@ -32,29 +32,10 @@ export async function GET(request: NextRequest) {
   return NextResponse.redirect(new URL(next, origin));
 }
 
-function fragmentPage(next: string): Response {
-  const nextJson = JSON.stringify(next).replace(/</g, "\\u003c");
-  const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Signing in…</title><meta name="robots" content="noindex">
-<style>body{margin:0;min-height:100dvh;display:flex;align-items:center;justify-content:center;background:#f6f4ef;color:#1d1d1f;font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}</style>
-</head><body><p>Signing you in…</p>
-<script>
-(function () {
-  var next = ${nextJson};
-  var done = "/auth/session?next=" + encodeURIComponent(next);
-  var params = new URLSearchParams(location.hash.slice(1));
-  var access = params.get("access_token");
-  var refresh = params.get("refresh_token");
-  history.replaceState(null, "", location.pathname + location.search);
-  if (!access || !refresh) { location.replace(done); return; }
-  fetch("/auth/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "same-origin",
-    body: JSON.stringify({ access_token: access, refresh_token: refresh })
-  }).then(function (r) { location.replace(r.ok ? next : done); }, function () { location.replace(done); });
-})();
-</script></body></html>`;
-  return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+function toConfirmPage(origin: string, next: string, handoff: string | null): Response {
+  // The browser keeps the URL fragment (the tokens) across this redirect.
+  const url = new URL("/auth/confirm", origin);
+  url.searchParams.set("next", next);
+  if (handoff) url.searchParams.set("handoff", handoff);
+  return NextResponse.redirect(url, 303);
 }

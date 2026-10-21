@@ -3,7 +3,10 @@
 import { z } from "zod";
 import { dataMode } from "@/lib/config";
 
-export type MagicLinkState = { status: "idle" } | { status: "sent"; email: string } | { status: "error"; message: string };
+export type MagicLinkState =
+  | { status: "idle" }
+  | { status: "sent"; email: string; handoff: { id: string; secret: string; code: string } | null }
+  | { status: "error"; message: string };
 
 const schema = z.object({ email: z.string().trim().email().max(200) });
 
@@ -17,7 +20,11 @@ export async function requestMagicLinkAction(_prev: MagicLinkState, formData: Fo
   if (!parsed.success) return { status: "error", message: "Enter a valid email address." };
   if (dataMode() === "demo") return { status: "error", message: "Sign-in is not available in demo mode." };
   const { sendMagicLink } = await import("@/lib/supabase/auth");
-  const res = await sendMagicLink(parsed.data.email);
+  const { createHandoff } = await import("@/lib/supabase/handoff");
+  // Lets the link sign in this screen even when the email opens in another
+  // browser (on iPhone, the home-screen app never receives email links).
+  const handoff = await createHandoff().catch(() => null);
+  const res = await sendMagicLink(parsed.data.email, handoff?.id);
   if (!res.ok) return { status: "error", message: res.error };
-  return { status: "sent", email: parsed.data.email };
+  return { status: "sent", email: parsed.data.email, handoff };
 }
