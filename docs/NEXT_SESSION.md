@@ -86,6 +86,15 @@ Fix (Supabase dashboard, Jamie; no tool in this session can change Auth settings
 2. Optional: raise the access token (JWT) expiry from 3600 s to 86400 s (1 day), so tokens are refreshed far less often. The trade-off: a removed member's access token keeps working for up to a day.
 Done 21 Oct 2026: Jamie turned off step 1 (reuse detection); step 2 not changed. Leave "Time-box user sessions" and "Inactivity timeout" unset (they are paid-plan features anyway). After the change, check `auth_logs` for `refresh_token_already_used` over the following days.
 
+## Magic links fixed for any browser (21 October 2026)
+Jamie got "That sign-in link is invalid or has expired" straight after requesting a link. Auth logs (16:00–16:01 UTC): Supabase accepted the link, but no PKCE code exchange followed, because the code-verifier cookie lives in the browser that requested the link, and the email opened elsewhere (on iPhone, Mail / Safari / the home-screen app keep separate cookies). A second tap 9 s later then really was "already used", and the resend 15 s later hit Supabase's 15-second cooldown, which the app wrongly called the hourly limit.
+
+Fix (commit `0d0bf6d`, deployed `dpl_8PzZqBxZNSWeT1YriXWScBq97cUz`; started by hand because the GitHub push did not trigger a build): magic links now use the implicit flow (`lib/supabase/auth.ts`). `/auth/callback` returns a small page that posts the URL-fragment tokens to `/auth/session` (same-origin only), which validates them with Supabase and sets the cookies. A used link tapped again continues into the app if already signed in. Invite links (admin client, already implicit) use the same path. The redirect URL is unchanged, so the Supabase allow-list needs no edit.
+
+Still to do: delete the 21 unused rows in `research_imports` (the hosted SQL tool holds deletes). In the Supabase SQL editor:
+`delete from research_imports i where not exists (select 1 from research_runs r where r.provider_response_id = 'import:' || i.id);`
+This keeps the two imports runs used (`950b1459-…`, `ddca488a-…`).
+
 ## Do next, in order
 1. Verify the deployment with the Vercel connector: latest deployment state and build log, runtime errors, then fetch `/auth/sign-in` and confirm it is the Supabase-mode sign-in page (no amber "Demo mode" banner).
 2. Confirm Supabase Auth settings with Jamie: Site URL `https://hannigan-ventures.vercel.app`, redirect allow-list includes `https://hannigan-ventures.vercel.app/auth/callback`, and "Allow new users to sign up" is off. Then have Jamie request a magic link and check `auth_logs` / `edge_logs` in Supabase to confirm the session and the Home page load.
