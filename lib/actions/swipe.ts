@@ -5,7 +5,6 @@ import { z } from "zod";
 import { requireMember } from "@/lib/auth/current-member";
 import { getRepository } from "@/lib/data";
 import { almostMatch } from "@/lib/domain/family-consensus";
-import type { VoteValue } from "@/lib/domain/types";
 import type { ActionResult } from "./family";
 
 export type SwipeOutcome =
