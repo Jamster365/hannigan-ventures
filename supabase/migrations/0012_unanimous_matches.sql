@@ -46,7 +46,9 @@ declare
   upd_id uuid;
   stamp text := to_char(clock_timestamp(), 'YYYYMMDDHH24MISSMS');
 begin
-  select household_id, name, slug, family_stage into hid, cname, cslug, prev from public.companies where id = cid;
+  -- Lock the company row so concurrent votes are counted one after another:
+  -- two "last" ticks committing together must still produce one match.
+  select household_id, name, slug, family_stage into hid, cname, cslug, prev from public.companies where id = cid for update;
   if hid is null then
     return coalesce(new, old);
   end if;
@@ -72,6 +74,9 @@ begin
         on conflict do nothing;
       end loop;
     elsif prev = 'shortlisted' then
+      -- The chat has closed: unread match and chat notifications would point at nothing.
+      update public.notifications set read_at = now()
+      where company_id = cid and read_at is null and notification_type in ('shortlist_promoted', 'comment');
       insert into public.company_updates (company_id, update_type, headline, summary, materiality, dedupe_key)
       values (cid, 'family', 'No longer a match', actor_name || ' changed their mind.', 'medium', 'demote:' || stamp)
       returning id into upd_id;
@@ -113,6 +118,25 @@ end;
 $$;
 
 revoke execute on function public.on_comment_insert() from public, anon, authenticated;
+
+-- "All members" changes when someone joins or leaves: re-derive that
+-- household's stages quietly (no notifications).
+create or replace function public.on_membership_change()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  hid uuid := coalesce(new.household_id, old.household_id);
+begin
+  update public.companies set family_stage = public.compute_family_stage(id)
+  where household_id = hid and family_stage is distinct from public.compute_family_stage(id);
+  return coalesce(new, old);
+end;
+$$;
+
+revoke execute on function public.on_membership_change() from public, anon, authenticated;
+
+create trigger household_members_restage
+after insert or delete or update of status on public.household_members
+for each row execute function public.on_membership_change();
 
 -- Re-derive every company's stage under the new rule (no notifications).
 update public.companies set family_stage = public.compute_family_stage(id)

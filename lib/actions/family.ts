@@ -22,6 +22,7 @@ export async function setVoteAction(input: z.input<typeof voteSchema>): Promise<
     const repo = await getRepository();
     const { transition } = await repo.setVote({ userId: member.userId, companyId: parsed.data.companyId, vote: parsed.data.vote, score: parsed.data.score });
     revalidatePath("/");
+    revalidatePath("/home");
     revalidatePath("/shortlist");
     revalidatePath("/updates");
     revalidatePath(`/companies/${parsed.data.slug}`);
@@ -92,6 +93,7 @@ export async function toggleBookmarkAction(input: z.input<typeof bookmarkSchema>
     const repo = await getRepository();
     const res = await repo.toggleBookmark({ userId: member.userId, companyId: parsed.data.companyId });
     revalidatePath("/");
+    revalidatePath("/home");
     revalidatePath("/discover");
     revalidatePath(`/companies/${parsed.data.slug}`);
     revalidatePath(`/matches/${parsed.data.slug}`);
@@ -108,6 +110,7 @@ export async function markNotificationsReadAction(ids?: string[]): Promise<Actio
     await repo.markNotificationsRead(member.userId, ids);
     revalidatePath("/updates");
     revalidatePath("/");
+    revalidatePath("/home");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not update notifications" };

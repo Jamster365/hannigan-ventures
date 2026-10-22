@@ -13,8 +13,8 @@ Build the new **The Deal Room** web app from `SPEC.md`, matching the primary des
 
 ## Do not compromise
 - Real permissible company imagery; premium typographic fallback instead of synthetic factual imagery.
-- Dynamic 2-of-3 Interested family shortlist; AI score independent from family ratings.
-- One shared comment thread per company; in-app important notifications only.
+- Dynamic family shortlist computed from votes: since 22 Oct 2026 the owner chose unanimous matches (all members tick; one cross ends it) for the swipe app; the classic 2-of-3 rule remains selectable (`docs/classic-app.md`). AI score independent from family ratings.
+- One shared comment thread per company (the match chat in the swipe app); in-app important notifications only.
 - All members may edit full research prompt; proposed AI changes require approval.
 - `CAN INVEST NOW` only if directly verified and fresh; unknown financials visibly unknown.
 - Reproducible citations, source lineage and research runs.

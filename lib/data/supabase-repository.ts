@@ -15,6 +15,7 @@ import type {
   ResearchFeedback,
   ResearchPreferences,
   ResearchRun,
+  Vote,
   VoteValue,
 } from "@/lib/domain/types";
 import { DEFAULT_PREFERENCES } from "@/lib/research/default-prompt";
@@ -229,6 +230,13 @@ class SupabaseRepository implements Repository {
     const { supabase, householdId } = await this.ctx();
     const { data } = await supabase.from("angel_networks").select("*").eq("household_id", householdId).order("name").returns<NetworkRow[]>();
     return (data ?? []).map((n) => ({ id: n.id, name: n.name, website: n.website, focus: n.focus, region: n.region, eligibility: n.eligibility, joiningUrl: n.joining_url, fees: n.fees, chequeRequirements: n.cheque_requirements, coInvestRoute: n.co_invest_route, contact: n.contact, verificationStatus: n.verification_status, accessibilityConfidence: n.accessibility_confidence, lastCheckedAt: n.last_checked_at, notes: n.notes, portfolioCompanyIds: n.portfolio_company_ids ?? [] }));
+  }
+
+  async listVotes(companyId: string): Promise<Vote[]> {
+    const { supabase } = await this.ctx();
+    const { data, error } = await supabase.from("member_votes").select("*").eq("company_id", companyId).returns<VoteRow[]>();
+    this.fail(error, "load votes");
+    return (data ?? []).map((v) => ({ companyId, userId: v.user_id, vote: v.vote, score: v.score, note: v.note ?? undefined, updatedAt: v.updated_at }));
   }
 
   async setVote({ userId, companyId, vote, score }: { userId: string; companyId: string; vote: VoteValue | null; score?: number | null }): Promise<{ transition: StageTransition }> {

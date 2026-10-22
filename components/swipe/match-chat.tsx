@@ -107,6 +107,7 @@ function Bubble({ comment, mine, slug, selected, onSelect }: { comment: Comment;
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(comment.body);
   const [pending, start] = useTransition();
+  const [failed, setFailed] = useState<string | null>(null);
   const temp = comment.id.startsWith("tmp-");
 
   if (editing) {
@@ -116,14 +117,22 @@ function Bubble({ comment, mine, slug, selected, onSelect }: { comment: Comment;
           e.preventDefault();
           start(async () => {
             const res = await editCommentAction({ commentId: comment.id, slug, body: text });
-            if (res.ok) setEditing(false);
+            if (res.ok) {
+              setEditing(false);
+              setFailed(null);
+            } else setFailed(res.error);
           });
         }}
         className="w-[min(78vw,360px)]"
       >
         <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={2000} className="w-full rounded-[16px] border border-hairline-strong px-3 py-2 text-[15px] text-ink" aria-label="Edit message" />
+        {failed ? (
+          <p role="alert" className="mt-1 text-right text-[12px] text-red">
+            {failed}
+          </p>
+        ) : null}
         <div className="mt-1 flex justify-end gap-3 text-[13px]">
-          <button type="button" onClick={() => { setEditing(false); setText(comment.body); }} className="text-secondary">
+          <button type="button" onClick={() => { setEditing(false); setText(comment.body); setFailed(null); }} className="text-secondary">
             Cancel
           </button>
           <button type="submit" disabled={pending} className="font-semibold text-blue">
@@ -162,7 +171,11 @@ function Bubble({ comment, mine, slug, selected, onSelect }: { comment: Comment;
                 type="button"
                 disabled={pending}
                 onClick={() => {
-                  if (confirm("Delete this message?")) start(async () => { await deleteCommentAction({ commentId: comment.id, slug }); });
+                  if (confirm("Delete this message?"))
+                    start(async () => {
+                      const res = await deleteCommentAction({ commentId: comment.id, slug });
+                      setFailed(res.ok ? null : res.error);
+                    });
                 }}
                 className="font-medium text-secondary hover:text-red"
               >
@@ -170,6 +183,11 @@ function Bubble({ comment, mine, slug, selected, onSelect }: { comment: Comment;
               </button>
             </>
           ) : null}
+        </p>
+      ) : null}
+      {failed ? (
+        <p role="alert" className={cn("mt-0.5 px-2 text-[11px] text-red", mine ? "text-right" : "text-left")}>
+          {failed}
         </p>
       ) : null}
     </>

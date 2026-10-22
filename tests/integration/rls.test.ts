@@ -137,6 +137,9 @@ describe("family stage is computed server-side (unanimous matches)", () => {
     expect(await stage()).toBe("pending");
     const updates = await h.admin.query("select headline from company_updates where company_id = $1 and update_type = 'family' order by effective_at", [company]);
     expect(updates.map((u) => u.headline)).toEqual(["It's a match", "No longer a match"]);
+    // The closed match's unread notifications are cleared so no badge points at a closed chat.
+    const unread = await h.admin.query("select id from notifications where company_id = $1 and notification_type in ('shortlist_promoted', 'comment') and read_at is null", [company]);
+    expect(unread).toEqual([]);
     const audit = await h.admin.query("select action from audit_events where object_id = $1 and action like 'vote.%'", [company]);
     expect(audit.length).toBeGreaterThanOrEqual(4);
   });
@@ -198,5 +201,19 @@ describe("deleting a company", () => {
     await h.admin.query("delete from companies where id = $1", [doomed]);
     const left = await h.admin.query<{ n: number }>("select (select count(*) from member_votes where company_id = $1) + (select count(*) from comments where company_id = $1) + (select count(*) from notifications where company_id = $1) as n", [doomed]);
     expect(Number(left[0].n)).toBe(0);
+  });
+});
+
+describe("membership changes re-derive matches", () => {
+  it("a match needs every active member; leaving or rejoining recomputes quietly", async () => {
+    const co = (await h.admin.query<{ id: string }>("insert into companies (household_id, name, slug) values ($1, 'Membership Co', 'membership-co') returning id", [household]))[0].id;
+    const stageOf = async () => (await h.admin.query<{ family_stage: string }>("select family_stage from companies where id = $1", [co]))[0].family_stage;
+    const members = await h.admin.query<{ user_id: string }>("select user_id from household_members where household_id = $1 and status = 'active' and user_id <> $2", [household, dad]);
+    for (const m of members) await h.as(m.user_id, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'interested')", [co, m.user_id]));
+    expect(await stageOf()).toBe("pending");
+    await h.admin.query("update household_members set status = 'removed' where household_id = $1 and user_id = $2", [household, dad]);
+    expect(await stageOf()).toBe("shortlisted");
+    await h.admin.query("update household_members set status = 'active' where household_id = $1 and user_id = $2", [household, dad]);
+    expect(await stageOf()).toBe("pending");
   });
 });

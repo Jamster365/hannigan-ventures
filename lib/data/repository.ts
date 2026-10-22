@@ -12,6 +12,7 @@ import type {
   ResearchFeedback,
   ResearchPreferences,
   ResearchRun,
+  Vote,
   VoteValue,
 } from "@/lib/domain/types";
 import type { StageTransition } from "@/lib/domain/family-consensus";
@@ -45,6 +46,8 @@ export interface Repository {
   listEvents(): Promise<EventRecord[]>;
   listNetworks(): Promise<AngelNetwork[]>;
 
+  // Family
+  listVotes(companyId: string): Promise<Vote[]>;
   // Family mutations (caller must already be authorised as userId)
   setVote(input: { userId: string; companyId: string; vote: VoteValue | null; score?: number | null }): Promise<{ transition: StageTransition }>;
   addComment(input: { userId: string; companyId: string; body: string }): Promise<Comment>;

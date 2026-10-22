@@ -97,6 +97,10 @@ class DemoRepository implements Repository {
     return DEMO_NETWORKS;
   }
 
+  async listVotes(companyId: string) {
+    return structuredClone(this.companies.find((c) => c.company.id === companyId)?.votes ?? []);
+  }
+
   async setVote({ userId, companyId, vote, score }: { userId: string; companyId: string; vote: import("@/lib/domain/types").VoteValue | null; score?: number | null }) {
     const bundle = this.companies.find((c) => c.company.id === companyId);
     if (!bundle) throw new Error("Company not found");
@@ -111,6 +115,10 @@ class DemoRepository implements Repository {
       bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "It's a match", summary: `Everyone ticked ${bundle.company.name}.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
       this.pushNotification(others, { notificationType: "shortlist_promoted", companyId, updateId: null, commentId: null, title: `It's a match: ${bundle.company.name}`, body: `Everyone ticked ${bundle.company.name}. The chat is open.`, importance: "high", href: `/matches/${bundle.company.slug}`, dedupe: `promote:${companyId}:${now}` });
     } else if (transition.demoted) {
+      // The chat has closed: unread match and chat notifications would point at nothing.
+      for (const n of this.notifications) {
+        if (n.companyId === companyId && !n.readAt && (n.notificationType === "shortlist_promoted" || n.notificationType === "comment")) n.readAt = now;
+      }
       bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "No longer a match", summary: `${actor} changed their mind.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
       this.pushNotification(others, { notificationType: "shortlist_demoted", companyId, updateId: null, commentId: null, title: `${bundle.company.name} is no longer a match`, body: `${actor} changed their mind.`, importance: "high", href: "/matches", dedupe: `demote:${companyId}:${now}` });
     }

@@ -76,13 +76,14 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
     [top, leaving],
   );
 
-  const undo = useCallback(() => {
-    const last = history.at(-1);
+  /** Undo the newest swipe, or a specific company's swipe (the almost-a-match sheet may refer to an older one). */
+  const undo = useCallback((companyId?: string) => {
+    const last = companyId ? history.findLast((s) => s.card.company.id === companyId) : history.at(-1);
     if (!last) return;
     setError(null);
     setOverlay(null);
     setLeaving(null);
-    setHistory((h) => h.slice(0, -1));
+    setHistory((h) => h.filter((s) => s !== last));
     setDeck((d) => [last.card, ...d.filter((c) => c.company.id !== last.card.company.id)]);
     setEntering("back");
     toTop();
@@ -161,7 +162,7 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
           </p>
           <button
             type="button"
-            onClick={undo}
+            onClick={() => undo()}
             disabled={history.length === 0}
             aria-label="Undo last swipe"
             title="Undo last swipe"
@@ -252,7 +253,7 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
       ) : null}
 
       {overlay?.kind === "match" ? <MatchOverlay card={overlay.card} members={members} currentUserId={currentUserId} onClose={() => setOverlay(null)} /> : null}
-      {overlay?.kind === "almost" ? <AlmostSheet card={overlay.card} likedBy={overlay.likedBy} onUndo={undo} onClose={() => setOverlay(null)} /> : null}
+      {overlay?.kind === "almost" ? <AlmostSheet card={overlay.card} likedBy={overlay.likedBy} onUndo={() => undo(overlay.card.company.id)} onClose={() => setOverlay(null)} /> : null}
     </div>
   );
 }
