@@ -15,7 +15,7 @@ export function CompanyProfile({ card, className }: { card: SwipeCard; className
   const { company } = card;
   return (
     <article className={cn("bg-surface", className)} aria-label={company.name}>
-      <div className="relative aspect-[2/1] w-full overflow-hidden bg-surface-muted">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-muted">
         <CompanyArtwork company={company} media={card.media} logo={card.logo} variant="hero" />
       </div>
 

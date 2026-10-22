@@ -287,3 +287,8 @@ html[data-launched] .launch-splash {
   from { transform: translateY(100%); }
   to { transform: none; }
 }
+
+@keyframes profile-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
