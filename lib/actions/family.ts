@@ -25,6 +25,7 @@ export async function setVoteAction(input: z.input<typeof voteSchema>): Promise<
     revalidatePath("/shortlist");
     revalidatePath("/updates");
     revalidatePath(`/companies/${parsed.data.slug}`);
+    revalidatePath(`/matches/${parsed.data.slug}`);
     return { ok: true, data: { promoted: transition.promoted, demoted: transition.demoted } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not save your vote" };
@@ -41,6 +42,8 @@ export async function addCommentAction(input: z.input<typeof commentSchema>): Pr
     const repo = await getRepository();
     await repo.addComment({ userId: member.userId, companyId: parsed.data.companyId, body: parsed.data.body });
     revalidatePath(`/companies/${parsed.data.slug}`);
+    revalidatePath(`/matches/${parsed.data.slug}`);
+    revalidatePath("/matches");
     revalidatePath("/updates");
     return { ok: true };
   } catch (e) {
@@ -57,6 +60,7 @@ export async function editCommentAction(input: z.input<typeof editSchema>): Prom
     const repo = await getRepository();
     await repo.editComment({ userId: member.userId, commentId: parsed.data.commentId, body: parsed.data.body });
     revalidatePath(`/companies/${parsed.data.slug}`);
+    revalidatePath(`/matches/${parsed.data.slug}`);
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not edit comment" };
@@ -72,6 +76,7 @@ export async function deleteCommentAction(input: z.input<typeof deleteSchema>): 
     const repo = await getRepository();
     await repo.deleteComment({ userId: member.userId, commentId: parsed.data.commentId });
     revalidatePath(`/companies/${parsed.data.slug}`);
+    revalidatePath(`/matches/${parsed.data.slug}`);
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not delete comment" };
@@ -89,6 +94,7 @@ export async function toggleBookmarkAction(input: z.input<typeof bookmarkSchema>
     revalidatePath("/");
     revalidatePath("/discover");
     revalidatePath(`/companies/${parsed.data.slug}`);
+    revalidatePath(`/matches/${parsed.data.slug}`);
     return { ok: true, data: res };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not update bookmark" };

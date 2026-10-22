@@ -31,8 +31,8 @@ export function VotePanel({ companyId, slug, existing }: { companyId: string; sl
         setMessage({ tone: "red", text: res.error });
         return;
       }
-      if (res.data?.promoted) setMessage({ tone: "green", text: "Promoted to the family shortlist — 2 of 3 members are now Interested." });
-      else if (res.data?.demoted) setMessage({ tone: "amber", text: "Removed from the shortlist — fewer than 2 members are Interested." });
+      if (res.data?.promoted) setMessage({ tone: "green", text: "Promoted to the family shortlist." });
+      else if (res.data?.demoted) setMessage({ tone: "amber", text: "Removed from the shortlist." });
       else setMessage(null);
     });
   };

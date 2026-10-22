@@ -1,10 +1,20 @@
 import type { FamilyStage, Vote, VoteValue } from "./types";
 
 /**
- * Number of Interested votes needed for the dynamic family shortlist.
- * v1 rule: 2 of 3 active members. Kept as a named constant so it can be
- * migrated explicitly later (SPEC §18).
+ * How a company reaches the family shortlist ("a match").
+ *  - "unanimous" (swipe app): every member ticks it; a single cross ends it.
+ *  - "two_of_three" (classic app): 2 Interested shortlists, 2 Pass passes.
+ * The database applies the same rule in compute_family_stage()
+ * (supabase/migrations/0012_unanimous_matches.sql); change both together.
+ * See docs/classic-app.md.
  */
+export type MatchRule = "unanimous" | "two_of_three";
+export const MATCH_RULE: MatchRule = "unanimous";
+
+/** Active household members at launch; used where the member list is not to hand. */
+export const HOUSEHOLD_SIZE = 3;
+
+/** Classic thresholds, kept for the two_of_three rule. */
 export const SHORTLIST_THRESHOLD = 2;
 export const PASS_THRESHOLD = 2;
 
@@ -25,16 +35,18 @@ export function tallyVotes(votes: Pick<Vote, "vote">[]): VoteTally {
 }
 
 /**
- * Deterministic family stage (SPEC §6):
- *  1. SHORTLISTED if interested >= 2
- *  2. else PASSED if pass >= 2
+ * Deterministic family stage:
+ *  1. SHORTLISTED (a match) if every member is interested (unanimous) or
+ *     interested >= 2 (two_of_three)
+ *  2. else PASSED if anyone passed (unanimous) or pass >= 2 (two_of_three)
  *  3. else UNREVIEWED if nobody has voted
  *  4. else PENDING
  */
-export function computeFamilyStage(votes: Pick<Vote, "vote">[]): FamilyStage {
+export function computeFamilyStage(votes: Pick<Vote, "vote">[], memberCount: number = HOUSEHOLD_SIZE, rule: MatchRule = MATCH_RULE): FamilyStage {
   const t = tallyVotes(votes);
-  if (t.interested >= SHORTLIST_THRESHOLD) return "shortlisted";
-  if (t.pass >= PASS_THRESHOLD) return "passed";
+  const unanimous = rule === "unanimous";
+  if (unanimous ? memberCount > 0 && t.interested >= memberCount : t.interested >= SHORTLIST_THRESHOLD) return "shortlisted";
+  if (t.pass >= (unanimous ? 1 : PASS_THRESHOLD)) return "passed";
   if (t.total === 0) return "unreviewed";
   return "pending";
 }
@@ -66,8 +78,9 @@ export interface StageTransition {
 export function applyVote(
   existing: Vote[],
   next: { userId: string; vote: VoteValue | null; score?: number | null },
+  memberCount: number = HOUSEHOLD_SIZE,
 ): { votes: Vote[]; transition: StageTransition } {
-  const from = computeFamilyStage(existing);
+  const from = computeFamilyStage(existing, memberCount);
   const others = existing.filter((v) => v.userId !== next.userId);
   const prior = existing.find((v) => v.userId === next.userId);
   const votes: Vote[] =
@@ -83,7 +96,7 @@ export function applyVote(
             updatedAt: new Date().toISOString(),
           },
         ];
-  const to = computeFamilyStage(votes);
+  const to = computeFamilyStage(votes, memberCount);
   return {
     votes,
     transition: {
@@ -93,6 +106,17 @@ export function applyVote(
       demoted: from === "shortlisted" && to !== "shortlisted",
     },
   };
+}
+
+/**
+ * "Almost a match": the member who just crossed a company was the last to
+ * decide, and everyone else had ticked it. Returns the members who ticked.
+ */
+export function almostMatch<M extends { userId: string }>(votes: Pick<Vote, "userId" | "vote">[], members: M[], userId: string): M[] | null {
+  const others = members.filter((m) => m.userId !== userId);
+  if (others.length === 0) return null;
+  const ticked = others.every((m) => votes.some((v) => v.userId === m.userId && v.vote === "interested"));
+  return ticked ? others : null;
 }
 
 export function stageLabel(stage: FamilyStage): string {

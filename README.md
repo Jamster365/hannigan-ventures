@@ -2,6 +2,8 @@
 
 A private family investment-discovery and research app for three household members. Mobile-first PWA built with Next.js 16, TypeScript, Tailwind CSS 4, Supabase (Postgres, Auth, RLS) and a server-side, source-grounded AI research pipeline. See `SPEC.md` for the product contract and `IMPLEMENTATION_STATUS.md` for what is done, deferred and known.
 
+The app opens as a **swipe app**: each member ticks or crosses every company in their deck, and when all three tick the same company it becomes a match with its own chat. The earlier "classic" app (Home feed, filters, seven-tab profiles) is kept at `/home`. See `docs/classic-app.md` for where each lives, the match rule and how to switch back.
+
 ## One-command local start (demo mode)
 
 ```bash
@@ -9,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. Without Supabase variables the app runs in **demo mode**: a labelled, fictional sample dataset is served from memory, sign-in is bypassed, and a banner lets you switch between the three sample members (Jamie, Brother, Dad) to try the 2-of-3 shortlist rule. Nothing in demo mode is an investment fact and changes reset when the server restarts.
+Open http://localhost:3000. Without Supabase variables the app runs in **demo mode**: a labelled, fictional sample dataset is served from memory, sign-in is bypassed, and a banner lets you switch between the three sample members (Jamie, Brother, Dad) to try ticking, crossing and matching. Nothing in demo mode is an investment fact and changes reset when the server restarts.
 
 ## Scripts
 
@@ -18,7 +20,7 @@ Open http://localhost:3000. Without Supabase variables the app runs in **demo mo
 | `npm run dev` / `npm run build` / `npm start` | Next.js dev server, production build, production server |
 | `npm run lint` / `npm run typecheck` | ESLint and strict TypeScript |
 | `npm run test:unit` | Domain logic, evidence rules, pipeline with fixture model (vitest) |
-| `npm run test:integration` | Applies `supabase/migrations` to an in-process Postgres (pglite) and proves RLS, triggers and the 2-of-3 rule |
+| `npm run test:integration` | Applies `supabase/migrations` to an in-process Postgres (pglite) and proves RLS, triggers and the unanimous match rule |
 | `npm run test:e2e` | Playwright smoke tests against demo mode on iPhone and desktop profiles |
 | `npm run screenshots -- http://localhost:3000 docs/screenshots` | Captures 390 / 820 / 1440 px screenshots |
 | `npm run seed:demo` | Seeds a Supabase project with the household, members, default instructions, networks and the labelled demo companies |
@@ -64,8 +66,10 @@ Set `OPENAI_API_KEY`, `CRON_SECRET` and `RESEARCH_HOUSEHOLD_ID` (the household u
 ## Project layout
 
 ```
-app/                 routes (App Router), API routes, auth callback, invite redemption
-components/          navigation, home, company (hero, tabs, voting, comments), research, ui
+app/(swipe)/         swipe app (default): deck, matches + chat, me, and shared settings pages
+app/(classic)/       classic app, kept working at /home (see docs/classic-app.md)
+app/                 API routes, auth callback, invite redemption
+components/          swipe, navigation, home, company (hero, tabs, voting, comments), research, ui
 lib/domain/          pure rules: family consensus, access status, summaries, formatting
 lib/data/            Repository contract + demo (in-memory) and Supabase implementations
 lib/supabase/        server/admin clients, session, auth, invitations, row types

@@ -38,7 +38,7 @@ export function PageHeader({
           </>
         ) : variant === "brand" ? (
           <>
-            <Link href="/" className="min-w-0 flex-1 xl:hidden" aria-label="Home">
+            <Link href="/home" className="min-w-0 flex-1 xl:hidden" aria-label="Home">
               <Wordmark />
             </Link>
             <Link href="/discover?focus=search" className="hidden min-w-0 flex-1 items-center gap-2 rounded-full border border-hairline bg-surface px-4 py-2.5 text-[14px] text-tertiary xl:flex">

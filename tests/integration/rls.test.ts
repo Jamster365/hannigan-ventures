@@ -104,38 +104,51 @@ describe("row level security", () => {
   });
 });
 
-describe("family stage is computed server-side (2 of 3 rule)", () => {
+describe("family stage is computed server-side (unanimous matches)", () => {
   const stage = async () => (await h.admin.query<{ family_stage: string }>("select family_stage from companies where id = $1", [company]))[0].family_stage;
 
-  it("1 Interested = pending", async () => {
+  it("1 tick = pending", async () => {
     expect(await stage()).toBe("pending");
   });
 
-  it("2 Interested = shortlisted, with one family update and one notification per other member", async () => {
+  it("2 of 3 ticks is not yet a match", async () => {
     await h.as(brother, (q) => q.query("insert into member_votes (company_id, user_id, vote, score) values ($1, $2, 'interested', 7)", [company, brother]));
+    expect(await stage()).toBe("pending");
+  });
+
+  it("the third tick makes a match, with one family update and one notification per other member pointing at the chat", async () => {
+    await h.as(dad, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'interested')", [company, dad]));
     expect(await stage()).toBe("shortlisted");
     const updates = await h.admin.query("select headline from company_updates where company_id = $1 and update_type = 'family'", [company]);
-    expect(updates.map((u) => u.headline)).toEqual(["Promoted to shortlist"]);
-    const notes = await h.admin.query<{ recipient_user_id: string }>("select recipient_user_id from notifications where notification_type = 'shortlist_promoted' and company_id = $1", [company]);
-    expect(notes.map((n) => n.recipient_user_id).sort()).toEqual([dad, jamie].sort());
+    expect(updates.map((u) => u.headline)).toEqual(["It's a match"]);
+    const notes = await h.admin.query<{ recipient_user_id: string; href: string }>("select recipient_user_id, href from notifications where notification_type = 'shortlist_promoted' and company_id = $1", [company]);
+    expect(notes.map((n) => n.recipient_user_id).sort()).toEqual([brother, jamie].sort());
+    expect(notes.every((n) => n.href === "/matches/larkspur-photonics")).toBe(true);
   });
 
-  it("withdrawing to Unsure immediately demotes and keeps history", async () => {
-    await h.as(brother, (q) => q.query("update member_votes set vote = 'unsure' where company_id = $1 and user_id = $2", [company, brother]));
+  it("comments on a match link to its chat", async () => {
+    await h.as(jamie, (q) => q.query("insert into comments (company_id, author_user_id, body) values ($1, $2, 'Shall we book a call?')", [company, jamie]));
+    const notes = await h.admin.query<{ href: string }>("select href from notifications where notification_type = 'comment' and comment_id in (select id from comments where company_id = $1 and body = 'Shall we book a call?')", [company]);
+    expect(notes.map((n) => n.href)).toEqual(["/matches/larkspur-photonics", "/matches/larkspur-photonics"]);
+  });
+
+  it("undoing a tick immediately ends the match and keeps history", async () => {
+    await h.as(dad, (q) => q.query("delete from member_votes where company_id = $1 and user_id = $2", [company, dad]));
     expect(await stage()).toBe("pending");
     const updates = await h.admin.query("select headline from company_updates where company_id = $1 and update_type = 'family' order by effective_at", [company]);
-    expect(updates.map((u) => u.headline)).toEqual(["Promoted to shortlist", "Left the shortlist"]);
+    expect(updates.map((u) => u.headline)).toEqual(["It's a match", "No longer a match"]);
     const audit = await h.admin.query("select action from audit_events where object_id = $1 and action like 'vote.%'", [company]);
-    expect(audit.length).toBeGreaterThanOrEqual(3);
+    expect(audit.length).toBeGreaterThanOrEqual(4);
   });
 
-  it("2 Pass = passed; a single Pass never deletes anything", async () => {
+  it("a single cross = passed, deletes nothing and announces no vote", async () => {
     await h.as(dad, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'pass')", [company, dad]));
-    expect(await stage()).toBe("pending");
-    await h.as(brother, (q) => q.query("update member_votes set vote = 'pass' where company_id = $1 and user_id = $2", [company, brother]));
     expect(await stage()).toBe("passed");
     const still = await h.admin.query("select id from companies where id = $1", [company]);
     expect(still).toHaveLength(1);
+    await h.as(brother, (q) => q.query("update member_votes set vote = 'pass' where company_id = $1 and user_id = $2", [company, brother]));
+    const changed = await h.admin.query("select id from notifications where notification_type = 'vote_changed' and company_id = $1", [company]);
+    expect(changed).toEqual([]);
   });
 
   it("deleting all votes returns to unreviewed", async () => {

@@ -215,7 +215,7 @@ const larkspurBundle: CompanyBundle = {
   votes: [
     { companyId: larkspur.id, userId: JAMIE.userId, vote: "interested", score: 8, updatedAt: hoursAgo(2) },
     { companyId: larkspur.id, userId: BROTHER.userId, vote: "interested", score: 7, updatedAt: hoursAgo(5) },
-    { companyId: larkspur.id, userId: DAD.userId, vote: "unsure", score: 6, updatedAt: hoursAgo(26) },
+    { companyId: larkspur.id, userId: DAD.userId, vote: "interested", score: 6, updatedAt: hoursAgo(26) },
   ],
   comments: [
     { id: "c-larkspur-1", companyId: larkspur.id, authorUserId: JAMIE.userId, body: "Really interesting technology. The differentiation looks strong and early cases are encouraging.", createdAt: hoursAgo(2), editedAt: null, deletedAt: null, likedBy: [BROTHER.userId, DAD.userId] },

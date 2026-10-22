@@ -29,8 +29,8 @@ async function clearVote(page: Page) {
   }
 }
 
-test("home renders the editorial feed with bottom navigation", async ({ page }) => {
-  await page.goto("/");
+test("classic home still renders the editorial feed at /home", async ({ page }) => {
+  await page.goto("/home");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/Good (morning|afternoon|evening)/);
   await expect(page.getByRole("heading", { name: "New discoveries" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Our shortlist" })).toBeVisible();
@@ -48,26 +48,80 @@ test("company page exposes all seven tabs and keeps unknowns visible", async ({ 
   await expect(page.getByText("CAN INVEST NOW")).toHaveCount(0);
 });
 
-test("second Interested vote promotes a company to the shortlist and demotion is immediate", async ({ page }) => {
-  // Quillon Verify starts with one Interested vote (Jamie). Brother's vote makes two.
+test("classic app: the third Interested vote promotes (unanimous) and withdrawal demotes immediately", async ({ page }) => {
+  // Quillon Verify starts with one Interested vote (Jamie).
   await viewAs(page, "Brother");
   await go(page, "/companies/quillon-verify?tab=family");
   await clearVote(page);
   await page.getByRole("radio", { name: "Interested" }).click();
-  await expect(page.getByRole("status").filter({ hasText: /Promoted to the family shortlist/ })).toBeVisible();
-  await page.goto("/shortlist");
-  await expect(page.getByRole("heading", { name: "Quillon Verify" })).toBeVisible();
+  await page.waitForTimeout(500);
+  await expect(page.getByRole("status").filter({ hasText: /Promoted to the family shortlist/ })).toHaveCount(0);
 
-  // Withdrawing to Unsure removes it straight away.
+  await viewAs(page, "Dad");
+  await go(page, "/companies/quillon-verify?tab=family");
+  await clearVote(page);
+  await page.getByRole("radio", { name: "Interested" }).click();
+  await expect(page.getByRole("status").filter({ hasText: /Promoted to the family shortlist/ })).toBeVisible();
+  await page.goto("/matches");
+  await expect(page.getByRole("link", { name: /Quillon Verify/ })).toBeVisible();
+
   await go(page, "/companies/quillon-verify?tab=family");
   await page.getByRole("radio", { name: "Unsure" }).click();
   await expect(page.getByRole("status").filter({ hasText: /Removed from the shortlist/ })).toBeVisible();
-  await page.goto("/shortlist");
-  await expect(page.getByRole("heading", { name: "Quillon Verify" })).toHaveCount(0);
+  await page.goto("/matches");
+  await expect(page.getByRole("link", { name: /Quillon Verify/ })).toHaveCount(0);
 
-  // Clean up: clear Brother's vote.
+  // Clean up both votes.
   await go(page, "/companies/quillon-verify?tab=family");
   await clearVote(page);
+  await viewAs(page, "Brother");
+  await go(page, "/companies/quillon-verify?tab=family");
+  await clearVote(page);
+});
+
+const topCard = (page: Page) => page.getByRole("article").first().getByRole("heading", { level: 2 });
+
+test("swipe: cross, almost a match, undo, tick makes a match, and undo puts everything back", async ({ page }) => {
+  // Tidewell Diagnostics has ticks from Jamie and Dad; Brother has not decided.
+  await viewAs(page, "Brother");
+  await go(page, "/");
+  let swipes = 0;
+  for (let i = 0; i < 10 && (await topCard(page).textContent()) !== "Tidewell Diagnostics"; i++) {
+    await page.getByRole("button", { name: "Cross: not for us" }).click();
+    swipes++;
+    await page.waitForTimeout(400);
+  }
+  await expect(topCard(page)).toHaveText("Tidewell Diagnostics");
+
+  await page.getByRole("button", { name: "Cross: not for us" }).click();
+  await expect(page.getByRole("dialog", { name: "Almost a match" })).toContainText("Jamie and Dad both ticked");
+  await page.getByRole("button", { name: "Undo my cross" }).click();
+  await expect(topCard(page)).toHaveText("Tidewell Diagnostics");
+
+  await page.getByRole("button", { name: "Tick: interested" }).click();
+  await expect(page.getByRole("dialog", { name: "It’s a match!" })).toBeVisible();
+  await page.getByRole("button", { name: "Keep swiping" }).click();
+
+  // Undo the tick, then every cross, newest first.
+  for (let i = 0; i <= swipes; i++) {
+    await page.getByRole("button", { name: "Undo last swipe" }).click();
+    await page.waitForTimeout(400);
+  }
+  await expect(page.getByRole("button", { name: "Undo last swipe" })).toBeDisabled();
+  await page.goto("/matches");
+  await expect(page.getByRole("link", { name: /Tidewell Diagnostics/ })).toHaveCount(0);
+});
+
+test("swipe: a match has one shared chat", async ({ page }) => {
+  await viewAs(page, "Dad");
+  await go(page, "/matches/larkspur-photonics");
+  const text = `E2E chat ${Date.now()}`;
+  await page.getByLabel("Message").fill(text);
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByText(text)).toBeVisible();
+  await viewAs(page, "Jamie");
+  await go(page, "/matches");
+  await expect(page.getByRole("link", { name: /Larkspur Photonics/ })).toContainText(text.slice(0, 12));
 });
 
 test("comments are shared and notify the other members", async ({ page }) => {

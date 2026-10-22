@@ -1,17 +1,17 @@
 "use client";
 
-import { Bell, Bookmark, Building2, CalendarDays, Compass, FlaskConical, Home, Info, Network, Settings, Users } from "lucide-react";
+import { Bell, Bookmark, Building2, CalendarDays, Compass, FlaskConical, Heart, Home, Info, Network, Settings, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Wordmark } from "./logo";
 
-const MAIN_TABS = new Set(["/", "/discover", "/shortlist", "/updates"]);
+const MAIN_TABS = new Set(["/home", "/discover", "/shortlist", "/updates"]);
 
 const groups = [
   {
     items: [
-      { href: "/", label: "Home", icon: Home, exact: true },
+      { href: "/home", label: "Home", icon: Home, exact: true },
       { href: "/discover", label: "Discover", icon: Compass },
       { href: "/shortlist", label: "Shortlist", icon: Bookmark },
       { href: "/updates", label: "Updates", icon: Bell },
@@ -32,6 +32,7 @@ const groups = [
       { href: "/family", label: "Family", icon: Users },
       { href: "/about", label: "Methodology", icon: Info },
       { href: "/account", label: "Account", icon: Settings },
+      { href: "/", label: "Swipe app", icon: Heart, exact: true },
     ],
   },
 ];

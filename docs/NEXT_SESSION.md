@@ -2,6 +2,11 @@
 
 Read this first, then `IMPLEMENTATION_STATUS.md` (section "Live environment") and `README.md`.
 
+## Swipe app (22 October 2026, branch `claude/swipe-company-matching-0k7ozv`)
+- Feedback was that the app was too complicated, so it now opens as a tick-or-cross swipe app with unanimous matches, "almost a match", undo and one chat per match. The classic app still works at `/home`. Details: `docs/classic-app.md`.
+- **Not live yet.** Production still deploys `claude/deal-room-build-ir9ris`, and migration `0012_unanimous_matches.sql` has **not** been applied to the live database. Apply it in the same step as switching production to this branch: on its own it would make the current live app shortlist only unanimous companies and link notifications to `/matches` pages that do not exist there.
+- A Vercel preview of this branch uses the live database (Preview env vars are set) but the old 2-of-3 trigger, so "It's a match" would fire after two ticks there, and every swipe is a real vote.
+
 ## Where things stand (20 October 2026)
 - **Hannigan Ventures** (the app formerly called The Deal Room) is built on branch `claude/deal-room-build-ir9ris`: Next.js 16 / TypeScript / Tailwind 4, Supabase (Postgres, Auth, RLS), versioned research instructions, and the source-grounded research pipeline. Lint, typecheck, 66 unit/integration tests, 16 Playwright e2e tests and the production build all pass.
 - **Supabase is live**: project `kqvuqtpeyosyvhezjxvy` (eu-west-2). Migrations applied. Household `4ddcccb4-d611-4d58-af2d-9ed5496df283` has three confirmed members who sign in by magic link only: Jamie (owner), George and Chris. The 10 labelled, fictional sample companies, stories, events and 12 angel networks are seeded. Cheque ceiling default is £250,000.

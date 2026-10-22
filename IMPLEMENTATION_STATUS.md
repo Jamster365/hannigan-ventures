@@ -36,7 +36,7 @@ Build date: 19 October 2026. Branch `claude/deal-room-build-ir9ris`.
 - **Demo data is fictional.** The spec's historic companies (Siloton, Unravel Health, Soteria Tools, Veren Surgical, Ninopay, Moree, Spectra Bio, Greencovery, EvoTouch) are not seeded, because no verified current data was available in this session and the spec forbids promoting unverified notes. They can be added as an import queue once re-checked by a research run.
 - **Model provider.** The spec names the OpenAI API; `lib/research/provider.ts` wraps it behind a small interface so another provider can be swapped in without touching the pipeline.
 - **Imagery.** No licensed company images exist for the sample data, so every card uses the designed typographic fallback. `company_media` records rights status and attribution for real assets.
-- **Member count.** The 2-of-3 threshold is a named constant (`SHORTLIST_THRESHOLD`) in TypeScript and a literal in the SQL trigger; both are documented for a future migration.
+- **Match rule.** Unanimous since 22 October 2026 (`MATCH_RULE` in TypeScript, `compute_family_stage()` in migration 0012); the classic 2-of-3 rule is still selectable in TypeScript. See `docs/classic-app.md`.
 
 ## Live environment (set up 20 October 2026)
 

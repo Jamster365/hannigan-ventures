@@ -254,3 +254,36 @@ html[data-launched] .launch-splash {
     visibility: hidden;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Swipe app: cards flying off the deck, returning on undo, and the match moment.
+   --------------------------------------------------------------------------- */
+@keyframes fly-right {
+  from { transform: translateX(var(--from-x, 0px)) rotate(var(--from-r, 0deg)); }
+  to { transform: translateX(140%) rotate(20deg); opacity: 0; }
+}
+
+@keyframes fly-left {
+  from { transform: translateX(var(--from-x, 0px)) rotate(var(--from-r, 0deg)); }
+  to { transform: translateX(-140%) rotate(-20deg); opacity: 0; }
+}
+
+@keyframes card-return {
+  from { transform: translateY(-24px) scale(0.94); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes match-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}

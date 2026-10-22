@@ -101,21 +101,20 @@ class DemoRepository implements Repository {
     const bundle = this.companies.find((c) => c.company.id === companyId);
     if (!bundle) throw new Error("Company not found");
     const before = bundle.votes.find((v) => v.userId === userId);
-    const { votes, transition } = applyVote(bundle.votes, { userId, vote, score });
+    const { votes, transition } = applyVote(bundle.votes, { userId, vote, score }, DEMO_MEMBERS.length);
     bundle.votes = votes.map((v) => ({ ...v, companyId }));
     this.record("vote.set", "company", companyId, userId, before ?? null, bundle.votes.find((v) => v.userId === userId) ?? null);
     const others = DEMO_MEMBERS.filter((m) => m.userId !== userId).map((m) => m.userId);
     const actor = DEMO_MEMBERS.find((m) => m.userId === userId)?.displayName ?? "A member";
     const now = new Date().toISOString();
     if (transition.promoted) {
-      bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "Promoted to shortlist", summary: `${actor}'s Interested vote brought the count to 2 of 3.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
-      this.pushNotification(others, { notificationType: "shortlist_promoted", companyId, updateId: null, commentId: null, title: `${bundle.company.name} promoted to shortlist`, body: `${actor}'s Interested vote brought the count to 2 of 3.`, importance: "high", href: `/companies/${bundle.company.slug}?tab=family`, dedupe: `promote:${companyId}:${now}` });
+      bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "It's a match", summary: `Everyone ticked ${bundle.company.name}.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
+      this.pushNotification(others, { notificationType: "shortlist_promoted", companyId, updateId: null, commentId: null, title: `It's a match: ${bundle.company.name}`, body: `Everyone ticked ${bundle.company.name}. The chat is open.`, importance: "high", href: `/matches/${bundle.company.slug}`, dedupe: `promote:${companyId}:${now}` });
     } else if (transition.demoted) {
-      bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "Left the shortlist", summary: `${actor} changed their vote; fewer than 2 members are Interested.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
-      this.pushNotification(others, { notificationType: "shortlist_demoted", companyId, updateId: null, commentId: null, title: `${bundle.company.name} left the shortlist`, body: `${actor} changed their vote; fewer than 2 members are Interested.`, importance: "high", href: `/companies/${bundle.company.slug}?tab=family`, dedupe: `demote:${companyId}:${now}` });
-    } else if (before && vote && before.vote !== vote) {
-      this.pushNotification(others, { notificationType: "vote_changed", companyId, updateId: null, commentId: null, title: `${actor} changed their view on ${bundle.company.name}`, body: `Now ${vote}.`, importance: "normal", href: `/companies/${bundle.company.slug}?tab=family`, dedupe: `vote:${companyId}:${userId}:${now}` });
+      bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "No longer a match", summary: `${actor} changed their mind.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
+      this.pushNotification(others, { notificationType: "shortlist_demoted", companyId, updateId: null, commentId: null, title: `${bundle.company.name} is no longer a match`, body: `${actor} changed their mind.`, importance: "high", href: "/matches", dedupe: `demote:${companyId}:${now}` });
     }
+    // Votes stay private until a match, so changed views are not announced.
     return { transition };
   }
 
@@ -126,7 +125,7 @@ class DemoRepository implements Repository {
     bundle.comments.push(comment);
     const actor = DEMO_MEMBERS.find((m) => m.userId === userId)?.displayName ?? "A member";
     const others = DEMO_MEMBERS.filter((m) => m.userId !== userId).map((m) => m.userId);
-    this.pushNotification(others, { notificationType: "comment", companyId, updateId: null, commentId: comment.id, title: `${actor} commented`, body: `On ${bundle.company.name}: “${body.slice(0, 90)}${body.length > 90 ? "…" : ""}”`, importance: "normal", href: `/companies/${bundle.company.slug}?tab=family`, dedupe: `comment:${comment.id}` });
+    this.pushNotification(others, { notificationType: "comment", companyId, updateId: null, commentId: comment.id, title: `${actor} commented`, body: `On ${bundle.company.name}: “${body.slice(0, 90)}${body.length > 90 ? "…" : ""}”`, importance: "normal", href: computeFamilyStage(bundle.votes, DEMO_MEMBERS.length) === "shortlisted" ? `/matches/${bundle.company.slug}` : `/companies/${bundle.company.slug}?tab=family`, dedupe: `comment:${comment.id}` });
     return comment;
   }
   async editComment({ userId, commentId, body }: { userId: string; commentId: string; body: string }) {
