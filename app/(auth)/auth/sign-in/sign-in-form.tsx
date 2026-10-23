@@ -91,7 +91,7 @@ export function SignInForm({ mode }: { mode: "demo" | "supabase" }) {
     return (
       <div className="mt-5" role="status">
         <div className="rounded-[12px] bg-green-pale px-3 py-3 text-[14px] text-green">
-          Check your email. If <span className="font-semibold">{waiting.email}</span> belongs to an invited member, a sign-in link is on its way.
+          Check your email. If <span className="font-semibold">{waiting.email}</span> belongs to an invited member, a sign-in link is on its way from noreply@mail.app.supabase.io. Not there after a couple of minutes? Check Junk or Spam, or ask the household owner for a direct sign-in link.
         </div>
         <p className="mt-4 text-[14px] text-secondary">Tap the link, even if it opens in another browser. Confirm this code there and this screen signs in by itself:</p>
         <p className="mt-3 text-center font-serif text-[40px] font-semibold tracking-[0.2em] text-ink" aria-label={`Code ${waiting.code.split("").join(" ")}`}>
@@ -114,7 +114,7 @@ export function SignInForm({ mode }: { mode: "demo" | "supabase" }) {
   if (state.status === "sent" && !state.handoff) {
     return (
       <div className="mt-5 rounded-[12px] bg-green-pale px-3 py-3 text-[14px] text-green" role="status">
-        Check your email. If <span className="font-semibold">{state.email}</span> belongs to an invited member, a sign-in link is on its way.
+        Check your email. If <span className="font-semibold">{state.email}</span> belongs to an invited member, a sign-in link is on its way from noreply@mail.app.supabase.io. Not there after a couple of minutes? Check Junk or Spam, or ask the household owner for a direct sign-in link.
       </div>
     );
   }

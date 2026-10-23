@@ -9,7 +9,7 @@ import { dataMode } from "@/lib/config";
 import { getRepository } from "@/lib/data";
 import { formatDateTime } from "@/lib/domain/format";
 
-export const metadata = { title: "Me" };
+export const metadata = { title: "Profile" };
 
 export default async function MePage() {
   const member = await requireMember();
@@ -21,8 +21,8 @@ export default async function MePage() {
 
   const groups: { title: string; items: Item[] }[] = [
     {
-      title: "Your decisions",
-      items: [{ href: "/decisions", label: "Decisions", sub: "Everything you’ve said yes or no to. Change your mind any time.", Icon: ListChecks }],
+      title: "Your picks",
+      items: [{ href: "/decisions", label: "Your picks", sub: "Everything you’ve said yes or no to. Change your mind any time.", Icon: ListChecks }],
     },
     {
       title: "Research",
@@ -49,7 +49,7 @@ export default async function MePage() {
 
   return (
     <>
-      <PageHeader title="Me" />
+      <PageHeader title="Profile" />
       <div className="mx-auto w-full max-w-[640px] px-4 pb-8 pt-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">

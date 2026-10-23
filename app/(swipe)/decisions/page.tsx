@@ -6,7 +6,7 @@ import { requireMember } from "@/lib/auth/current-member";
 import { getRepository } from "@/lib/data";
 import { decisionsFor } from "@/lib/domain/swipe";
 
-export const metadata = { title: "Decisions" };
+export const metadata = { title: "Your picks" };
 
 export default async function DecisionsPage() {
   const member = await requireMember();
@@ -18,7 +18,7 @@ export default async function DecisionsPage() {
 
   return (
     <>
-      <PageHeader title="Decisions" backHref="/me" variant="back" />
+      <PageHeader title="Your picks" backHref="/me" variant="back" />
       <div className="mx-auto w-full max-w-[640px] pb-8">
         <p className="px-4 pt-3 text-[13px] text-secondary">Every company you’ve said you’re interested or not interested in. Change your mind any time; only you can see your picks until there’s a match.</p>
         {decided.length === 0 && watching.length === 0 ? (

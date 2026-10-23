@@ -243,12 +243,12 @@ test("members other than the owner cannot open the upload screen", async ({ page
   await expect(page.getByRole("button", { name: "Copy the Claude prompt" })).toHaveCount(0);
 });
 
-test("three tabs: Decisions lives under Me", async ({ page }) => {
+test("three tabs: Your picks lives under Profile", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("hv-deck-tip-seen", "1"));
   await go(page, "/");
   const nav = page.getByRole("navigation", { name: "Primary" });
   await expect(nav.getByRole("link")).toHaveCount(3);
-  await nav.getByRole("link", { name: "Me" }).click();
-  await page.getByRole("link", { name: /Decisions/ }).click();
-  await expect(page.getByRole("heading", { name: "Decisions" })).toBeVisible();
+  await nav.getByRole("link", { name: "Profile" }).click();
+  await page.getByRole("link", { name: /Your picks/ }).click();
+  await expect(page.getByRole("heading", { name: "Your picks" })).toBeVisible();
 });

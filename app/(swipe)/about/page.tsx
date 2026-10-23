@@ -11,7 +11,7 @@ const sections = [
   },
   {
     title: "How matches work",
-    body: "Each member marks every company in their deck as interested or not interested (or skips it), and everyone's answers stay private until there is a match. When two of you are interested in the same company it is a match: it moves to Matches and opens a chat for the whole family. Two “not interested” answers end it. If your “not interested” was the deciding answer and “interested” would have made a match, you are told it was almost a match and can undo. Change any decision later in Decisions. Companies whose round has closed wait on the watch list until a new round appears. A match means \"worth a conversation\", never \"let's invest\". Nothing is overridden by hand or by the AI.",
+    body: "Each member marks every company in their deck as interested or not interested (or skips it), and everyone's answers stay private until there is a match. When two of you are interested in the same company it is a match: it moves to Matches and opens a chat for the whole family. Two “not interested” answers end it. If your “not interested” was the deciding answer and “interested” would have made a match, you are told it was almost a match and can undo. Change any answer later in Profile → Your picks. Companies whose round has closed wait on the watch list until a new round appears. A match means \"worth a conversation\", never \"let's invest\". Nothing is overridden by hand or by the AI.",
   },
   {
     title: "How the AI rating works",

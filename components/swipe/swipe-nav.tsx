@@ -1,17 +1,17 @@
 "use client";
 
-import { Heart, MessageCircle, UserRound } from "lucide-react";
+import { MessageCircle, Search, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { href: "/", label: "Discover", icon: Heart, match: (p: string) => p === "/" },
+  { href: "/", label: "Discover", icon: Search, match: (p: string) => p === "/" },
   { href: "/matches", label: "Matches", icon: MessageCircle, match: (p: string) => p.startsWith("/matches") },
-  { href: "/me", label: "Me", icon: UserRound, match: (p: string) => ["/me", "/decisions", "/events", "/networks", "/research", "/about", "/account"].some((x) => p.startsWith(x)) },
+  { href: "/me", label: "Profile", icon: UserRound, match: (p: string) => ["/me", "/decisions", "/events", "/networks", "/research", "/about", "/account"].some((x) => p.startsWith(x)) },
 ];
 
-/** Three-tab thumb navigation (Decisions lives under Me) for the swipe app, at every screen width. */
+/** Three-tab thumb navigation (Your picks lives under Profile) for the swipe app, at every screen width. */
 export function SwipeNav({ unreadMatches }: { unreadMatches: number }) {
   const pathname = usePathname();
   return (
@@ -29,7 +29,7 @@ export function SwipeNav({ unreadMatches }: { unreadMatches: number }) {
                 className={cn("relative flex min-w-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium", active ? "text-ink" : "text-tertiary hover:text-secondary")}
               >
                 <span className="relative">
-                  <Icon size={22} strokeWidth={active ? 2.4 : 1.9} fill={active && item.label === "Discover" ? "currentColor" : "none"} aria-hidden />
+                  <Icon size={22} strokeWidth={active ? 2.4 : 1.9} aria-hidden />
                   {item.label === "Matches" && unreadMatches > 0 ? (
                     <span className="absolute -right-2.5 -top-1.5 min-w-[18px] rounded-full bg-red px-1 text-center text-[10px] font-semibold leading-[18px] text-white ring-2 ring-surface" aria-label={`${unreadMatches} unread`}>
                       {unreadMatches > 9 ? "9+" : unreadMatches}

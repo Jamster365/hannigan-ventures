@@ -36,7 +36,7 @@ export function joinNames(names: string[]): string {
  * The deck, Hinge-style: the whole screen is one company's profile, scrolled
  * like any page. Round Interested / Not interested buttons float in the
  * bottom corners, Undo sits in the header; swiping right or left also decides.
- * Undo here covers this visit; the Decisions tab changes any earlier vote.
+ * Undo here covers this visit; Profile → Your picks changes any earlier vote.
  * The deck is local state seeded from the server, so a refresh after each
  * swipe never reshuffles it.
  */
@@ -309,7 +309,7 @@ function CaughtUp() {
         <Check size={28} strokeWidth={2.6} aria-hidden />
       </span>
       <p className="mt-4 font-serif text-[24px] font-semibold text-ink">You’re all caught up</p>
-      <p className="mt-1 max-w-[30ch] text-[14px] leading-relaxed text-secondary">New companies arrive as research adds them. Closed rounds wait on your watch list in Decisions.</p>
+      <p className="mt-1 max-w-[30ch] text-[14px] leading-relaxed text-secondary">New companies arrive as research adds them. Closed rounds wait on your watch list in Your picks.</p>
       <LinkButton href="/matches" variant="outline" className="mt-5">
         See matches
       </LinkButton>
@@ -356,7 +356,7 @@ function DeckTip({ onClose }: { onClose: () => void }) {
           </li>
           <li className="flex gap-3">
             <RotateCcw size={20} className="mt-0.5 shrink-0 text-amber" aria-hidden />
-            <span><b>Undo</b> brings back the last one. Change any decision later in Me → Decisions.</span>
+            <span><b>Undo</b> brings back the last one. Change any answer later in Profile → Your picks.</span>
           </li>
           <li className="flex gap-3">
             <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[11px] font-bold text-white">2</span>

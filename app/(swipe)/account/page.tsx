@@ -6,6 +6,7 @@ import { dataMode } from "@/lib/config";
 import { getRepository } from "@/lib/data";
 import { formatDate } from "@/lib/domain/format";
 import { AccountForms } from "./account-forms";
+import { SignInLinkButton } from "./sign-in-link";
 
 export const metadata = { title: "Account" };
 
@@ -35,12 +36,14 @@ export default async function AccountPage() {
         <section className="mt-6">
           <h2 className="mb-2 font-serif text-[18px] font-semibold text-ink">Household members</h2>
           <Card className="overflow-hidden p-0">
+            {mode === "supabase" && member.role === "owner" ? <p className="border-b border-hairline px-4 py-2.5 text-[12px] text-secondary">If someone’s sign-in email doesn’t arrive (BT and some other mail providers can hold it back), make them a sign-in link here and send it to them directly.</p> : null}
             <ul className="divide-y divide-hairline">
               {members.map((m) => (
-                <li key={m.userId} className="flex items-center gap-3 px-4 py-3">
+                <li key={m.userId} className="flex flex-wrap items-center gap-3 px-4 py-3">
                   <Avatar member={m} size="sm" />
                   <span className="flex-1 text-[14px] font-medium text-ink">{m.displayName}</span>
                   <span className="text-[12px] text-tertiary">Joined {formatDate(m.joinedAt)}</span>
+                  {mode === "supabase" && member.role === "owner" && m.userId !== member.userId ? <SignInLinkButton userId={m.userId} name={m.displayName} /> : null}
                 </li>
               ))}
             </ul>

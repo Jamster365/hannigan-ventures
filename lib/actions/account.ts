@@ -39,3 +39,29 @@ export async function signOutAction(): Promise<void> {
   await signOut();
   redirect("/auth/sign-in");
 }
+
+/**
+ * Owner only: a one-time sign-in link for another household member, to send
+ * them directly (e.g. on WhatsApp) when the sign-in email doesn't arrive.
+ * Nothing is emailed. The link opens /auth/link, which signs in only when the
+ * member taps the button, so link previews can't use it up. It works once and
+ * expires after the project's email-link lifetime (one hour by default).
+ */
+export async function createSignInLinkAction(userId: string): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  if (dataMode() === "demo") return { ok: false, error: "Not available in demo mode." };
+  const member = await requireMember();
+  if (member.role !== "owner") return { ok: false, error: "Only the household owner can create sign-in links." };
+  if (userId === member.userId) return { ok: false, error: "Use the sign-in page for your own account." };
+  const [{ getSessionContext }, { createSupabaseAdminClient }] = await Promise.all([import("@/lib/supabase/member"), import("@/lib/supabase/admin")]);
+  const ctx = await getSessionContext();
+  if (!ctx) return { ok: false, error: "Not signed in." };
+  const admin = createSupabaseAdminClient();
+  const { data: row } = await admin.from("household_members").select("user_id").eq("household_id", ctx.householdId).eq("user_id", userId).eq("status", "active").maybeSingle();
+  if (!row) return { ok: false, error: "That person isn't an active member of this household." };
+  const { data: target, error: userError } = await admin.auth.admin.getUserById(userId);
+  if (userError || !target.user?.email) return { ok: false, error: "Couldn't find that member's account." };
+  const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email: target.user.email });
+  if (error || !data.properties?.hashed_token) return { ok: false, error: "Couldn't create a link. Try again in a minute." };
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://hannigan-ventures.vercel.app";
+  return { ok: true, url: `${site}/auth/link?t=${encodeURIComponent(data.properties.hashed_token)}` };
+}
