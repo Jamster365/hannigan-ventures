@@ -8,6 +8,8 @@ import type { ResearchPreferences } from "@/lib/domain/types";
  */
 export const DEFAULT_RESEARCH_PROMPT = `Find early-stage investment opportunities across all sectors, with emphasis on the UK (London, Cambridge, Oxford), university spinouts, accelerators (Antler, EF, X-HEC) and genuine pre-round access for an individual angel writing cheques of up to £250,000. Every sector qualifies; there are no thematic quotas. Prefer a few well-evidenced findings over volume, and do not re-surface unchanged companies.
 
+Scope: UK first, then the rest of Europe. Any company size or stage with a real route in for an individual angel. Equity crowdfunding campaigns count (the app labels them). Chase EIS/SEIS status (HMRC advance assurance, a company claim, or unknown) for every UK company.
+
 Discovery priorities (keep all ten):
 
 1. Actual allocation before close. Find quality companies where a cheque of up to £250,000 can genuinely be invested or plausibly obtained before the round closes: live EIS/SEIS rounds, residual allocations, extensions, SPVs, founder-direct and secondaries. Verify availability, price and the ability to execute.
@@ -36,11 +38,12 @@ Briefing style: short, sceptical, commercially literate. Lead with what changed 
 
 export const DEFAULT_PREFERENCES: ResearchPreferences = {
   maxChequeGbp: 250_000,
-  geographicFocus: "UK first, global exceptions",
+  geographicFocus: "UK first (all regions), then Europe",
   discoveryDepth: "balanced",
   eventGeography: "London",
   researchTimeLocal: "07:00",
   sectorsInclude: [],
   sectorsExclude: [],
   dailyBudgetUsd: 2,
+  dailyMode: "update_only",
 };

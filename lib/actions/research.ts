@@ -16,6 +16,7 @@ const prefsSchema = z.object({
   sectorsInclude: z.array(z.string().trim().min(1).max(60)).max(50),
   sectorsExclude: z.array(z.string().trim().min(1).max(60)).max(50),
   dailyBudgetUsd: z.number().min(0).max(500),
+  dailyMode: z.enum(["update_only", "discover"]).default("update_only"),
 });
 
 const saveSchema = z.object({

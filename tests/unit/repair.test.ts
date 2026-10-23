@@ -100,3 +100,13 @@ describe("missing text", () => {
     expect(bad.ok).toBe(false);
   });
 });
+
+describe("missing values", () => {
+  it("treats a missing nullable value as unknown, but still fails a required one", async () => {
+    const { z } = await import("zod");
+    const schema = z.object({ amount: z.number().nullable(), name: z.string().min(1), when: z.object({ at: z.string() }).nullable() });
+    const ok = repairToSchema(schema, { name: "A" });
+    expect(ok.ok && ok.data).toEqual({ amount: null, name: "A", when: null });
+    expect(repairToSchema(z.object({ n: z.number() }), {}).ok).toBe(false);
+  });
+});

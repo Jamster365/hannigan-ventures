@@ -404,6 +404,12 @@ export interface ResearchPreferences {
   sectorsInclude: string[];
   sectorsExclude: string[];
   dailyBudgetUsd: number;
+  /**
+   * What the daily scheduled run does. "update_only" (default since 23 Oct
+   * 2026): re-check tracked companies, add none; new companies arrive in
+   * uploaded batches. "discover": also look for new companies.
+   */
+  dailyMode?: "update_only" | "discover";
 }
 
 export interface ResearchFeedback {

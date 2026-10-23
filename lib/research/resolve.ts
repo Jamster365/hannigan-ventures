@@ -13,6 +13,10 @@ export interface KnownCompany {
   domain: string | null;
   legalName: string | null;
   aliases: string[];
+  /** When research last checked how to invest (null: never). Used to rotate daily re-checks. */
+  lastCheckedAt?: string | null;
+  /** The family has matched it (two ticks). */
+  matched?: boolean;
 }
 
 export type Resolution = { kind: "existing"; companyId: string; reason: string } | { kind: "new"; slug: string } | { kind: "ambiguous"; candidates: { companyId: string; name: string }[]; reason: string };

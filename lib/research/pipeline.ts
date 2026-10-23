@@ -1,6 +1,6 @@
 import { londonDate } from "@/lib/domain/format";
 import { assessCandidate } from "./assess";
-import { discoveryBrief, extractCandidates } from "./discover";
+import { discoveryBrief, extractCandidates, pickDailyRechecks } from "./discover";
 import type { SafeFetcher } from "./fetch";
 import { canonicaliseUrl } from "./fetch";
 import { findCompanyImagery } from "./imagery";
@@ -26,6 +26,8 @@ export interface PipelineInput {
   companyIds?: string[];
   /** One-off first run: deep discovery, a longer write-up and up to FIRST_FILL_NEW_DOSSIERS new companies. */
   firstFill?: boolean;
+  /** Re-check a rotating set of tracked companies (pickDailyRechecks) and add no new ones. */
+  updateOnly?: boolean;
 }
 
 export interface PipelineResult {
@@ -68,14 +70,18 @@ export async function beginPipeline(deps: PipelineDeps, input: PipelineInput): P
   const { model, store, now } = deps;
   const localDate = londonDate(now);
   const config = await store.loadConfig(input.householdId);
-  const run = await store.startRun({ householdId: input.householdId, localDate, runKind: input.runKind, promptVersionId: config.promptVersionId, model: model.name, triggeredBy: input.triggeredBy, newCompanyLimit: input.firstFill ? FIRST_FILL_NEW_DOSSIERS : undefined });
+  const rotation = input.updateOnly && !input.companyIds?.length ? pickDailyRechecks(config.known) : null;
+  if (rotation && rotation.length === 0) {
+    return { ...emptyCounts(null, config.promptVersionId), status: "skipped", summary: "No tracked companies to update yet.", errorSummary: null };
+  }
+  const run = await store.startRun({ householdId: input.householdId, localDate, runKind: input.runKind, promptVersionId: config.promptVersionId, model: model.name, triggeredBy: input.triggeredBy, newCompanyLimit: input.firstFill ? FIRST_FILL_NEW_DOSSIERS : input.updateOnly ? 0 : undefined });
   if (!run) {
     return { status: "skipped", runId: null, promptVersionId: config.promptVersionId, sourceCount: 0, candidatesCount: 0, publishedCount: 0, estimatedCostUsd: 0, summary: `A ${input.runKind} run already exists for ${localDate}.`, errorSummary: null };
   }
   const finish = finisher(deps, { id: run.id, householdId: input.householdId }, config);
   try {
     const system = composeSystemPrompt(config.promptText, config.preferences);
-    const recheck = input.companyIds?.length ? config.known.filter((k) => input.companyIds!.includes(k.id)) : undefined;
+    const recheck = input.companyIds?.length ? config.known.filter((k) => input.companyIds!.includes(k.id)) : (rotation ?? undefined);
     const brief = discoveryBrief({ localDate, known: config.known, recheckCompanies: recheck, depth: input.firstFill ? "deep" : config.preferences.discoveryDepth, firstFill: input.firstFill });
     // 2. Source discovery (web-grounded, cited), as a background job
     await store.progress(run.id, "searching", recheck ? `Re-checking ${recheck.length} tracked compan${recheck.length === 1 ? "y" : "ies"} on the web` : "Searching the web for new companies, updates and events");

@@ -32,9 +32,9 @@ function householdFromEnv(householdId?: string): string {
   return id;
 }
 
-export async function beginResearch(input: { runKind: ResearchRun["runKind"]; triggeredBy: string | null; householdId?: string; companyIds?: string[]; firstFill?: boolean }): Promise<PipelineResult> {
+export async function beginResearch(input: { runKind: ResearchRun["runKind"]; triggeredBy: string | null; householdId?: string; companyIds?: string[]; firstFill?: boolean; updateOnly?: boolean }): Promise<PipelineResult> {
   const deps = await productionDeps();
-  return beginPipeline(deps, { householdId: householdFromEnv(input.householdId), runKind: input.runKind, triggeredBy: input.triggeredBy, companyIds: input.companyIds, firstFill: input.firstFill });
+  return beginPipeline(deps, { householdId: householdFromEnv(input.householdId), runKind: input.runKind, triggeredBy: input.triggeredBy, companyIds: input.companyIds, firstFill: input.firstFill, updateOnly: input.updateOnly });
 }
 
 export async function advanceResearch(runId: string): Promise<PipelineResult> {
@@ -54,7 +54,8 @@ export function staleReason(run: StoredRun, now: Date): string | null {
   const since = (iso: string | null) => now.getTime() - Date.parse(iso ?? run.startedAt);
   if (run.phase === null && since(run.startedAt) > 10 * MINUTE) return "Run stopped before its web research started (likely the hosting time limit).";
   if (run.phase === "processing" && since(run.progressAt) > 10 * MINUTE) return "Run stopped while verifying and publishing (likely the hosting time limit).";
-  if (run.phase === "discovering" && since(run.startedAt) > 3 * 60 * MINUTE) return "The web research job did not finish within 3 hours.";
+  // Uploaded batches wait their turn in "discovering" without a provider job, so only real jobs time out there.
+  if (run.phase === "discovering" && !run.responseHandle?.startsWith(IMPORT_PREFIX) && since(run.startedAt) > 3 * 60 * MINUTE) return "The web research job did not finish within 3 hours.";
   return null;
 }
 
@@ -71,7 +72,12 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
   const store = createSupabaseResearchStore();
   const report: { advanced: { runId: string; status: string }[]; failedStale: string[]; started: PipelineResult | null; localDate: string } = { advanced: [], failedStale: [], started: null, localDate: londonDate(now) };
 
+  let importsProcessed = 0;
   for (const run of await store.listActiveRuns(householdId)) {
+    // Uploaded batches are processed one per heartbeat so each call stays inside the hosting time limit.
+    const isImport = run.responseHandle?.startsWith(IMPORT_PREFIX) ?? false;
+    if (isImport && importsProcessed > 0) continue;
+    if (isImport) importsProcessed++;
     const stale = staleReason(run, now);
     if (stale) {
       await store.finishRun({ runId: run.id, status: "failed", sourceCount: run.sourceCount, candidatesCount: run.candidatesCount, publishedCount: run.publishedCount, estimatedCostUsd: run.estimatedCostUsd, summary: "Research run did not complete; nothing new was published.", errorSummary: stale });
@@ -91,7 +97,7 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
   const config = await store.loadConfig(householdId);
   const configuredHour = Number((config.preferences.researchTimeLocal ?? "07:00").split(":")[0]);
   if (opts.forceStart || londonHour(now) === configuredHour) {
-    report.started = await beginResearch({ runKind: "scheduled", triggeredBy: null, householdId });
+    report.started = await beginResearch({ runKind: "scheduled", triggeredBy: null, householdId, updateOnly: (config.preferences.dailyMode ?? "update_only") === "update_only" });
   }
   return report;
 }

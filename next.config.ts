@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
     // pages (main tabs, company pages warmed from the current screen) for 5 min.
     // Server actions that change data (votes, comments) still refresh it.
     staleTimes: { dynamic: 30, static: 300 },
+    // Research uploads (Me → Upload research) can be a few MB of JSON; Vercel's request limit is 4.5 MB.
+    serverActions: { bodySizeLimit: "4mb" },
   },
   // Company imagery is served from Supabase Storage (licensed/permitted assets only)
   // or from local /public fallbacks. No blind hotlinking of third-party images.

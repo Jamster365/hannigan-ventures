@@ -28,7 +28,10 @@ class SupabaseResearchStore implements ResearchStore {
     const prompt = this.must(await this.admin.from("research_prompts").select("id, prompt_text, config_jsonb").eq("household_id", householdId).eq("active", true).maybeSingle<{ id: string; prompt_text: string; config_jsonb: Partial<ResearchPreferences> }>(), "active prompt");
     if (!prompt) throw new Error("No active research instructions for this household");
     // Labelled sample companies are fictional: never research them or match real findings onto them.
-    const companies = this.must(await this.admin.from("companies").select("id, name, slug, domain, legal_name").eq("household_id", householdId).eq("is_demo", false).returns<{ id: string; name: string; slug: string; domain: string | null; legal_name: string | null }[]>(), "companies") ?? [];
+    const companies = this.must(await this.admin.from("companies").select("id, name, slug, domain, legal_name, family_stage").eq("household_id", householdId).eq("is_demo", false).returns<{ id: string; name: string; slug: string; domain: string | null; legal_name: string | null; family_stage: string }[]>(), "companies") ?? [];
+    const checks = this.must(await this.admin.from("investment_access_checks").select("company_id, checked_at").in("company_id", companies.map((c) => c.id)).returns<{ company_id: string; checked_at: string }[]>(), "access checks") ?? [];
+    const lastChecked = new Map<string, string>();
+    for (const k of checks) if ((lastChecked.get(k.company_id) ?? "") < k.checked_at) lastChecked.set(k.company_id, k.checked_at);
     const aliases = this.must(await this.admin.from("company_aliases").select("company_id, alias").in("company_id", companies.map((c) => c.id)).returns<{ company_id: string; alias: string }[]>(), "aliases") ?? [];
     const members = this.must(await this.admin.from("household_members").select("user_id").eq("household_id", householdId).eq("status", "active").returns<{ user_id: string }[]>(), "members") ?? [];
     const hashes = this.must(await this.admin.from("sources").select("content_hash").eq("household_id", householdId).not("content_hash", "is", null).returns<{ content_hash: string }[]>(), "hashes") ?? [];
@@ -37,7 +40,7 @@ class SupabaseResearchStore implements ResearchStore {
       promptVersionId: prompt.id,
       promptText: prompt.prompt_text,
       preferences: { ...DEFAULT_PREFERENCES, ...prompt.config_jsonb },
-      known: companies.map((c) => ({ id: c.id, name: c.name, slug: c.slug, domain: c.domain, legalName: c.legal_name, aliases: aliases.filter((a) => a.company_id === c.id).map((a) => a.alias) })),
+      known: companies.map((c) => ({ id: c.id, name: c.name, slug: c.slug, domain: c.domain, legalName: c.legal_name, aliases: aliases.filter((a) => a.company_id === c.id).map((a) => a.alias), lastCheckedAt: lastChecked.get(c.id) ?? null, matched: c.family_stage === "shortlisted" })),
       memberIds: members.map((m) => m.user_id),
       seenHashes: new Set(hashes.map((h) => h.content_hash)),
     };

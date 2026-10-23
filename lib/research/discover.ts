@@ -21,7 +21,7 @@ export function discoveryBrief(input: { localDate: string; known: KnownCompany[]
     .join("\n");
   if (input.recheckCompanies?.length) {
     return `Date: ${input.localDate} (Europe/London).
-Re-check ONLY these tracked companies for material developments since the last check (financing status, live application routes, closures, valuation, major customer/clinical milestones, founder changes, risks):
+Re-check ONLY these tracked companies for material developments since the last check (financing status, live application routes including crowdfunding campaigns, closures, valuation, EIS/SEIS status (HMRC advance assurance, or the company's own statement), major customer/clinical milestones, founder changes, risks):
 ${input.recheckCompanies.map((k) => `- ${k.name}${k.domain ? ` (${k.domain})` : ""}`).join("\n")}
 For each, cite the pages you read. If nothing material changed, say so explicitly. Do not add new companies.`;
   }
@@ -32,6 +32,20 @@ Already tracked (do not re-surface unless something material changed):
 ${knownList || "- none yet"}
 
 For every company and event, cite the pages you actually read. Prefer company sites, programme pages, filings and official announcements. State what is unknown.${input.firstFill ? FIRST_FILL : ""}`;
+}
+
+/** Companies per daily update-only run: enough to rotate through the list every week or two. */
+export const DAILY_RECHECKS = 10;
+
+/**
+ * The daily update-only run's companies: matches first (the family is
+ * actively looking at them), then whatever was checked longest ago.
+ */
+export function pickDailyRechecks(known: KnownCompany[], max = DAILY_RECHECKS): KnownCompany[] {
+  const age = (k: KnownCompany) => k.lastCheckedAt ?? "";
+  const byAge = [...known].sort((a, b) => age(a).localeCompare(age(b)) || a.name.localeCompare(b.name));
+  const matched = byAge.filter((k) => k.matched).slice(0, Math.ceil(max / 2));
+  return [...matched, ...byAge.filter((k) => !matched.includes(k))].slice(0, max);
 }
 
 const FIRST_FILL = `

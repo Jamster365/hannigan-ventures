@@ -7,7 +7,8 @@ import type { z } from "zod";
  * throws away good, sourced research. This repairs only such shape slips,
  * guided by the schema's own validation issues: truncate over-long text,
  * shorten over-long lists, null out malformed URLs, map unknown enum values to
- * "unknown"/"none" when the schema offers them, treat a missing list as empty.
+ * "unknown"/"none" when the schema offers them, treat a missing list as empty
+ * and a missing value as unknown (null).
  * It never invents content (an empty source list means "unsourced", which the
  * evidence rules then treat as unknown):
  * anything else still fails validation, and evidence rules run afterwards.
@@ -54,6 +55,11 @@ export function repairToSchema<T>(schema: z.ZodType<T>, input: unknown, maxPasse
       } else if (i.code === "invalid_type" && i.expected === "array" && (current === null || current === undefined)) {
         container[key] = [];
         repairs.push(`empty list for ${at}`);
+        changed = true;
+      } else if (i.code === "invalid_type" && current === undefined && i.expected !== "string") {
+        // A missing value is unknown: null. If the field cannot be null, the next pass still fails.
+        container[key] = null;
+        repairs.push(`unknown (null) for missing ${at}`);
         changed = true;
       } else if (i.code === "invalid_type" && i.expected === "string" && (current === null || current === undefined)) {
         // "Not stated" text becomes empty text; required text (min length) still fails afterwards.

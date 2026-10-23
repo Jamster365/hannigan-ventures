@@ -48,6 +48,12 @@ export function PreferencesForm({ active }: { active: PromptVersion }) {
         <Field label="Daily budget (USD)" hint="Research stops for the day when reached.">
           <input type="number" min={0} step={0.5} value={prefs.dailyBudgetUsd} onChange={(e) => set("dailyBudgetUsd", Number(e.target.value))} className={inputCls} />
         </Field>
+        <Field label="Daily run" hint="New companies normally arrive in uploaded batches (Me → Upload research).">
+          <select value={prefs.dailyMode ?? "update_only"} onChange={(e) => set("dailyMode", e.target.value as NonNullable<ResearchPreferences["dailyMode"]>)} className={inputCls}>
+            <option value="update_only">Update tracked companies only</option>
+            <option value="discover">Update and look for new companies</option>
+          </select>
+        </Field>
         <Field label="Sectors to include" hint="Comma-separated. Empty = every sector qualifies.">
           <input value={prefs.sectorsInclude.join(", ")} onChange={(e) => set("sectorsInclude", splitList(e.target.value))} className={inputCls} />
         </Field>

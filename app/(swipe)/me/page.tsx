@@ -1,4 +1,4 @@
-import { Building2, CalendarDays, ChevronRight, FlaskConical, Info, LayoutGrid, Network, Settings } from "lucide-react";
+import { Building2, Upload, CalendarDays, ChevronRight, FlaskConical, Info, LayoutGrid, Network, Settings } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/navigation/page-header";
@@ -24,6 +24,7 @@ export default async function MePage() {
       title: "Research",
       items: [
         { href: "/research/settings", label: "Research instructions", sub: openSuggestions ? `${openSuggestions} suggestion${openSuggestions === 1 ? "" : "s"} to review` : "What the daily research looks for", Icon: FlaskConical, badge: openSuggestions },
+        ...(member.role === "owner" ? [{ href: "/research/upload", label: "Upload research", sub: "Add companies researched in a Claude chat (only you see this)", Icon: Upload }] : []),
         { href: "/research/history", label: "Research history", sub: lastRun ? `Last run ${formatDateTime(lastRun.startedAt)} · ${lastRun.status.replace("_", " ")}` : "No runs yet", Icon: Building2 },
         { href: "/events", label: "Events", sub: `${upcoming} upcoming`, Icon: CalendarDays },
         { href: "/networks", label: "Angel networks", sub: "Ways to get into deals", Icon: Network },

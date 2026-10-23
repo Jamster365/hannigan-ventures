@@ -10,6 +10,8 @@ import { resolveCandidate } from "@/lib/research/resolve";
 import { assessmentSchema, candidateSchema, extractionSchema, homeStorySchema, type AssessmentOutput, type Candidate, type Extraction } from "@/lib/research/schemas";
 import { sanitiseCandidate } from "@/lib/research/verify";
 import { ImportedResearchModel } from "@/lib/research/imported-model";
+import { pickDailyRechecks } from "@/lib/research/discover";
+import { planImport } from "@/lib/research/import-batch";
 
 // ---------------------------------------------------------------------------
 // Fixtures: a fake model that "cites" pages, a fetcher that serves some of them
@@ -366,5 +368,63 @@ describe("end-to-end pipeline with fixtures", () => {
     expect(store.reviews.some((r) => r.kind === "ambiguous_entity")).toBe(true);
     expect(store.companies).toHaveLength(0);
     expect(result.status).toBe("no_new_research");
+  });
+});
+
+describe("daily update-only runs", () => {
+  const extraction = (): Extraction => extractionSchema.parse({ candidates: [candidate()], events: [], executiveFindings: [] });
+  it("re-checks a rotation of tracked companies, matches first, and adds no new companies", async () => {
+    const store = new MemoryResearchStore();
+    store.known = [
+      { id: "c1", name: "Old Co", slug: "old-co", domain: null, legalName: null, aliases: [], lastCheckedAt: "2026-10-01T00:00:00Z" },
+      { id: "c2", name: "Fresh Co", slug: "fresh-co", domain: null, legalName: null, aliases: [], lastCheckedAt: "2026-10-22T00:00:00Z" },
+      { id: "c3", name: "Matched Co", slug: "matched-co", domain: null, legalName: null, aliases: [], lastCheckedAt: "2026-10-22T00:00:00Z", matched: true },
+      { id: "c4", name: "Never Co", slug: "never-co", domain: null, legalName: null, aliases: [], lastCheckedAt: null },
+    ];
+    expect(pickDailyRechecks(store.known, 3).map((k) => k.name)).toEqual(["Matched Co", "Never Co", "Old Co"]);
+
+    let brief = "";
+    const model = fakeModel(extraction(), goodAssessment());
+    const start = model.startResearch.bind(model);
+    model.startResearch = async (args) => ((brief = args.input), start(args));
+    const result = await runPipeline({ model, fetcher, store, now: new Date("2026-10-23T06:00:00Z") }, { householdId: "h1", runKind: "scheduled", triggeredBy: null, updateOnly: true });
+    expect(brief).toMatch(/Re-check ONLY these tracked companies/);
+    expect(brief).toMatch(/EIS\/SEIS/);
+    expect(brief).toMatch(/Matched Co/);
+    expect(store.runs.find((r) => r.id === result.runId)?.newCompanyLimit).toBe(0);
+    // The model "found" Example Photonics, which is not tracked: an update-only run leaves it out.
+    expect(store.companies.map((c) => c.candidate.name)).not.toContain("Example Photonics");
+  });
+
+  it("does nothing when no companies are tracked yet", async () => {
+    const result = await beginPipeline({ model: fakeModel(extraction(), goodAssessment()), fetcher, store: new MemoryResearchStore(), now: new Date("2026-10-23T06:00:00Z") }, { householdId: "h1", runKind: "scheduled", triggeredBy: null, updateOnly: true });
+    expect(result.status).toBe("skipped");
+  });
+});
+
+describe("planImport (uploaded research)", () => {
+  const entry = (name: string) => ({ candidate: { ...candidate(), name, website: `https://${name.toLowerCase().replace(/\s/g, "")}.test/` }, assessment: goodAssessment() });
+
+  it("splits uploads into runs of 12 and keeps the write-up on each", () => {
+    const res = planImport({ writeUp: "Batch.", companies: Array.from({ length: 30 }, (_, i) => entry(`Company ${i + 1}`)), events: [{ x: 1 }] });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.plan.batches.map((b) => b.companies.length)).toEqual([12, 12, 6]);
+    expect(res.plan.batches.every((b) => b.writeUp === "Batch.")).toBe(true);
+    expect(res.plan.batches[1].events).toEqual([]);
+  });
+
+  it("accepts a bare list, rejects unreadable and duplicate companies, and drops bad assessments", () => {
+    const res = planImport([entry("Alpha"), { candidate: { name: "Broken" } }, entry("alpha"), { ...entry("Beta"), assessment: { aiPriority: "nope" } }]);
+    if (!res.ok) throw new Error(res.error);
+    expect(res.plan.accepted).toEqual(["Alpha", "Beta"]);
+    expect(res.plan.rejected.map((r) => r.name)).toEqual(["Broken", "alpha"]);
+    expect(res.plan.notes[0]).toMatch(/^Beta: assessment ignored/);
+    expect(res.plan.batches[0].companies[1]).not.toHaveProperty("assessment");
+  });
+
+  it("refuses an upload with no companies", () => {
+    expect(planImport({ writeUp: "x" }).ok).toBe(false);
+    expect(planImport({ companies: [] }).ok).toBe(false);
   });
 });

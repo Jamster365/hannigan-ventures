@@ -224,3 +224,26 @@ test("Me shows phone notifications as live-app only in the demo", async ({ page 
   await expect(page.getByText("Phone notifications")).toBeVisible();
   await expect(page.getByText("Available in the live app (not the demo).")).toBeVisible();
 });
+
+test("owner's upload screen checks a Claude batch and splits it into runs", async ({ page }) => {
+  await viewAs(page, "Jamie");
+  await go(page, "/me");
+  await page.getByRole("link", { name: /Upload research/ }).click();
+  await expect(page.getByRole("button", { name: "Copy the Claude prompt" })).toBeVisible();
+  const company = (name: string) => ({ candidate: { name, website: null, legalName: null, sector: "Fintech", subSector: null, city: "London", country: "United Kingdom", stage: "Seed", teaser: `${name} test company.`, description: "Test.", discoverySignal: "Test", researchRuleMatched: "Test", access: { status: "unknown", sourceUrls: [] }, eis: { status: "unknown", note: null, sourceUrls: [] }, round: null } });
+  const payload = { writeUp: "Test batch.", companies: Array.from({ length: 14 }, (_, i) => company(`Batch Co ${i + 1}`)).concat([{ candidate: { name: "Broken" } } as never]) };
+  await page.getByLabel("Claude’s reply (the JSON)").fill("```json\n" + JSON.stringify(payload) + "\n```");
+  await page.getByRole("button", { name: "Upload" }).click();
+  const status = page.getByRole("status").filter({ hasText: "Checked" });
+  await expect(status).toContainText("14 companies would be queued in 2 run(s)");
+  await expect(status).toContainText("Broken");
+});
+
+test("members other than the owner cannot open the upload screen", async ({ page }) => {
+  await viewAs(page, "Dad");
+  await go(page, "/me");
+  await expect(page.getByRole("link", { name: /Upload research/ })).toHaveCount(0);
+  await page.goto("/research/upload");
+  await expect(page.getByText("This page could not be found.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy the Claude prompt" })).toHaveCount(0);
+});
