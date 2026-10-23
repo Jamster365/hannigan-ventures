@@ -2,6 +2,17 @@
 
 Read this first, then `IMPLEMENTATION_STATUS.md` (section "Live environment") and `README.md`.
 
+## Tap-only deck, reasons and UK SEIS/EIS focus (23 October 2026, `efc817b`, live)
+- Swiping is gone: answers are the two round buttons only. The "family is waiting on your view" banner is gone; the deck banner shows matches only.
+- After an answer that isn't a match, a "Say why…" pill shows for 9 seconds and opens an optional reason sheet (chips + text, max 500 chars) stored in `member_votes.note` via `saveReasonAction`. Reasons can be added or edited later in Profile → Your picks. A new answer clears the old note.
+- Company profiles show everything on one scrolling page (no "Show more"). Hero is capped at 42dvh (30dvh on iPad).
+- iPad: text sizes are rem, and `html{font-size:110%}` on touch screens ≥768px. Matches stay as separate screens; companies stay one column.
+- Deck: `isUk` hides non-UK companies (unknown country stays); `fitScore` ranks SEIS/EIS, pre-seed/seed and ≤£5m pre-money first. Research brief (`lib/research/import-template.ts`, `default-prompt.ts`) asks for UK SEIS/EIS early rounds, non-EIS only rarely.
+- Pictures: the heartbeat backfills missing heroes (3 companies a tick, retried at most weekly, audit `imagery.backfill`) using large images from each company's own website. 27 of 61 companies have a real photo, 31 a logo; the rest show the typographic fallback. No synthetic images.
+- 61 live companies after the 23 Oct UK batches. Two German companies in the last batch (NIMMSTA, Lindis Blood Care) were left out. Earlier European companies remain in the database but are hidden from the deck.
+- Future plan for dating-app-style matching: Claude Docs "Hannigan Ventures matching plan" (https://claude.ai/artifact/BXizWhF9s4Li6kEnVjCnFR). Not built yet beyond the steps above.
+- Two empty leftover `research_imports` rows (`be4a7e5b…`, `b6165e70…`) could be deleted; the delete timed out this session.
+
 ## Swipe app (22 October 2026, branch `claude/swipe-company-matching-0k7ozv`)
 - Feedback was that the app was too complicated, so it now opens as a tick-or-cross swipe app with unanimous matches, "almost a match", undo and one chat per match. The classic app still works at `/home`. Details: `docs/classic-app.md`.
 - **Live (23 October 2026).** Production (`claude/deal-room-build-ir9ris`) was fast-forwarded to this branch and deployed (`dpl_Fjz5oTjthubcusnBuFpifEGUqYKC`). Earlier note, kept for history: **Half live.** Migration `0012_unanimous_matches.sql` is applied to the live database (no votes or comments existed, so no data changed). Production still deploys `claude/deal-room-build-ir9ris` (the classic app); the push to switch it was blocked pending Jamie's permission. To finish: fast-forward `claude/deal-room-build-ir9ris` to this branch, or set Vercel's production branch to this branch.
