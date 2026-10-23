@@ -9,7 +9,7 @@ export function claudeBatchPrompt(opts: { maxChequeGbp: number; known: string[] 
 Find as many genuinely investable companies as you can verify (aim for 20–50). What the family wants:
 - UK companies only.
 - SEIS or EIS opportunities: ideally HMRC advance assurance stated on a page you read; "eligible" claims are fine if marked as company claims. Include a company without SEIS/EIS only very rarely, when it is exceptional, and say why.
-- Early: pre-seed and seed rounds at small valuations (ideally under £5m pre-money), where a cheque of £10k–£${opts.maxChequeGbp.toLocaleString("en-GB")} buys a meaningful share of the company. Later-stage companies only as rare exceptions.
+- Early: pre-seed and seed rounds at small valuations (ideally under £5m pre-money), where a cheque of £50k–£${opts.maxChequeGbp.toLocaleString("en-GB")} per member buys a meaningful share of the company. Later-stage companies only as rare exceptions.
 - Any sector, as long as an individual angel has a real route in: a live or upcoming round, an angel network or syndicate, an SPV, a founder intro, or an equity crowdfunding campaign (Crowdcube, Republic Europe and similar; include these, they are labelled in the app).
 - Prefer rounds open now or opening soon. Skip companies whose last round has closed with no sign of a new one.
 - The website field must be the company's own site: the app takes the company's picture from it.
