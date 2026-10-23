@@ -30,11 +30,42 @@ export interface SwipeCard {
   aiLine: { worth: string | null; watch: string | null };
   /** Raising through a crowdfunding platform (Crowdcube, Republic, Seedrs...). */
   crowdfunding: boolean;
+  /**
+   * The crowdfunding platform by name, and the campaign page a member can
+   * open to check it. These pages block automated reading, so the round
+   * stays "reported" until a member checks it.
+   */
+  platform: { name: string; url: string | null; checkedBy: string | null } | null;
   /** This member's current vote, if any (only "unsure" can be left over from the classic app). */
   myVote: VoteValue | null;
 }
 
 const CROWDFUNDING = /crowdcube|republic|seedrs|crowdfunding/i;
+const PLATFORMS: [RegExp, string][] = [
+  [/crowdcube/i, "Crowdcube"],
+  [/seedrs/i, "Seedrs"],
+  [/republic/i, "Republic"],
+];
+
+/** The crowdfunding platform a company is listed on, from its latest access check. */
+export function crowdfundingPlatform(bundle: CompanyBundle): string | null {
+  const latest = [...bundle.accessChecks].sort((a, b) => b.checkedAt.localeCompare(a.checkedAt))[0];
+  if (!latest) return null;
+  const text = `${latest.contactOrUrl ?? ""} ${latest.notes}`;
+  for (const [re, name] of PLATFORMS) if (re.test(text)) return name;
+  return null;
+}
+
+/**
+ * A live campaign listing on Crowdcube, Seedrs or Republic: probably open,
+ * though research can't read the page to confirm it. "Coming soon" and
+ * early-access pages don't count.
+ */
+function probablyOpenListing(bundle: CompanyBundle, status: string): boolean {
+  if (!["fundraising_reported", "contactable", "unknown"].includes(status)) return false;
+  const latest = [...bundle.accessChecks].sort((a, b) => b.checkedAt.localeCompare(a.checkedAt))[0];
+  return Boolean(crowdfundingPlatform(bundle)) && !/coming-soon|early-access/i.test(latest?.contactOrUrl ?? "");
+}
 
 /** True when the round is over: the deck parks these on the watch list until a new round appears. */
 export function isClosedRound(bundle: CompanyBundle, opts: { now?: Date } = {}): boolean {
@@ -49,6 +80,9 @@ export function investability(bundle: CompanyBundle, opts: { now?: Date; maxCheq
   const round = bundle.rounds.find((r) => r.isCurrent) ?? null;
   if (access.canInvestNow) return 100;
   if (access.status === "closing_soon" || access.status === "verified_open") return 90;
+  // Listed on a crowdfunding platform: probably open, even though research
+  // cannot read the page to confirm it.
+  if (probablyOpenListing(bundle, access.status)) return 80;
   if (round?.claimedStatus === "open" || access.status === "fundraising_reported") return 70;
   if (access.status === "expected" || round?.claimedStatus === "expected") return 50;
   if (access.status === "contactable") return 40;
@@ -103,9 +137,11 @@ export function buildSwipeCard(bundle: CompanyBundle, userId: string, opts: { no
   const access = effectiveAccess(accessChecks, opts);
   const round = rounds.find((r) => r.isCurrent) ?? null;
 
+  const platformName = crowdfundingPlatform(bundle);
   let raising: SwipeCard["raising"];
   if (access.canInvestNow) raising = { label: "Can invest now", tone: "green", detail: access.reason };
   else if (access.status === "closed" || round?.claimedStatus === "closed") raising = { label: "Round closed", tone: "red", detail: access.reason };
+  else if (platformName && probablyOpenListing(bundle, access.status)) raising = { label: `On ${platformName} · probably open`, tone: "blue", detail: "Reported until a member checks the page" };
   else if (round?.claimedStatus === "open") raising = { label: "Raising (reported)", tone: "blue", detail: evidenceHint(round.evidenceStatus) ?? "Not verified" };
   else if (access.status !== "unknown") raising = { label: accessLabel(access.status), tone: access.status === "stale" || access.status === "expected" ? "amber" : "blue", detail: access.reason };
   else if (round?.claimedStatus === "expected") raising = { label: "Round expected", tone: "amber", detail: evidenceHint(round.evidenceStatus) ?? "Not verified" };
@@ -141,6 +177,13 @@ export function buildSwipeCard(bundle: CompanyBundle, userId: string, opts: { no
     sources: sources.slice(0, 6).map((s) => ({ id: s.id, title: s.title, publisher: s.publisher, url: s.canonicalUrl })),
     aiLine: { worth: assessment?.whyInterested[0] ?? null, watch: assessment?.risks[0] ?? null },
     crowdfunding: CROWDFUNDING.test(`${access.check?.contactOrUrl ?? ""} ${access.check?.notes ?? ""}`) || access.check?.routeType === "platform",
+    platform: platformName
+      ? {
+          name: platformName,
+          url: access.check?.contactOrUrl && /^https?:\/\//.test(access.check.contactOrUrl) ? access.check.contactOrUrl : null,
+          checkedBy: access.check?.verifier.startsWith("member:") ? access.check.notes : null,
+        }
+      : null,
     myVote: votes.find((v) => v.userId === userId)?.vote ?? null,
   };
 }

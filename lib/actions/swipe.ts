@@ -109,3 +109,29 @@ export async function saveReasonAction(input: z.input<typeof reasonSchema>): Pro
     return { ok: false, error: e instanceof Error ? e.message : "Could not save the reason" };
   }
 }
+
+const roundCheckSchema = z.object({
+  companyId: z.string().min(1),
+  slug: z.string().min(1),
+  open: z.boolean(),
+});
+
+/**
+ * A member opened the round's page (usually a crowdfunding campaign, which
+ * research cannot read) and says whether it is live. "Open" counts as a
+ * direct, fresh check for 48 hours.
+ */
+export async function recordRoundCheckAction(input: z.input<typeof roundCheckSchema>): Promise<ActionResult> {
+  const parsed = roundCheckSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid check" };
+  try {
+    const member = await requireMember();
+    const repo = await getRepository();
+    await repo.recordMemberRoundCheck({ userId: member.userId, companyId: parsed.data.companyId, open: parsed.data.open });
+    revalidateSwipe(parsed.data.slug);
+    revalidatePath(`/matches/${parsed.data.slug}/profile`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Could not save your check" };
+  }
+}

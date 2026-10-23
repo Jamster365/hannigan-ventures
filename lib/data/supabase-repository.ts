@@ -266,6 +266,28 @@ class SupabaseRepository implements Repository {
     this.fail(error, "save reason");
   }
 
+  async recordMemberRoundCheck({ userId, companyId, open }: { userId: string; companyId: string; open: boolean }): Promise<void> {
+    const { supabase, member } = await this.ctx();
+    if (member.userId !== userId) throw new Error("You can only record your own check");
+    const { data: last, error: readError } = await supabase.from("investment_access_checks").select("route_type, contact_or_url, min_cheque, max_cheque, currency").eq("company_id", companyId).order("checked_at", { ascending: false }).limit(1).maybeSingle<{ route_type: string; contact_or_url: string | null; min_cheque: number | null; max_cheque: number | null; currency: string | null }>();
+    this.fail(readError, "read access");
+    const now = new Date();
+    const { error } = await supabase.from("investment_access_checks").insert({
+      company_id: companyId,
+      access_status: open ? "verified_open" : "closed",
+      route_type: last?.route_type ?? "platform",
+      contact_or_url: last?.contact_or_url ?? null,
+      min_cheque: last?.min_cheque ?? null,
+      max_cheque: last?.max_cheque ?? null,
+      currency: last?.currency ?? null,
+      checked_at: now.toISOString(),
+      expires_at: open ? new Date(now.getTime() + 48 * 3600_000).toISOString() : null,
+      verifier: `member:${userId}`,
+      notes: `${member.displayName} checked the page on ${now.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Europe/London" })}: ${open ? "the round is live" : "the round has closed"}.`,
+    });
+    this.fail(error, "record check");
+  }
+
   async addComment({ userId, companyId, body }: { userId: string; companyId: string; body: string }): Promise<Comment> {
     const { supabase } = await this.ctx();
     const { data, error } = await supabase.from("comments").insert({ company_id: companyId, author_user_id: userId, body }).select("*").single<CommentRow>();

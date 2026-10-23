@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { Pill, type Tone } from "@/components/ui/primitives";
 import type { SwipeCard } from "@/lib/domain/swipe";
 import { cn } from "@/lib/utils";
+import { RoundCheck } from "./round-check";
 
 /**
  * Hinge-style company profile, all on one scrolling page: picture, pitch,
@@ -106,6 +107,7 @@ export function CompanyProfile({ card, className }: { card: SwipeCard; className
 
             <Prompt title="How we could get in">
               <p>{card.howToGetIn}</p>
+              {card.platform ? <RoundCheck card={card} /> : null}
             </Prompt>
 
             {card.ai?.summary ? (

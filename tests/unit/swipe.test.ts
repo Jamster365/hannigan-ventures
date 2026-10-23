@@ -93,3 +93,21 @@ describe("deck fit", () => {
     expect(deckFor(all, a.userId).map((x) => x.company.id)).toEqual([eis.company.id, plain.company.id]);
   });
 });
+
+describe("crowdfunding rounds", () => {
+  it("shows a platform listing as probably open until a member checks the page", async () => {
+    const [x] = await bundles();
+    const now = new Date("2026-10-23T12:00:00Z");
+    const listing = { id: "k1", companyId: x.company.id, accessStatus: "fundraising_reported" as const, routeType: "platform" as const, contactOrUrl: "https://www.crowdcube.com/companies/example/pitches/abc", minCheque: 10, maxCheque: null, currency: "GBP", checkedAt: "2026-10-22T09:00:00Z", expiresAt: null, verifier: "research", sourceId: null, notes: "" };
+    x.accessChecks = [listing];
+    x.rounds = [];
+    const card = buildSwipeCard(x, a.userId, { now });
+    expect(card.raising.label).toBe("On Crowdcube · probably open");
+    expect(card.platform).toMatchObject({ name: "Crowdcube", url: listing.contactOrUrl, checkedBy: null });
+
+    x.accessChecks = [listing, { ...listing, id: "k2", accessStatus: "verified_open", checkedAt: "2026-10-23T10:00:00Z", expiresAt: "2026-10-25T10:00:00Z", verifier: `member:${a.userId}`, notes: "Jamie checked the page on 23 Oct: the round is live." }];
+    const checked = buildSwipeCard(x, a.userId, { now });
+    expect(checked.raising.label).toBe("Can invest now");
+    expect(checked.platform?.checkedBy).toContain("checked the page");
+  });
+});

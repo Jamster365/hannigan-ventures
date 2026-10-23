@@ -138,6 +138,29 @@ class DemoRepository implements Repository {
     if (v) v.note = note ?? undefined;
   }
 
+  async recordMemberRoundCheck({ userId, companyId, open }: { userId: string; companyId: string; open: boolean }) {
+    const bundle = this.companies.find((c) => c.company.id === companyId);
+    if (!bundle) throw new Error("Company not found");
+    const last = [...bundle.accessChecks].sort((a, b) => b.checkedAt.localeCompare(a.checkedAt))[0];
+    const now = new Date();
+    const name = DEMO_MEMBERS.find((m) => m.userId === userId)?.displayName ?? "A member";
+    bundle.accessChecks.push({
+      id: this.nextId("ac"),
+      companyId,
+      accessStatus: open ? "verified_open" : "closed",
+      routeType: last?.routeType ?? "platform",
+      contactOrUrl: last?.contactOrUrl ?? null,
+      minCheque: last?.minCheque ?? null,
+      maxCheque: last?.maxCheque ?? null,
+      currency: last?.currency ?? null,
+      checkedAt: now.toISOString(),
+      expiresAt: open ? new Date(now.getTime() + 48 * 3600_000).toISOString() : null,
+      verifier: `member:${userId}`,
+      sourceId: null,
+      notes: `${name} checked the page: ${open ? "the round is live" : "the round has closed"}.`,
+    });
+  }
+
   async addComment({ userId, companyId, body }: { userId: string; companyId: string; body: string }) {
     const bundle = this.companies.find((c) => c.company.id === companyId);
     if (!bundle) throw new Error("Company not found");
