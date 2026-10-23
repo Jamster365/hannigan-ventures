@@ -65,20 +65,20 @@ export function PreferencesForm({ active }: { active: PromptVersion }) {
         <Button type="submit" disabled={!dirty || pending}>
           {pending ? "Saving…" : "Save as new version"}
         </Button>
-        {status ? <p className={cn("text-[13px]", status.ok ? "text-green" : "text-red")}>{status.text}</p> : null}
+        {status ? <p className={cn("text-[0.8125rem]", status.ok ? "text-green" : "text-red")}>{status.text}</p> : null}
       </div>
     </form>
   );
 }
 
-const inputCls = "mt-1 block min-h-[44px] w-full rounded-[12px] border border-hairline-strong bg-surface px-3 text-[14px] text-ink";
+const inputCls = "mt-1 block min-h-[44px] w-full rounded-[12px] border border-hairline-strong bg-surface px-3 text-[0.875rem] text-ink";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-[13px] font-medium text-ink">{label}</span>
+      <span className="text-[0.8125rem] font-medium text-ink">{label}</span>
       {children}
-      {hint ? <span className="mt-1 block text-[11px] text-tertiary">{hint}</span> : null}
+      {hint ? <span className="mt-1 block text-[0.6875rem] text-tertiary">{hint}</span> : null}
     </label>
   );
 }

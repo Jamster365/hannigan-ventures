@@ -20,15 +20,15 @@ export function CopyPrompt({ prompt }: { prompt: string }) {
             setCopied(true);
             setTimeout(() => setCopied(false), 2500);
           }}
-          className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-ink px-4 text-[14px] font-medium text-white"
+          className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-ink px-4 text-[0.875rem] font-medium text-white"
         >
           {copied ? <Check size={16} aria-hidden /> : <Copy size={16} aria-hidden />}
           {copied ? "Copied" : "Copy the Claude prompt"}
         </button>
       </div>
       <details className="mt-2">
-        <summary className="cursor-pointer text-[13px] font-medium text-secondary">Show the prompt</summary>
-        <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-[12px] bg-surface-muted p-3 text-[11px] leading-relaxed text-ink">{prompt}</pre>
+        <summary className="cursor-pointer text-[0.8125rem] font-medium text-secondary">Show the prompt</summary>
+        <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-[12px] bg-surface-muted p-3 text-[0.6875rem] leading-relaxed text-ink">{prompt}</pre>
       </details>
     </div>
   );
@@ -52,12 +52,12 @@ export function UploadForm() {
       className="space-y-3"
     >
       <label className="block">
-        <span className="text-[13px] font-medium text-ink">Name for this batch</span>
-        <input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} placeholder="e.g. UK crowdfunding, late October" className="mt-1 block min-h-[44px] w-full rounded-[12px] border border-hairline-strong bg-surface px-3 text-[14px] text-ink" />
+        <span className="text-[0.8125rem] font-medium text-ink">Name for this batch</span>
+        <input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} placeholder="e.g. UK crowdfunding, late October" className="mt-1 block min-h-[44px] w-full rounded-[12px] border border-hairline-strong bg-surface px-3 text-[0.875rem] text-ink" />
       </label>
       <label className="block">
-        <span className="text-[13px] font-medium text-ink">Claude’s reply (the JSON)</span>
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={8} spellCheck={false} placeholder='Paste the whole reply, or just the { "writeUp": …, "companies": [ … ] } block' className="mt-1 block w-full rounded-[12px] border border-hairline-strong bg-surface px-3 py-2 font-mono text-[12px] text-ink" />
+        <span className="text-[0.8125rem] font-medium text-ink">Claude’s reply (the JSON)</span>
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={8} spellCheck={false} placeholder='Paste the whole reply, or just the { "writeUp": …, "companies": [ … ] } block' className="mt-1 block w-full rounded-[12px] border border-hairline-strong bg-surface px-3 py-2 font-mono text-[0.75rem] text-ink" />
       </label>
       <div className="flex flex-wrap items-center gap-2">
         <input
@@ -71,7 +71,7 @@ export function UploadForm() {
             e.target.value = "";
           }}
         />
-        <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-hairline-strong px-4 text-[14px] font-medium text-ink">
+        <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-hairline-strong px-4 text-[0.875rem] font-medium text-ink">
           <FileUp size={16} aria-hidden /> Choose a file
         </button>
         <Button type="submit" disabled={pending || !text.trim()}>
@@ -80,7 +80,7 @@ export function UploadForm() {
       </div>
 
       {result ? (
-        <div role="status" className={cn("rounded-[12px] p-3 text-[13px]", result.ok ? "bg-green-pale text-ink" : "bg-red-pale text-ink")}>
+        <div role="status" className={cn("rounded-[12px] p-3 text-[0.8125rem]", result.ok ? "bg-green-pale text-ink" : "bg-red-pale text-ink")}>
           {result.ok ? (
             <>
               <p className="font-semibold">

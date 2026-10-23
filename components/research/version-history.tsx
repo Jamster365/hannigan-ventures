@@ -23,13 +23,13 @@ export function VersionHistory({ versions, members }: { versions: PromptVersion[
           <li key={v.id} className="rounded-[var(--radius-card)] border border-hairline bg-surface p-4">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-[14px] font-semibold text-ink">
+                <p className="text-[0.875rem] font-semibold text-ink">
                   v{v.version} {v.active ? <Pill tone="green" className="ml-1">Active</Pill> : null}
                 </p>
-                <p className="text-[12px] text-secondary">
+                <p className="text-[0.75rem] text-secondary">
                   {author} · {formatDateTime(v.createdAt)}
                 </p>
-                {v.changeNote ? <p className="mt-1 text-[13px] text-text">{v.changeNote}</p> : null}
+                {v.changeNote ? <p className="mt-1 text-[0.8125rem] text-text">{v.changeNote}</p> : null}
               </div>
               <div className="flex shrink-0 gap-1.5">
                 <Button size="sm" variant="ghost" onClick={() => setOpen(isOpen ? null : v.id)}>
@@ -43,7 +43,7 @@ export function VersionHistory({ versions, members }: { versions: PromptVersion[
               </div>
             </div>
             {isOpen ? (
-              <pre className="mt-3 max-h-[320px] overflow-auto whitespace-pre-wrap rounded-[12px] border border-hairline bg-page p-3 text-[12px] leading-relaxed">
+              <pre className="mt-3 max-h-[320px] overflow-auto whitespace-pre-wrap rounded-[12px] border border-hairline bg-page p-3 text-[0.75rem] leading-relaxed">
                 {parent ? (
                   diff.length ? (
                     diff.map((l, i) => (

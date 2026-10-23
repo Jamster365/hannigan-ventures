@@ -26,12 +26,12 @@ export function CompanyTabs({ slug, active, counts }: { slug: string; active: Co
             role="tab"
             aria-selected={selected}
             className={cn(
-              "relative inline-flex min-h-[44px] shrink-0 items-center gap-1 px-3 text-[14px] font-medium transition-colors",
+              "relative inline-flex min-h-[44px] shrink-0 items-center gap-1 px-3 text-[0.875rem] font-medium transition-colors",
               selected ? "text-ink" : "text-secondary hover:text-ink",
             )}
           >
             {t.label}
-            {count ? <span className={cn("tnum text-[11px]", selected ? "text-ink/70" : "text-tertiary")}>{count}</span> : null}
+            {count ? <span className={cn("tnum text-[0.6875rem]", selected ? "text-ink/70" : "text-tertiary")}>{count}</span> : null}
             <span className={cn("absolute inset-x-2 bottom-0 h-[2.5px] rounded-full", selected ? "bg-ink" : "bg-transparent")} aria-hidden />
           </Link>
         );

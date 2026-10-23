@@ -7,8 +7,8 @@ import type { SafeFetcher } from "./fetch";
  * verified source for the company in this run, so a wrong website from the
  * model can never put another company's picture on a profile. From the home
  * page we take the image the company publishes for link previews (Open Graph /
- * Twitter card) as the hero and its touch icon or structured-data logo as the
- * logo. Pages that opt out of image indexing are skipped. Files must be real
+ * Twitter card) as the hero, or failing that a large picture from the page
+ * itself, and its touch icon or structured-data logo as the logo. Pages that opt out of image indexing are skipped. Files must be real
  * raster images (PNG, JPEG, WebP, GIF; never SVG) of a sensible size.
  */
 
@@ -21,6 +21,8 @@ export interface FoundImage {
   type: ImageType;
   width: number;
   height: number;
+  /** True when the hero came from the page body rather than its link-preview tag. */
+  fromPage?: boolean;
 }
 
 const MAX_IMAGE_BYTES = 4_000_000;
@@ -64,6 +66,31 @@ export function extractImageCandidates(html: string, pageUrl: string): { optedOu
 
   const clean = (xs: (string | null)[]) => [...new Set(xs.filter((x): x is string => Boolean(x) && !/\.svg(\?|#|$)/i.test(x!)))];
   return { optedOut, heroes: clean(heroes).slice(0, 3), logos: clean(logos).slice(0, 4) };
+}
+
+/**
+ * Pictures in the page body (the company's own site), for sites that publish
+ * no link-preview image. Skips logos, icons, avatars, badges and SVGs; the
+ * file's real size is checked after download.
+ */
+export function bodyImageCandidates(html: string, pageUrl: string): string[] {
+  const out: string[] = [];
+  for (const m of html.slice(0, 600_000).matchAll(/<img\b[^>]*>/gi)) {
+    const a = parseAttributes(m[0]);
+    const fromSrcset = (a.srcset ?? a["data-srcset"] ?? "")
+      .split(",")
+      .map((x) => x.trim().split(/\s+/))
+      .filter((x) => x[0])
+      .sort((x, y) => (parseInt(y[1] ?? "0") || 0) - (parseInt(x[1] ?? "0") || 0))[0]?.[0];
+    const src = fromSrcset ?? a.src ?? a["data-src"] ?? "";
+    const hint = `${src} ${a.alt ?? ""} ${a.class ?? ""} ${a.id ?? ""}`;
+    if (!src || src.startsWith("data:") || /\.svg(\?|#|$)/i.test(src) || /logo|icon|avatar|badge|sprite|favicon|award|partner|client|press/i.test(hint)) continue;
+    const w = Number(a.width) || 0;
+    if (w && w < 600) continue;
+    const url = absolute(src, pageUrl);
+    if (url) out.push(url);
+  }
+  return [...new Set(out)].slice(0, 6);
 }
 
 /** Reads type and pixel size from the file header; null for anything that is not a supported raster image. */
@@ -118,13 +145,14 @@ export async function findCompanyImagery(input: { website: string; verifiedUrls:
   if (optedOut) return [];
 
   const found: FoundImage[] = [];
-  for (const [kind, urls] of [["hero", heroes], ["logo", logos]] as const) {
+  const heroUrls = [...heroes, ...bodyImageCandidates(page.text, page.finalUrl).filter((u) => !heroes.includes(u))];
+  for (const [kind, urls] of [["hero", heroUrls], ["logo", logos]] as const) {
     for (const url of urls) {
       const res = await fetcher(url, { binary: true, maxBytes: MAX_IMAGE_BYTES, timeoutMs: 8000 });
       if (!res.ok || !res.bytes) continue;
       const info = imageInfo(res.bytes);
       if (!info || !acceptable(kind, info.width, info.height)) continue;
-      found.push({ kind, originUrl: res.finalUrl, pageUrl: page.finalUrl, bytes: res.bytes, ...info });
+      found.push({ kind, originUrl: res.finalUrl, pageUrl: page.finalUrl, bytes: res.bytes, ...info, fromPage: kind === "hero" && !heroes.includes(url) });
       break;
     }
   }

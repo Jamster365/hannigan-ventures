@@ -67,13 +67,13 @@ export default async function UpdatesPage({ searchParams }: { searchParams: Sear
         <UpdatesTabs active={tab} counts={{ all: notifications.length, company: notifications.filter((n) => !familyTypes.includes(n.notificationType)).length, family: notifications.filter((n) => familyTypes.includes(n.notificationType)).length }} />
       </PageHeader>
       <div className="mx-auto max-w-[900px] px-4 pt-4">
-        <p className="mb-3 text-[13px] text-secondary">Important developments only. Routine daily re-checks and passive views never appear here.</p>
+        <p className="mb-3 text-[0.8125rem] text-secondary">Important developments only. Routine daily re-checks and passive views never appear here.</p>
         {groups.length === 0 ? (
           <EmptyState title="No updates" body="Material company developments and meaningful family activity will appear here." />
         ) : (
           groups.map((g) => (
             <section key={g.label} className="mb-5">
-              <h2 className="mb-2 font-serif text-[18px] font-semibold text-ink">{g.label}</h2>
+              <h2 className="mb-2 font-serif text-[1.125rem] font-semibold text-ink">{g.label}</h2>
               <Card className="overflow-hidden p-0">
                 <ul className="divide-y divide-hairline">
                   {g.items.map((n) => {
@@ -87,10 +87,10 @@ export default async function UpdatesPage({ searchParams }: { searchParams: Sear
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="flex items-baseline gap-2">
-                              <span className={cn("truncate text-[14px] text-ink", !n.readAt ? "font-semibold" : "font-medium")}>{n.title}</span>
-                              <span className="ml-auto shrink-0 text-[11px] text-tertiary">{relativeTime(n.createdAt)}</span>
+                              <span className={cn("truncate text-[0.875rem] text-ink", !n.readAt ? "font-semibold" : "font-medium")}>{n.title}</span>
+                              <span className="ml-auto shrink-0 text-[0.6875rem] text-tertiary">{relativeTime(n.createdAt)}</span>
                             </span>
-                            <span className="mt-0.5 block text-[13px] text-secondary clamp-2">{n.body}</span>
+                            <span className="mt-0.5 block text-[0.8125rem] text-secondary clamp-2">{n.body}</span>
                             {!n.readAt ? <span className="sr-only">Unread</span> : null}
                           </span>
                           {s ? (

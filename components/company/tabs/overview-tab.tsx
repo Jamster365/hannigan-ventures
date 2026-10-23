@@ -17,8 +17,8 @@ export function OverviewTab({ bundle }: { bundle: CompanyBundle }) {
   return (
     <div className="space-y-6">
       <section>
-        <h2 className="font-serif text-[20px] font-semibold text-ink">In a sentence</h2>
-        <p className="mt-1.5 text-[15px] leading-relaxed text-text">{company.teaser}</p>
+        <h2 className="font-serif text-[1.25rem] font-semibold text-ink">In a sentence</h2>
+        <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-text">{company.teaser}</p>
       </section>
 
       <section>
@@ -31,51 +31,51 @@ export function OverviewTab({ bundle }: { bundle: CompanyBundle }) {
             <KeyFact key={f.id} label={f.label} value={typeof f.value === "number" ? formatMoney(f.value, f.currency) : String(f.value)} hint={evidenceHint(f.evidenceStatus)} />
           ))}
         </div>
-        <p className="mt-2 text-[12px] text-tertiary">Values are shown as Undisclosed or Unknown until a source supports them.</p>
+        <p className="mt-2 text-[0.75rem] text-tertiary">Values are shown as Undisclosed or Unknown until a source supports them.</p>
       </section>
 
       {assessment ? (
         <section>
-          <h2 className="font-serif text-[20px] font-semibold text-ink">Why it matters</h2>
-          <p className="mt-1.5 text-[15px] leading-relaxed text-text">{assessment.whyNow}</p>
+          <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Why it matters</h2>
+          <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-text">{assessment.whyNow}</p>
         </section>
       ) : null}
 
       {recent.length ? (
         <section>
-          <h2 className="font-serif text-[20px] font-semibold text-ink">What changed recently</h2>
+          <h2 className="font-serif text-[1.25rem] font-semibold text-ink">What changed recently</h2>
           <ul className="mt-2 space-y-2">
             {recent.map((u) => (
               <li key={u.id} className="rounded-[14px] bg-surface-muted px-3.5 py-3">
                 <div className="flex items-baseline justify-between gap-2">
-                  <p className="text-[14px] font-semibold text-ink">{u.headline}</p>
-                  <span className="shrink-0 text-[11px] text-tertiary">{relativeTime(u.effectiveAt)}</span>
+                  <p className="text-[0.875rem] font-semibold text-ink">{u.headline}</p>
+                  <span className="shrink-0 text-[0.6875rem] text-tertiary">{relativeTime(u.effectiveAt)}</span>
                 </div>
-                <p className="mt-0.5 text-[13px] text-secondary">
+                <p className="mt-0.5 text-[0.8125rem] text-secondary">
                   {u.summary}
                   <SourceRef source={u.sourceId ? byId.get(u.sourceId) : undefined} />
                 </p>
               </li>
             ))}
           </ul>
-          <Link href={`/companies/${company.slug}?tab=updates`} scroll={false} className="mt-2 inline-flex min-h-[36px] items-center text-[13px] font-medium text-blue">
+          <Link href={`/companies/${company.slug}?tab=updates`} scroll={false} className="mt-2 inline-flex min-h-[36px] items-center text-[0.8125rem] font-medium text-blue">
             All updates
           </Link>
         </section>
       ) : null}
 
       <section>
-        <h2 className="font-serif text-[20px] font-semibold text-ink">Investment thesis</h2>
+        <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Investment thesis</h2>
         {assessment ? (
           <>
-            <p className="mt-1.5 text-[15px] leading-relaxed text-text">{assessment.bullCase}</p>
-            <p className="mt-2 text-[14px] leading-relaxed text-secondary">
+            <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-text">{assessment.bullCase}</p>
+            <p className="mt-2 text-[0.875rem] leading-relaxed text-secondary">
               <span className="font-semibold text-ink">Reasons to hesitate: </span>
               {assessment.bearCase}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <EvidencePill status={assessment.aiPriority === "insufficient_evidence" ? "unknown" : "analyst_inference"} />
-              <span className="text-[12px] text-tertiary">
+              <span className="text-[0.75rem] text-tertiary">
                 AI research view · {relativeTime(assessment.createdAt)} ·{" "}
                 <Link href={`/companies/${company.slug}?tab=analysis`} scroll={false} className="text-blue">
                   full analysis
@@ -84,14 +84,14 @@ export function OverviewTab({ bundle }: { bundle: CompanyBundle }) {
             </div>
           </>
         ) : (
-          <p className="mt-1.5 text-[14px] text-secondary">No AI assessment yet. Not enough sourced evidence to form a view.</p>
+          <p className="mt-1.5 text-[0.875rem] text-secondary">No AI assessment yet. Not enough sourced evidence to form a view.</p>
         )}
       </section>
 
       {assessment?.nextAction ? (
         <section className="rounded-[14px] border border-hairline bg-surface p-4">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-tertiary">Next action</p>
-          <p className="mt-1 text-[14px] text-ink">{assessment.nextAction}</p>
+          <p className="text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-tertiary">Next action</p>
+          <p className="mt-1 text-[0.875rem] text-ink">{assessment.nextAction}</p>
         </section>
       ) : null}
 

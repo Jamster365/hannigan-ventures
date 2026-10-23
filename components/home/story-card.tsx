@@ -27,13 +27,13 @@ export function StoryCard({ story, company }: { story: HomeStory; company: Compa
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-surface-muted text-secondary">
             <Icon size={14} aria-hidden />
           </span>
-          <Pill tone={m.tone} className="uppercase tracking-[0.06em] text-[10px] font-semibold">
+          <Pill tone={m.tone} className="uppercase tracking-[0.06em] text-[0.625rem] font-semibold">
             {m.label}
           </Pill>
-          <span className="ml-auto text-[11px] text-tertiary">{relativeTime(story.createdAt)}</span>
+          <span className="ml-auto text-[0.6875rem] text-tertiary">{relativeTime(story.createdAt)}</span>
         </div>
-        <h3 className="mt-2.5 font-serif text-[16px] font-semibold leading-snug text-ink clamp-2">{story.headline}</h3>
-        <p className="mt-1 text-[13px] leading-snug text-secondary clamp-2">{story.teaser}</p>
+        <h3 className="mt-2.5 font-serif text-[1rem] font-semibold leading-snug text-ink clamp-2">{story.headline}</h3>
+        <p className="mt-1 text-[0.8125rem] leading-snug text-secondary clamp-2">{story.teaser}</p>
       </div>
       {company ? (
         <div className="w-[88px] shrink-0 bg-ink">

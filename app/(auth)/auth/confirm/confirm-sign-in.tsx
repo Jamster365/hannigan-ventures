@@ -82,9 +82,9 @@ export function ConfirmSignIn() {
   if (view.kind === "confirm") {
     return (
       <div>
-        <h1 className="font-serif text-[24px] font-semibold text-ink">Finish signing in</h1>
-        <p className="mt-2 text-[14px] text-secondary">You asked for this link on another screen, such as the Hannigan Ventures app on your home screen. Check that screen shows this code:</p>
-        <p className="mt-4 text-center font-serif text-[40px] font-semibold tracking-[0.2em] text-ink" aria-label={`Code ${view.code.split("").join(" ")}`}>
+        <h1 className="font-serif text-[1.5rem] font-semibold text-ink">Finish signing in</h1>
+        <p className="mt-2 text-[0.875rem] text-secondary">You asked for this link on another screen, such as the Hannigan Ventures app on your home screen. Check that screen shows this code:</p>
+        <p className="mt-4 text-center font-serif text-[2.5rem] font-semibold tracking-[0.2em] text-ink" aria-label={`Code ${view.code.split("").join(" ")}`}>
           {view.code}
         </p>
         <Button className="mt-5 w-full" onClick={() => void handOver()}>
@@ -93,17 +93,17 @@ export function ConfirmSignIn() {
         <Button variant="outline" className="mt-3 w-full" onClick={() => void signInHere()}>
           Use this browser instead
         </Button>
-        <p className="mt-4 text-[12px] text-tertiary">If you did not ask for a sign-in link, close this page. Nothing is signed in until you choose.</p>
+        <p className="mt-4 text-[0.75rem] text-tertiary">If you did not ask for a sign-in link, close this page. Nothing is signed in until you choose.</p>
       </div>
     );
   }
   if (view.kind === "handed_off") {
     return (
       <div role="status">
-        <h1 className="font-serif text-[24px] font-semibold text-ink">You&rsquo;re signed in</h1>
-        <p className="mt-2 text-[14px] text-secondary">Go back to the Hannigan Ventures app. It signs in by itself within a few seconds. You can close this page.</p>
+        <h1 className="font-serif text-[1.5rem] font-semibold text-ink">You&rsquo;re signed in</h1>
+        <p className="mt-2 text-[0.875rem] text-secondary">Go back to the Hannigan Ventures app. It signs in by itself within a few seconds. You can close this page.</p>
       </div>
     );
   }
-  return <p className="text-[14px] text-secondary">Signing you in…</p>;
+  return <p className="text-[0.875rem] text-secondary">Signing you in…</p>;
 }

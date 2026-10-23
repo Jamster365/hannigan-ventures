@@ -32,8 +32,8 @@ export default async function MatchChatPage({ params }: { params: Promise<{ slug
             <CompanyArtwork company={company} media={card.media} logo={card.logo} variant="thumb" />
           </span>
           <span className="min-w-0">
-            <span className="block truncate font-serif text-[17px] font-semibold text-ink">{company.name}</span>
-            <span className="block truncate text-[12px] text-secondary">Tap for profile · {company.teaser}</span>
+            <span className="block truncate font-serif text-[1.0625rem] font-semibold text-ink">{company.name}</span>
+            <span className="block truncate text-[0.75rem] text-secondary">Tap for profile · {company.teaser}</span>
           </span>
         </Link>
       </header>
@@ -61,8 +61,8 @@ export default async function MatchChatPage({ params }: { params: Promise<{ slug
         />
       ) : (
         <div className="mx-auto max-w-[36ch] px-6 pt-12 text-center">
-          <p className="font-serif text-[20px] font-semibold text-ink">Not a match right now</p>
-          <p className="mt-1 text-[14px] text-secondary">Not enough of you want {company.name} right now, so its chat is closed.</p>
+          <p className="font-serif text-[1.25rem] font-semibold text-ink">Not a match right now</p>
+          <p className="mt-1 text-[0.875rem] text-secondary">Not enough of you want {company.name} right now, so its chat is closed.</p>
           <Link href="/matches" className="mt-4 inline-flex min-h-[44px] items-center font-medium text-blue">
             Back to matches
           </Link>

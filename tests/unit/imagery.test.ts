@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SafeFetcher } from "@/lib/research/fetch";
-import { extractImageCandidates, findCompanyImagery, imageInfo } from "@/lib/research/imagery";
+import { bodyImageCandidates, extractImageCandidates, findCompanyImagery, imageInfo } from "@/lib/research/imagery";
 
 function png(width: number, height: number): Uint8Array {
   const b = new Uint8Array(33);
@@ -92,5 +92,12 @@ describe("links in research write-ups", () => {
     const { linksInText } = await import("@/lib/research/links");
     const text = "Acme raised a seed round ([Sifted](https://sifted.eu/articles/acme-seed)). See https://acme.example/investors. Also (https://www.ox.ac.uk/news/acme)!";
     expect(linksInText(text)).toEqual(["https://sifted.eu/articles/acme-seed", "https://acme.example/investors", "https://www.ox.ac.uk/news/acme"]);
+  });
+});
+
+describe("bodyImageCandidates", () => {
+  it("takes large page pictures (largest srcset first) and skips logos, icons, SVGs and small images", () => {
+    const html = `<img src="/logo.png"><img src="/hero.svg"><img src="/team.jpg" width="200"><img alt="Our factory" srcset="/f-800.jpg 800w, /f-1600.jpg 1600w" src="/f.jpg"><img class="partner-badge" src="/p.png"><img src="data:image/png;base64,AAA">`;
+    expect(bodyImageCandidates(html, "https://example.test/")).toEqual(["https://example.test/f-1600.jpg"]);
   });
 });

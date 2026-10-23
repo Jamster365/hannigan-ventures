@@ -35,14 +35,14 @@ export function ChangeRow({ update, summary, showCompany = true }: { update: Com
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
-            {showCompany ? <span className="truncate text-[13px] font-semibold text-ink">{summary.company.name}</span> : null}
-            <Pill tone={update.updateType === "family" ? "amber" : "violet"} className="text-[10px] uppercase tracking-[0.06em]">
+            {showCompany ? <span className="truncate text-[0.8125rem] font-semibold text-ink">{summary.company.name}</span> : null}
+            <Pill tone={update.updateType === "family" ? "amber" : "violet"} className="text-[0.625rem] uppercase tracking-[0.06em]">
               {m.label}
             </Pill>
-            <span className="ml-auto shrink-0 text-[11px] text-tertiary">{relativeTime(update.effectiveAt)}</span>
+            <span className="ml-auto shrink-0 text-[0.6875rem] text-tertiary">{relativeTime(update.effectiveAt)}</span>
           </span>
-          <span className="mt-0.5 block text-[14px] font-medium text-ink">{update.headline}</span>
-          <span className="block text-[13px] text-secondary clamp-2">{update.summary}</span>
+          <span className="mt-0.5 block text-[0.875rem] font-medium text-ink">{update.headline}</span>
+          <span className="block text-[0.8125rem] text-secondary clamp-2">{update.summary}</span>
         </span>
         {showCompany ? (
           <span className="hidden h-12 w-12 shrink-0 overflow-hidden rounded-[10px] bg-ink sm:block">

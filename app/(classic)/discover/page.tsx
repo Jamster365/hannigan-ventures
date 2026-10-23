@@ -52,7 +52,7 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Sea
             <div className="hidden overflow-hidden rounded-[var(--radius-card)] border border-hairline bg-surface shadow-[var(--shadow-card)] xl:block">
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="text-[11px] font-semibold uppercase tracking-[0.06em] text-tertiary">
+                  <tr className="text-[0.6875rem] font-semibold uppercase tracking-[0.06em] text-tertiary">
                     <th className="py-3 pl-4 font-semibold">Company</th>
                     <th className="px-2 font-semibold">Sector</th>
                     <th className="px-2 font-semibold">Stage</th>

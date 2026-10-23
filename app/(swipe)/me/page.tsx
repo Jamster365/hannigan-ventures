@@ -55,17 +55,17 @@ export default async function MePage() {
           <div className="flex items-center gap-3">
             <Avatar member={member} size="lg" />
             <div className="min-w-0">
-              <p className="font-serif text-[18px] font-semibold text-ink">{member.displayName}</p>
-              <p className="text-[13px] text-secondary">{member.role === "owner" ? "Household owner" : "Household member"}</p>
+              <p className="font-serif text-[1.125rem] font-semibold text-ink">{member.displayName}</p>
+              <p className="text-[0.8125rem] text-secondary">{member.role === "owner" ? "Household owner" : "Household member"}</p>
             </div>
           </div>
-          <p className="mt-3 text-[13px] text-secondary">
+          <p className="mt-3 text-[0.8125rem] text-secondary">
             A company becomes a match when two of you ({members.map((m) => m.displayName).join(", ")}) are interested in it. Your answers stay private until then.
           </p>
         </Card>
         <MenuGroup group={groups[0]} />
         <section className="mt-5">
-          <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">Notifications</h2>
+          <h2 className="mb-2 px-1 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-tertiary">Notifications</h2>
           <Card className="overflow-hidden p-0">
             <PushSettings publicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null} available={dataMode() === "supabase"} />
           </Card>
@@ -83,7 +83,7 @@ type Item = { href: string; label: string; sub: string; Icon: React.ComponentTyp
 function MenuGroup({ group }: { group: { title: string; items: Item[] } }) {
   return (
     <section className="mt-5">
-      <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">{group.title}</h2>
+      <h2 className="mb-2 px-1 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-tertiary">{group.title}</h2>
       <Card className="overflow-hidden p-0">
         <ul className="divide-y divide-hairline">
           {group.items.map((it) => (
@@ -93,10 +93,10 @@ function MenuGroup({ group }: { group: { title: string; items: Item[] } }) {
                   <it.Icon size={17} aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[15px] font-medium text-ink">{it.label}</span>
-                  <span className="block truncate text-[12px] text-secondary">{it.sub}</span>
+                  <span className="block text-[0.9375rem] font-medium text-ink">{it.label}</span>
+                  <span className="block truncate text-[0.75rem] text-secondary">{it.sub}</span>
                 </span>
-                {it.badge ? <span className="rounded-full bg-red px-2 py-0.5 text-[11px] font-semibold text-white">{it.badge}</span> : null}
+                {it.badge ? <span className="rounded-full bg-red px-2 py-0.5 text-[0.6875rem] font-semibold text-white">{it.badge}</span> : null}
                 <ChevronRight size={18} className="text-tertiary" aria-hidden />
               </Link>
             </li>

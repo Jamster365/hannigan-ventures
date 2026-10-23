@@ -34,43 +34,43 @@ export function FundingTab({ bundle, currentUserId, maxChequeGbp }: { bundle: Co
     <div className="space-y-6">
       <section>
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-[20px] font-semibold text-ink">Latest round</h2>
+          <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Latest round</h2>
           {current ? <EvidencePill status={current.evidenceStatus} /> : null}
         </div>
         {current ? (
           <dl className="mt-2 divide-y divide-hairline rounded-[var(--radius-card)] border border-hairline bg-surface">
             {rows.map((r) => (
               <div key={r.label} className="grid grid-cols-[120px_1fr] gap-3 px-4 py-2.5">
-                <dt className="text-[13px] text-secondary">{r.label}</dt>
-                <dd className="text-[14px] font-medium text-ink">
+                <dt className="text-[0.8125rem] text-secondary">{r.label}</dt>
+                <dd className="text-[0.875rem] font-medium text-ink">
                   {r.value}
-                  {r.hint ? <span className="block text-[11px] font-normal text-tertiary">{r.hint}</span> : null}
+                  {r.hint ? <span className="block text-[0.6875rem] font-normal text-tertiary">{r.hint}</span> : null}
                 </dd>
               </div>
             ))}
             {current.sourceId ? (
-              <div className="px-4 py-2.5 text-[12px] text-tertiary">
+              <div className="px-4 py-2.5 text-[0.75rem] text-tertiary">
                 Source <SourceRef source={byId.get(current.sourceId)} /> {byId.get(current.sourceId)?.publisher}, {formatDate(byId.get(current.sourceId)?.publishedAt)}
               </div>
             ) : (
-              <div className="px-4 py-2.5 text-[12px] text-tertiary">No source attached to these round details.</div>
+              <div className="px-4 py-2.5 text-[0.75rem] text-tertiary">No source attached to these round details.</div>
             )}
           </dl>
         ) : (
-          <p className="mt-2 rounded-[14px] bg-surface-muted px-4 py-5 text-center text-[14px] text-secondary">No round information recorded.</p>
+          <p className="mt-2 rounded-[14px] bg-surface-muted px-4 py-5 text-center text-[0.875rem] text-secondary">No round information recorded.</p>
         )}
       </section>
 
       <section>
-        <h2 className="font-serif text-[20px] font-semibold text-ink">Access</h2>
+        <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Access</h2>
         <div className="mt-2 rounded-[var(--radius-card)] border border-hairline bg-surface p-4">
           <div className="flex flex-wrap items-center gap-2">
             <AccessPill access={access} />
             {access.isStale ? <Pill tone="amber">Stale check</Pill> : null}
           </div>
-          <p className="mt-2 text-[14px] leading-relaxed text-text">{access.reason}</p>
+          <p className="mt-2 text-[0.875rem] leading-relaxed text-text">{access.reason}</p>
           {check ? (
-            <dl className="mt-3 grid grid-cols-[120px_1fr] gap-x-3 gap-y-1.5 text-[13px]">
+            <dl className="mt-3 grid grid-cols-[120px_1fr] gap-x-3 gap-y-1.5 text-[0.8125rem]">
               <dt className="text-secondary">Route</dt>
               <dd className="text-ink">{routeLabel(check.routeType)}</dd>
               <dt className="text-secondary">Contact / link</dt>
@@ -110,8 +110,8 @@ export function FundingTab({ bundle, currentUserId, maxChequeGbp }: { bundle: Co
               ) : null}
             </dl>
           ) : null}
-          <p className="mt-3 text-[12px] text-tertiary">An application route never guarantees an allocation. Live status expires automatically after 48 hours without re-verification.</p>
-          <div className="mt-3 flex items-center gap-2 rounded-full bg-blue-pale px-3 py-1.5 text-[13px] font-medium text-blue">
+          <p className="mt-3 text-[0.75rem] text-tertiary">An application route never guarantees an allocation. Live status expires automatically after 48 hours without re-verification.</p>
+          <div className="mt-3 flex items-center gap-2 rounded-full bg-blue-pale px-3 py-1.5 text-[0.8125rem] font-medium text-blue">
             <BellRing size={15} aria-hidden />
             <span className="flex-1">Bookmark to follow access changes</span>
             <BookmarkButton companyId={company.id} slug={company.slug} bookmarked={bundle.bookmarkedBy.includes(currentUserId)} variant="plain" className="h-8 w-8 text-blue" />
@@ -120,11 +120,11 @@ export function FundingTab({ bundle, currentUserId, maxChequeGbp }: { bundle: Co
       </section>
 
       <section>
-        <h2 className="font-serif text-[20px] font-semibold text-ink">Funding history</h2>
+        <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Funding history</h2>
         {previous.length ? (
           <ul className="mt-2 space-y-2">
             {previous.map((r) => (
-              <li key={r.id} className="rounded-[14px] border border-hairline bg-surface px-4 py-3 text-[13px]">
+              <li key={r.id} className="rounded-[14px] border border-hairline bg-surface px-4 py-3 text-[0.8125rem]">
                 <p className="font-semibold text-ink">
                   {r.stage} · {formatMoney(r.targetAmount ?? r.reportedCommitted, r.currency)}
                 </p>
@@ -136,7 +136,7 @@ export function FundingTab({ bundle, currentUserId, maxChequeGbp }: { bundle: Co
             ))}
           </ul>
         ) : (
-          <p className="mt-1 text-[14px] text-secondary">No previous rounds found.</p>
+          <p className="mt-1 text-[0.875rem] text-secondary">No previous rounds found.</p>
         )}
       </section>
     </div>

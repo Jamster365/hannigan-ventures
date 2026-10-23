@@ -36,7 +36,7 @@ export function SourceRef({ source, index }: { source: Source | undefined; index
       target="_blank"
       rel="noopener noreferrer"
       title={`${source.title} — ${source.publisher}, ${formatDate(source.publishedAt)}`}
-      className="ml-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blue-pale px-1 align-middle text-[10px] font-semibold text-blue no-underline"
+      className="ml-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blue-pale px-1 align-middle text-[0.625rem] font-semibold text-blue no-underline"
     >
       {index ?? <ExternalLink size={10} aria-hidden />}
       <span className="sr-only">Source: {source.title}</span>

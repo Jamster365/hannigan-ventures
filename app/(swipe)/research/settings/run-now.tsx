@@ -69,7 +69,7 @@ export function RunNowButton({ mode }: { mode: "demo" | "supabase" }) {
     };
   }, [active, router]);
 
-  if (mode === "demo") return <p className="text-[13px] text-tertiary">Manual runs need Supabase and a research API key. See README for setup.</p>;
+  if (mode === "demo") return <p className="text-[0.8125rem] text-tertiary">Manual runs need Supabase and a research API key. See README for setup.</p>;
 
   const run = async () => {
     setResult(null);
@@ -92,7 +92,7 @@ export function RunNowButton({ mode }: { mode: "demo" | "supabase" }) {
         </Button>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[13px] text-text">This will call the research provider and may cost money. Continue?</span>
+          <span className="text-[0.8125rem] text-text">This will call the research provider and may cost money. Continue?</span>
           <Button size="sm" variant="ghost" onClick={() => setConfirm(false)}>
             Cancel
           </Button>
@@ -101,7 +101,7 @@ export function RunNowButton({ mode }: { mode: "demo" | "supabase" }) {
           </Button>
         </div>
       )}
-      {result ? <p className={cn("rounded-[12px] px-3 py-2.5 text-[13px]", result.ok ? "bg-green-pale text-green" : "bg-red-pale text-red")}>{result.text}</p> : null}
+      {result ? <p className={cn("rounded-[12px] px-3 py-2.5 text-[0.8125rem]", result.ok ? "bg-green-pale text-green" : "bg-red-pale text-red")}>{result.text}</p> : null}
     </div>
   );
 }
@@ -156,10 +156,10 @@ function RunProgress({ startedAt, progress, onProgress }: { startedAt: number; p
           </svg>
         </span>
         <div className="min-w-0 flex-1">
-          <p className="font-serif text-[17px] font-semibold text-ink">Researching</p>
-          <p className="text-[12px] text-secondary">A thorough search can take 5–15 minutes. You can leave; it finishes on its own.</p>
+          <p className="font-serif text-[1.0625rem] font-semibold text-ink">Researching</p>
+          <p className="text-[0.75rem] text-secondary">A thorough search can take 5–15 minutes. You can leave; it finishes on its own.</p>
         </div>
-        <span className="tnum text-[13px] font-medium text-secondary">{clock}</span>
+        <span className="tnum text-[0.8125rem] font-medium text-secondary">{clock}</span>
       </div>
 
       <div className="relative mt-4 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
@@ -186,12 +186,12 @@ function RunProgress({ startedAt, progress, onProgress }: { startedAt: number; p
                 )}
               </span>
               <div className="min-w-0">
-                <p className={cn("text-[14px]", state === "todo" ? "text-tertiary" : "font-medium text-ink")}>
+                <p className={cn("text-[0.875rem]", state === "todo" ? "text-tertiary" : "font-medium text-ink")}>
                   {step.label}
                   <span className="sr-only">{state === "done" ? " (done)" : state === "active" ? " (in progress)" : ""}</span>
                 </p>
                 {state === "active" ? (
-                  <p key={progress.detail ?? "starting"} className="run-progress-detail mt-0.5 text-[12px] text-secondary">
+                  <p key={progress.detail ?? "starting"} className="run-progress-detail mt-0.5 text-[0.75rem] text-secondary">
                     {progress.detail ?? "Starting the research run…"}
                   </p>
                 ) : null}

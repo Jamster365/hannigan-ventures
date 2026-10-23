@@ -249,13 +249,21 @@ class SupabaseRepository implements Repository {
       const { error } = await supabase.from("member_votes").delete().eq("company_id", companyId).eq("user_id", userId);
       this.fail(error, "clear vote");
     } else {
-      const payload: Record<string, unknown> = { company_id: companyId, user_id: userId, vote, updated_at: new Date().toISOString() };
+      // A new answer starts without a reason; the member can add one afterwards.
+      const payload: Record<string, unknown> = { company_id: companyId, user_id: userId, vote, note: null, updated_at: new Date().toISOString() };
       if (score !== undefined) payload.score = score;
       const { error } = await supabase.from("member_votes").upsert(payload, { onConflict: "company_id,user_id" });
       this.fail(error, "save vote");
     }
     const to = await stageOf();
     return { transition: { from, to, promoted: to === "shortlisted" && from !== "shortlisted", demoted: from === "shortlisted" && to !== "shortlisted" } };
+  }
+
+  async setVoteNote({ userId, companyId, note }: { userId: string; companyId: string; note: string | null }): Promise<void> {
+    const { supabase, member } = await this.ctx();
+    if (member.userId !== userId) throw new Error("You can only change your own answer");
+    const { error } = await supabase.from("member_votes").update({ note }).eq("company_id", companyId).eq("user_id", userId);
+    this.fail(error, "save reason");
   }
 
   async addComment({ userId, companyId, body }: { userId: string; companyId: string; body: string }): Promise<Comment> {

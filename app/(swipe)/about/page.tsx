@@ -47,8 +47,8 @@ export default function AboutPage() {
         <div className="space-y-3">
           {sections.map((s) => (
             <Card key={s.title} className="p-4">
-              <h2 className="font-serif text-[18px] font-semibold text-ink">{s.title}</h2>
-              <p className="mt-1.5 text-[14px] leading-relaxed text-text">{s.body}</p>
+              <h2 className="font-serif text-[1.125rem] font-semibold text-ink">{s.title}</h2>
+              <p className="mt-1.5 text-[0.875rem] leading-relaxed text-text">{s.body}</p>
             </Card>
           ))}
         </div>

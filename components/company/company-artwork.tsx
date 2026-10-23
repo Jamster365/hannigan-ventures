@@ -42,16 +42,16 @@ export function CompanyArtwork({ company, media, logo = null, className, variant
       {logo?.url ? <LogoTile logo={logo} variant={variant} /> : null}
       {variant === "thumb" && logo?.url ? null : variant === "card" ? (
         <div className="absolute inset-x-0 bottom-0 p-4">
-          <p className="font-serif text-[22px] font-semibold leading-none text-white/95 drop-shadow-sm">{company.name}</p>
-          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/70">{company.subSector ?? company.sector}</p>
+          <p className="font-serif text-[1.375rem] font-semibold leading-none text-white/95 drop-shadow-sm">{company.name}</p>
+          <p className="mt-1 text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-white/70">{company.subSector ?? company.sector}</p>
         </div>
       ) : variant === "thumb" ? (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="font-serif text-[20px] font-semibold text-white/95">{company.name.slice(0, 1)}</span>
+          <span className="font-serif text-[1.25rem] font-semibold text-white/95">{company.name.slice(0, 1)}</span>
         </div>
       ) : (
         <div className="absolute inset-x-0 bottom-0 p-4">
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/70">{company.subSector ?? company.sector}</p>
+          <p className="text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-white/70">{company.subSector ?? company.sector}</p>
         </div>
       )}
     </div>

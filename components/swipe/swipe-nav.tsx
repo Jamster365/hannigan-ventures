@@ -26,12 +26,12 @@ export function SwipeNav({ unreadMatches }: { unreadMatches: number }) {
                 href={item.href}
                 prefetch
                 aria-current={active ? "page" : undefined}
-                className={cn("relative flex min-w-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium", active ? "text-ink" : "text-tertiary hover:text-secondary")}
+                className={cn("relative flex min-w-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[0.6875rem] font-medium", active ? "text-ink" : "text-tertiary hover:text-secondary")}
               >
                 <span className="relative">
                   <Icon size={22} strokeWidth={active ? 2.4 : 1.9} aria-hidden />
                   {item.label === "Matches" && unreadMatches > 0 ? (
-                    <span className="absolute -right-2.5 -top-1.5 min-w-[18px] rounded-full bg-red px-1 text-center text-[10px] font-semibold leading-[18px] text-white ring-2 ring-surface" aria-label={`${unreadMatches} unread`}>
+                    <span className="absolute -right-2.5 -top-1.5 min-w-[18px] rounded-full bg-red px-1 text-center text-[0.625rem] font-semibold leading-[18px] text-white ring-2 ring-surface" aria-label={`${unreadMatches} unread`}>
                       {unreadMatches > 9 ? "9+" : unreadMatches}
                     </span>
                   ) : null}

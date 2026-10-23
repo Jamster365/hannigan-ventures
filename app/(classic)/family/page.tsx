@@ -31,40 +31,40 @@ export default async function FamilyPage() {
             <li key={m.userId}>
               <Card className="flex h-full flex-col items-center p-4 text-center">
                 <Avatar member={m} size="lg" />
-                <p className="mt-2 font-serif text-[18px] font-semibold text-ink">
+                <p className="mt-2 font-serif text-[1.125rem] font-semibold text-ink">
                   {m.displayName}
-                  {m.userId === member.userId ? <span className="text-[12px] font-sans font-normal text-tertiary"> (you)</span> : null}
+                  {m.userId === member.userId ? <span className="text-[0.75rem] font-sans font-normal text-tertiary"> (you)</span> : null}
                 </p>
                 <Pill tone={m.role === "owner" ? "blue" : "neutral"} className="mt-1">
                   {m.role === "owner" ? "Owner" : "Member"}
                 </Pill>
                 <dl className="mt-3 grid w-full grid-cols-3 gap-1 text-center">
                   <div>
-                    <dt className="text-[11px] text-tertiary">Reviewed</dt>
-                    <dd className="font-serif text-[18px] font-semibold text-ink tnum">{m.userId === member.userId ? reviewed : "–"}</dd>
+                    <dt className="text-[0.6875rem] text-tertiary">Reviewed</dt>
+                    <dd className="font-serif text-[1.125rem] font-semibold text-ink tnum">{m.userId === member.userId ? reviewed : "–"}</dd>
                   </div>
                   <div>
-                    <dt className="text-[11px] text-tertiary">Interested</dt>
-                    <dd className="font-serif text-[18px] font-semibold text-ink tnum">{m.userId === member.userId ? interested : "–"}</dd>
+                    <dt className="text-[0.6875rem] text-tertiary">Interested</dt>
+                    <dd className="font-serif text-[1.125rem] font-semibold text-ink tnum">{m.userId === member.userId ? interested : "–"}</dd>
                   </div>
                   <div>
-                    <dt className="text-[11px] text-tertiary">Comments</dt>
-                    <dd className="font-serif text-[18px] font-semibold text-ink tnum">{comments}</dd>
+                    <dt className="text-[0.6875rem] text-tertiary">Comments</dt>
+                    <dd className="font-serif text-[1.125rem] font-semibold text-ink tnum">{comments}</dd>
                   </div>
                 </dl>
-                <p className="mt-2 text-[11px] text-tertiary">{m.userId === member.userId ? `Joined ${formatDate(m.joinedAt)}` : "Votes private until a match"}</p>
+                <p className="mt-2 text-[0.6875rem] text-tertiary">{m.userId === member.userId ? `Joined ${formatDate(m.joinedAt)}` : "Votes private until a match"}</p>
               </Card>
             </li>
           ))}
         </ul>
         <section className="mt-6">
-          <h2 className="mb-2 font-serif text-[18px] font-semibold text-ink">Shortlist rule</h2>
-          <Card className="p-4 text-[14px] leading-relaxed text-text">
+          <h2 className="mb-2 font-serif text-[1.125rem] font-semibold text-ink">Shortlist rule</h2>
+          <Card className="p-4 text-[0.875rem] leading-relaxed text-text">
             A company is <span className="font-semibold">Shortlisted</span> when at least 2 of {members.length} members mark it Interested. It is <span className="font-semibold">Passed</span> when 2 mark it Pass. Otherwise it is <span className="font-semibold">Awaiting views</span> once anyone has voted. Each member’s votes stay private until a company is shortlisted. Votes mean willingness to investigate, not a commitment to invest. The AI research rating is shown separately and is never averaged with family scores.
           </Card>
         </section>
         <section className="mt-6">
-          <h2 className="mb-2 font-serif text-[18px] font-semibold text-ink">Recent family activity</h2>
+          <h2 className="mb-2 font-serif text-[1.125rem] font-semibold text-ink">Recent family activity</h2>
           <Card className="overflow-hidden p-0">
             {familyChanges.length ? (
               <ul className="divide-y divide-hairline">
@@ -73,7 +73,7 @@ export default async function FamilyPage() {
                 ))}
               </ul>
             ) : (
-              <p className="p-4 text-[13px] text-secondary">No family activity recorded yet.</p>
+              <p className="p-4 text-[0.8125rem] text-secondary">No family activity recorded yet.</p>
             )}
           </Card>
         </section>

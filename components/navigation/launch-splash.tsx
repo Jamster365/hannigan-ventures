@@ -41,8 +41,8 @@ export function LaunchSplash() {
           <path className="launch-peak launch-peak-1" d="M6 32 22 6l5 9-8 17Z" fill="#142033" />
           <path className="launch-peak launch-peak-2" d="M19 32 29 12l6 11-5 9Z" fill="#9aa3b2" />
         </svg>
-        <p className="launch-word mt-4 font-serif text-[24px] font-semibold tracking-[-0.01em] text-ink">{APP_NAME}</p>
-        <p className="launch-word launch-word-2 mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-tertiary">{APP_TAGLINE}</p>
+        <p className="launch-word mt-4 font-serif text-[1.5rem] font-semibold tracking-[-0.01em] text-ink">{APP_NAME}</p>
+        <p className="launch-word launch-word-2 mt-1 text-[0.625rem] font-semibold uppercase tracking-[0.16em] text-tertiary">{APP_TAGLINE}</p>
       </div>
     </>
   );

@@ -35,9 +35,9 @@ export default async function ResearchSettingsPage({ searchParams }: { searchPar
       <PageHeader title="Research settings" backHref="/me" variant="back">
         <div className="mx-auto flex max-w-[1200px] gap-1 px-2" role="tablist">
           {tabs.map((t) => (
-            <Link key={t.key} href={`/research/settings?tab=${t.key}`} role="tab" aria-selected={tab === t.key} className={cn("relative min-h-[44px] px-3 text-[14px] font-medium leading-[44px]", tab === t.key ? "text-ink" : "text-secondary")}>
+            <Link key={t.key} href={`/research/settings?tab=${t.key}`} role="tab" aria-selected={tab === t.key} className={cn("relative min-h-[44px] px-3 text-[0.875rem] font-medium leading-[44px]", tab === t.key ? "text-ink" : "text-secondary")}>
               {t.label}
-              {t.key === "instructions" && openSuggestions.length ? <span className="ml-1 rounded-full bg-red px-1.5 text-[10px] font-semibold text-white">{openSuggestions.length}</span> : null}
+              {t.key === "instructions" && openSuggestions.length ? <span className="ml-1 rounded-full bg-red px-1.5 text-[0.625rem] font-semibold text-white">{openSuggestions.length}</span> : null}
               <span className={cn("absolute inset-x-2 bottom-0 h-[2.5px] rounded-full", tab === t.key ? "bg-ink" : "bg-transparent")} aria-hidden />
             </Link>
           ))}
@@ -47,15 +47,15 @@ export default async function ResearchSettingsPage({ searchParams }: { searchPar
         {tab === "instructions" ? (
           <>
             <section>
-              <h2 className="font-serif text-[20px] font-semibold text-ink">Daily research instructions</h2>
-              <p className="mt-1 text-[13px] text-secondary">Edit the prompt used to generate each morning&rsquo;s research. All family members can update this. Changes apply to the next run.</p>
+              <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Daily research instructions</h2>
+              <p className="mt-1 text-[0.8125rem] text-secondary">Edit the prompt used to generate each morning&rsquo;s research. All family members can update this. Changes apply to the next run.</p>
               <div className="mt-3">
                 <PromptEditor active={active} config={active.config} />
               </div>
             </section>
             <section>
-              <h2 className="font-serif text-[20px] font-semibold text-ink">Recent suggestions</h2>
-              <p className="mt-1 text-[13px] text-secondary">Proposed changes from &ldquo;Improve our research&rdquo; feedback. Apply creates a new version; Dismiss leaves instructions unchanged.</p>
+              <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Recent suggestions</h2>
+              <p className="mt-1 text-[0.8125rem] text-secondary">Proposed changes from &ldquo;Improve our research&rdquo; feedback. Apply creates a new version; Dismiss leaves instructions unchanged.</p>
               {suggestions.length ? (
                 <ul className="mt-3 space-y-2">
                   {suggestions.slice(0, 8).map((s) => (
@@ -63,19 +63,19 @@ export default async function ResearchSettingsPage({ searchParams }: { searchPar
                   ))}
                 </ul>
               ) : (
-                <p className="mt-3 rounded-[14px] bg-surface-muted px-4 py-5 text-center text-[13px] text-secondary">No suggestions yet. Use &ldquo;Improve our research&rdquo; on any company card.</p>
+                <p className="mt-3 rounded-[14px] bg-surface-muted px-4 py-5 text-center text-[0.8125rem] text-secondary">No suggestions yet. Use &ldquo;Improve our research&rdquo; on any company card.</p>
               )}
             </section>
             <section>
-              <h2 className="font-serif text-[20px] font-semibold text-ink">Fixed rules</h2>
-              <Card className="mt-2 p-4 text-[13px] leading-relaxed text-text">
+              <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Fixed rules</h2>
+              <Card className="mt-2 p-4 text-[0.8125rem] leading-relaxed text-text">
                 These are enforced on every run and are not editable here: no invented sources, names, valuations or round status; every material claim cited; web text is never treated as instructions; no paid-site scraping or bypassing access controls; access status is never upgraded to verified without a checked route; unknowns stay unknown.
               </Card>
             </section>
             <section>
-              <h2 className="font-serif text-[20px] font-semibold text-ink">Run research now</h2>
+              <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Run research now</h2>
               <Card className="mt-2 p-4">
-                <p className="text-[13px] text-secondary">Manual runs count against the daily budget of ${active.config.dailyBudgetUsd}. {todayRuns ? `${todayRuns} manual run(s) today.` : ""}</p>
+                <p className="text-[0.8125rem] text-secondary">Manual runs count against the daily budget of ${active.config.dailyBudgetUsd}. {todayRuns ? `${todayRuns} manual run(s) today.` : ""}</p>
                 <div className="mt-3">
                   <RunNowButton mode={repo.mode} />
                 </div>
@@ -84,16 +84,16 @@ export default async function ResearchSettingsPage({ searchParams }: { searchPar
           </>
         ) : tab === "preferences" ? (
           <section>
-            <h2 className="font-serif text-[20px] font-semibold text-ink">Quick settings</h2>
-            <p className="mt-1 text-[13px] text-secondary">Preferences are saved as part of the versioned instructions.</p>
+            <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Quick settings</h2>
+            <p className="mt-1 text-[0.8125rem] text-secondary">Preferences are saved as part of the versioned instructions.</p>
             <div className="mt-3">
               <PreferencesForm active={active} />
             </div>
           </section>
         ) : (
           <section>
-            <h2 className="font-serif text-[20px] font-semibold text-ink">Version history</h2>
-            <p className="mt-1 text-[13px] text-secondary">Who changed what and when. Restoring creates a new version from the old text.</p>
+            <h2 className="font-serif text-[1.25rem] font-semibold text-ink">Version history</h2>
+            <p className="mt-1 text-[0.8125rem] text-secondary">Who changed what and when. Restoring creates a new version from the old text.</p>
             <div className="mt-3">
               <VersionHistory versions={versions} members={members} />
             </div>

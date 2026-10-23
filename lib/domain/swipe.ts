@@ -1,5 +1,5 @@
 import { accessLabel, effectiveAccess, eisLabel } from "./company-status";
-import { computeFamilyStage, SHORTLIST_THRESHOLD } from "./family-consensus";
+import { computeFamilyStage } from "./family-consensus";
 import { formatMoney } from "./format";
 import type { Assessment, Company, CompanyBundle, CompanyMedia, EvidenceStatus, Member, Notification, VoteValue } from "./types";
 
@@ -43,7 +43,7 @@ export function isClosedRound(bundle: CompanyBundle, opts: { now?: Date } = {}):
   return access.status === "closed" || (round?.claimedStatus === "closed" && !["verified_open", "closing_soon", "fundraising_reported", "expected"].includes(access.status));
 }
 
-/** Higher = closer to a cheque actually being possible. Used to order the deck. */
+/** Higher = closer to a cheque actually being possible. With fitScore, orders the deck. */
 export function investability(bundle: CompanyBundle, opts: { now?: Date; maxChequeGbp?: number } = {}): number {
   const access = effectiveAccess(bundle.accessChecks, opts);
   const round = bundle.rounds.find((r) => r.isCurrent) ?? null;
@@ -54,6 +54,33 @@ export function investability(bundle: CompanyBundle, opts: { now?: Date; maxCheq
   if (access.status === "contactable") return 40;
   if (access.status === "stale") return 30;
   return 20;
+}
+
+const UK = /^(uk|u\.k\.|united kingdom|great britain|england|scotland|wales|northern ireland|gb)$/i;
+
+/** True unless the company is known to be outside the UK (unknown location stays in). */
+export function isUk(bundle: CompanyBundle): boolean {
+  const country = bundle.company.country?.trim();
+  return !country || country === "Unknown" || UK.test(country);
+}
+
+/**
+ * How well a company fits what the family looks for (owner's brief, 23 Oct
+ * 2026): UK EIS/SEIS opportunities at an early stage, where a cheque buys a
+ * meaningful share. Non-EIS companies still appear, just rarely near the top.
+ */
+export function fitScore(bundle: CompanyBundle): number {
+  const { company } = bundle;
+  let score = 0;
+  score += company.eisStatus === "confirmed_documented" ? 30 : company.eisStatus === "company_claimed" || company.eisStatus === "pending" ? 20 : company.eisStatus === "not_applicable" ? -30 : 0;
+  const stage = (company.stage ?? "").toLowerCase();
+  if (/pre-?seed|angel/.test(stage)) score += 15;
+  else if (/seed/.test(stage)) score += 10;
+  else if (/series [b-z]|growth|late/.test(stage)) score -= 15;
+  const round = bundle.rounds.find((r) => r.isCurrent) ?? null;
+  const pre = round?.preMoney ?? null;
+  if (pre !== null && (round?.currency ?? "GBP") === "GBP") score += pre <= 5_000_000 ? 10 : pre >= 20_000_000 ? -10 : 0;
+  return score;
 }
 
 export function evidenceHint(status: EvidenceStatus): string | undefined {
@@ -121,8 +148,9 @@ export function buildSwipeCard(bundle: CompanyBundle, userId: string, opts: { no
 /**
  * A member's deck: companies they have not ticked or crossed, that are not
  * already a match or ended (two crosses), and whose round is not closed
- * (closed ones wait on the watch list). Most investable first, then newest.
- * Everyone still decides: one person's cross does not hide a company.
+ * (closed ones wait on the watch list). UK companies only. Ordered by how
+ * investable and how good a fit (EIS/SEIS, early, small valuation), then
+ * newest. Everyone still decides: one "not interested" does not hide a company.
  */
 export function deckFor(bundles: CompanyBundle[], userId: string, opts: { now?: Date; maxChequeGbp?: number; memberCount?: number } = {}): CompanyBundle[] {
   return bundles
@@ -131,16 +159,11 @@ export function deckFor(bundles: CompanyBundle[], userId: string, opts: { now?: 
       if (mine && mine.vote !== "unsure") return false;
       const stage = computeFamilyStage(b.votes, opts.memberCount);
       if (stage === "shortlisted" || stage === "passed") return false;
-      return !isClosedRound(b, opts);
+      return isUk(b) && !isClosedRound(b, opts);
     })
-    .map((b) => ({ b, score: investability(b, opts) }))
+    .map((b) => ({ b, score: investability(b, opts) + fitScore(b) }))
     .sort((x, y) => y.score - x.score || y.b.company.firstDiscoveredAt.localeCompare(x.b.company.firstDiscoveredAt))
     .map((x) => x.b);
-}
-
-/** Whether this member's tick alone would make at least one deck company a match. Never says which. */
-export function someoneWaiting(deck: CompanyBundle[], userId: string): boolean {
-  return deck.some((b) => b.votes.filter((v) => v.userId !== userId && v.vote === "interested").length >= SHORTLIST_THRESHOLD - 1);
 }
 
 export type DecisionStatus = "match" | "waiting" | "ended";
@@ -153,6 +176,8 @@ export interface DecisionRow {
   decidedAt: string;
   status: DecisionStatus;
   closed: boolean;
+  /** This member's optional reason for their answer (private). */
+  note: string | null;
 }
 
 /**
@@ -172,8 +197,8 @@ export function decisionsFor(bundles: CompanyBundle[], userId: string, opts: { n
     const stage = computeFamilyStage(b.votes, opts.memberCount);
     const status: DecisionStatus = stage === "shortlisted" ? "match" : stage === "passed" ? "ended" : "waiting";
     const mine = b.votes.find((v) => v.userId === userId);
-    if (mine && mine.vote !== "unsure") decided.push({ ...base, vote: mine.vote, decidedAt: mine.updatedAt, status });
-    else if (base.closed && stage !== "shortlisted" && stage !== "passed") watching.push({ ...base, vote: "unsure", decidedAt: b.company.updatedAt, status });
+    if (mine && mine.vote !== "unsure") decided.push({ ...base, vote: mine.vote, decidedAt: mine.updatedAt, status, note: mine.note ?? null });
+    else if (base.closed && stage !== "shortlisted" && stage !== "passed") watching.push({ ...base, vote: "unsure", decidedAt: b.company.updatedAt, status, note: null });
   }
   decided.sort((a, b) => b.decidedAt.localeCompare(a.decidedAt));
   watching.sort((a, b) => a.company.name.localeCompare(b.company.name));

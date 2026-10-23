@@ -50,6 +50,8 @@ export interface Repository {
   listVotes(companyId: string): Promise<Vote[]>;
   // Family mutations (caller must already be authorised as userId)
   setVote(input: { userId: string; companyId: string; vote: VoteValue | null; score?: number | null }): Promise<{ transition: StageTransition }>;
+  /** The member's optional reason for their current answer (private, like the vote). */
+  setVoteNote(input: { userId: string; companyId: string; note: string | null }): Promise<void>;
   addComment(input: { userId: string; companyId: string; body: string }): Promise<Comment>;
   editComment(input: { userId: string; commentId: string; body: string }): Promise<Comment>;
   deleteComment(input: { userId: string; commentId: string }): Promise<void>;

@@ -15,10 +15,10 @@ export function UpdatesTabs({ active, counts }: { active: string; counts: Record
           href={t.key === "all" ? "/updates" : `/updates?tab=${t.key}`}
           role="tab"
           aria-selected={active === t.key}
-          className={cn("inline-flex min-h-[34px] items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-medium", active === t.key ? "border-ink bg-ink text-white" : "border-hairline bg-surface text-ink")}
+          className={cn("inline-flex min-h-[34px] items-center gap-1.5 rounded-full border px-3.5 text-[0.8125rem] font-medium", active === t.key ? "border-ink bg-ink text-white" : "border-hairline bg-surface text-ink")}
         >
           {t.label}
-          <span className={cn("tnum text-[11px]", active === t.key ? "text-white/70" : "text-tertiary")}>{counts[t.key]}</span>
+          <span className={cn("tnum text-[0.6875rem]", active === t.key ? "text-white/70" : "text-tertiary")}>{counts[t.key]}</span>
         </Link>
       ))}
     </div>

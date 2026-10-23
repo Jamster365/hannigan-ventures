@@ -36,7 +36,7 @@ export default async function MatchesPage() {
         {active.length ? <MatchList rows={active} nameOf={nameOf} /> : null}
         {archived.length ? (
           <details className="mt-4 border-t border-hairline">
-            <summary className="flex min-h-[44px] cursor-pointer items-center px-4 text-[13px] font-semibold text-secondary">Archived · round closed ({archived.length})</summary>
+            <summary className="flex min-h-[44px] cursor-pointer items-center px-4 text-[0.8125rem] font-semibold text-secondary">Archived · round closed ({archived.length})</summary>
             <MatchList rows={archived} nameOf={nameOf} muted />
           </details>
         ) : null}
@@ -56,17 +56,17 @@ function MatchList({ rows, nameOf, muted }: { rows: MatchRow[]; nameOf: (id: str
             </span>
             <span className="min-w-0 flex-1">
               <span className="flex items-baseline justify-between gap-2">
-                <span className={cn("truncate text-[16px] text-ink", r.unread || r.isNewMatch ? "font-bold" : "font-semibold")}>{r.company.name}</span>
-                <span className="shrink-0 text-[12px] text-tertiary">{relativeTime(r.lastMessage?.createdAt ?? r.matchedAt)}</span>
+                <span className={cn("truncate text-[1rem] text-ink", r.unread || r.isNewMatch ? "font-bold" : "font-semibold")}>{r.company.name}</span>
+                <span className="shrink-0 text-[0.75rem] text-tertiary">{relativeTime(r.lastMessage?.createdAt ?? r.matchedAt)}</span>
               </span>
               <span className="mt-0.5 flex items-center justify-between gap-2">
-                <span className={cn("truncate text-[14px]", r.unread ? "font-medium text-ink" : "text-secondary")}>
+                <span className={cn("truncate text-[0.875rem]", r.unread ? "font-medium text-ink" : "text-secondary")}>
                   {r.lastMessage ? `${nameOf(r.lastMessage.authorUserId)}: ${r.lastMessage.body.split("\n")[0]}` : r.isNewMatch ? "New match! Say hello." : "Matched. No messages yet."}
                 </span>
                 {r.unread ? (
-                  <span className="shrink-0 rounded-full bg-red px-1.5 text-[11px] font-semibold leading-[18px] text-white">{r.unread}</span>
+                  <span className="shrink-0 rounded-full bg-red px-1.5 text-[0.6875rem] font-semibold leading-[18px] text-white">{r.unread}</span>
                 ) : r.isNewMatch ? (
-                  <span className="shrink-0 rounded-full bg-green px-2 text-[11px] font-semibold leading-[18px] text-white">New</span>
+                  <span className="shrink-0 rounded-full bg-green px-2 text-[0.6875rem] font-semibold leading-[18px] text-white">New</span>
                 ) : null}
               </span>
             </span>

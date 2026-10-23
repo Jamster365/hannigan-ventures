@@ -36,7 +36,7 @@ export function PageHeader({
         {variant === "back" ? (
           <>
             <BackLink href={backHref ?? "/"} />
-            <h1 className="min-w-0 flex-1 truncate text-center font-serif text-[18px] font-semibold text-ink">{title}</h1>
+            <h1 className="min-w-0 flex-1 truncate text-center font-serif text-[1.125rem] font-semibold text-ink">{title}</h1>
             <div className="flex min-w-[44px] items-center justify-end gap-1">{actions}</div>
           </>
         ) : variant === "brand" ? (
@@ -44,7 +44,7 @@ export function PageHeader({
             <Link href="/home" className="min-w-0 flex-1 xl:hidden" aria-label="Home">
               <Wordmark />
             </Link>
-            <Link href="/discover?focus=search" className="hidden min-w-0 flex-1 items-center gap-2 rounded-full border border-hairline bg-surface px-4 py-2.5 text-[14px] text-tertiary xl:flex">
+            <Link href="/discover?focus=search" className="hidden min-w-0 flex-1 items-center gap-2 rounded-full border border-hairline bg-surface px-4 py-2.5 text-[0.875rem] text-tertiary xl:flex">
               <Search size={16} aria-hidden />
               Search companies, sectors, founders…
             </Link>
@@ -59,7 +59,7 @@ export function PageHeader({
           </>
         ) : (
           <>
-            <h1 className="min-w-0 flex-1 truncate font-serif text-[24px] font-semibold text-ink">{title}</h1>
+            <h1 className="min-w-0 flex-1 truncate font-serif text-[1.5rem] font-semibold text-ink">{title}</h1>
             <div className="flex items-center gap-1">{actions}</div>
           </>
         )}

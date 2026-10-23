@@ -25,14 +25,14 @@ export function SignInLinkButton({ userId, name }: { userId: string; name: strin
               } else setError(res.error);
             })
           }
-          className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-hairline-strong px-3 text-[13px] font-medium text-ink disabled:opacity-60"
+          className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-hairline-strong px-3 text-[0.8125rem] font-medium text-ink disabled:opacity-60"
         >
           <Link2 size={14} aria-hidden /> {pending ? "Creating…" : `Sign-in link for ${name}`}
         </button>
       ) : (
         <div className="rounded-[12px] bg-surface-muted p-3">
-          <p className="text-[12px] text-secondary">Send this to {name} (e.g. on WhatsApp). It works once, within an hour.</p>
-          <p className="mt-1 select-all break-all font-mono text-[11px] text-ink">{url}</p>
+          <p className="text-[0.75rem] text-secondary">Send this to {name} (e.g. on WhatsApp). It works once, within an hour.</p>
+          <p className="mt-1 select-all break-all font-mono text-[0.6875rem] text-ink">{url}</p>
           <button
             type="button"
             onClick={async () => {
@@ -43,14 +43,14 @@ export function SignInLinkButton({ userId, name }: { userId: string; name: strin
                 setCopied(false);
               }
             }}
-            className="mt-2 inline-flex min-h-[34px] items-center gap-1.5 rounded-full bg-ink px-3 text-[13px] font-medium text-white"
+            className="mt-2 inline-flex min-h-[34px] items-center gap-1.5 rounded-full bg-ink px-3 text-[0.8125rem] font-medium text-white"
           >
             {copied ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />} {copied ? "Copied" : "Copy link"}
           </button>
         </div>
       )}
       {error ? (
-        <p role="alert" className="mt-1 text-[12px] text-red">
+        <p role="alert" className="mt-1 text-[0.75rem] text-red">
           {error}
         </p>
       ) : null}

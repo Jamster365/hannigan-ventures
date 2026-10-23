@@ -6,10 +6,13 @@
 export function claudeBatchPrompt(opts: { maxChequeGbp: number; known: string[] }): string {
   return `You are researching early-stage companies for a private family angel-investing app (three members, individual cheques up to £${opts.maxChequeGbp.toLocaleString("en-GB")}).
 
-Find as many genuinely investable companies as you can verify (aim for 20–50), mainly in the UK, then Europe:
-- Any sector and any size, as long as an individual angel has a real route in: a live or upcoming round, an angel network or syndicate, an SPV, a founder intro, or an equity crowdfunding campaign (Crowdcube, Seedrs/Republic Europe and similar — include these, they are labelled in the app).
-- Chase EIS/SEIS: say whether the company has HMRC advance assurance, only claims eligibility, or it is unknown, with the page that says so.
+Find as many genuinely investable companies as you can verify (aim for 20–50). What the family wants:
+- UK companies only.
+- SEIS or EIS opportunities: ideally HMRC advance assurance stated on a page you read; "eligible" claims are fine if marked as company claims. Include a company without SEIS/EIS only very rarely, when it is exceptional, and say why.
+- Early: pre-seed and seed rounds at small valuations (ideally under £5m pre-money), where a cheque of £10k–£${opts.maxChequeGbp.toLocaleString("en-GB")} buys a meaningful share of the company. Later-stage companies only as rare exceptions.
+- Any sector, as long as an individual angel has a real route in: a live or upcoming round, an angel network or syndicate, an SPV, a founder intro, or an equity crowdfunding campaign (Crowdcube, Republic Europe and similar; include these, they are labelled in the app).
 - Prefer rounds open now or opening soon. Skip companies whose last round has closed with no sign of a new one.
+- The website field must be the company's own site: the app takes the company's picture from it.
 - Do not include these, which we already track: ${opts.known.length ? opts.known.join(", ") : "(none yet)"}.
 
 Use web search. Only state what a page you actually read says, and cite that page's full URL next to each claim (sourceUrls). Unknown values are null with evidenceStatus "unknown"; never guess figures. No made-up people, numbers or quotes.

@@ -1,7 +1,7 @@
 import { SwipeDeck } from "@/components/swipe/swipe-deck";
 import { requireMember } from "@/lib/auth/current-member";
 import { getRepository } from "@/lib/data";
-import { buildSwipeCard, deckFor, someoneWaiting } from "@/lib/domain/swipe";
+import { buildSwipeCard, deckFor } from "@/lib/domain/swipe";
 
 export const metadata = { title: "Discover" };
 
@@ -16,10 +16,9 @@ export default async function DiscoverDeckPage({ searchParams }: { searchParams:
   const at = focus ? deck.findIndex((b) => b.company.slug === focus) : -1;
   if (at > 0) deck.unshift(...deck.splice(at, 1));
   const cards = deck.map((b) => buildSwipeCard(b, member.userId, { now, maxChequeGbp: prompt.config.maxChequeGbp }));
-  const waiting = someoneWaiting(deck, member.userId);
   const newMatch = notifications.find((n) => !n.readAt && n.notificationType === "shortlist_promoted" && n.href.startsWith("/matches"));
 
-  const banner = newMatch ? ({ kind: "match", href: newMatch.href, title: newMatch.title } as const) : waiting ? ({ kind: "waiting" } as const) : null;
+  const banner = newMatch ? ({ kind: "match", href: newMatch.href, title: newMatch.title } as const) : null;
 
   return <SwipeDeck key={member.userId} initialCards={cards} members={members} banner={banner} />;
 }

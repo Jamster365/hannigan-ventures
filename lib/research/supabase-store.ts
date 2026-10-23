@@ -16,7 +16,7 @@ import type { ResearchPreferences } from "@/lib/domain/types";
  * validated every payload with zod) and never destructively overwrites
  * facts: superseded facts get effective_to set instead of being deleted.
  */
-class SupabaseResearchStore implements ResearchStore {
+export class SupabaseResearchStore implements ResearchStore {
   constructor(private admin: SupabaseClient) {}
 
   private must<T>(res: { data: T | null; error: { message: string } | null }, what: string): T {
@@ -83,6 +83,24 @@ class SupabaseResearchStore implements ResearchStore {
     return (count ?? 0) > 0;
   }
 
+  /** Real companies with a website but no picture yet, not retried in the last week. */
+  async companiesMissingHero(householdId: string, limit: number) {
+    const companies = this.must(await this.admin.from("companies").select("id, name, domain").eq("household_id", householdId).eq("is_demo", false).not("domain", "is", null).returns<{ id: string; name: string; domain: string }[]>(), "companies") ?? [];
+    const ids = companies.map((c) => c.id);
+    if (!ids.length) return [];
+    const [heroes, tried, sources] = await Promise.all([
+      this.admin.from("company_media").select("company_id").in("company_id", ids).eq("kind", "hero").neq("rights_status", "fallback").not("url", "is", null).returns<{ company_id: string }[]>(),
+      this.admin.from("audit_events").select("object_id").eq("household_id", householdId).eq("action", "imagery.backfill").gte("created_at", new Date(Date.now() - 7 * 86_400_000).toISOString()).returns<{ object_id: string }[]>(),
+      this.admin.from("sources").select("company_id, url").in("company_id", ids).returns<{ company_id: string; url: string }[]>(),
+    ]);
+    const has = new Set((heroes.data ?? []).map((h) => h.company_id));
+    const recent = new Set((tried.data ?? []).map((t) => t.object_id));
+    return companies
+      .filter((c) => !has.has(c.id) && !recent.has(c.id))
+      .slice(0, limit)
+      .map((c) => ({ companyId: c.id, name: c.name, website: `https://${c.domain}`, verifiedUrls: (sources.data ?? []).filter((s) => s.company_id === c.id).map((s) => s.url) }));
+  }
+
   async saveImagery(input: { householdId: string; companyId: string; companyName: string; images: FoundImage[] }) {
     const { createHash } = await import("node:crypto");
     let saved = 0;
@@ -104,7 +122,7 @@ class SupabaseResearchStore implements ResearchStore {
           rights_status: "attributed",
           origin_url: img.originUrl,
           creator_or_owner: input.companyName,
-          license_or_permission: img.kind === "hero" ? "Published by the company on its website for link previews; shown with attribution" : "Company logo from its own website; shown with attribution",
+          license_or_permission: img.kind === "hero" ? (img.fromPage ? "Picture published by the company on its own homepage; shown with attribution" : "Published by the company on its website for link previews; shown with attribution") : "Company logo from its own website; shown with attribution",
           attribution: `Image: ${host}`,
           alt_text: img.kind === "hero" ? `${input.companyName}, image from ${host}` : `${input.companyName} logo`,
           checked_at: new Date().toISOString(),
@@ -262,7 +280,7 @@ function hash(s: string): number {
   return h;
 }
 
-export function createSupabaseResearchStore(): ResearchStore {
+export function createSupabaseResearchStore(): SupabaseResearchStore {
   return new SupabaseResearchStore(createSupabaseAdminClient());
 }
 

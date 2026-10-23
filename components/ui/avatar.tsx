@@ -10,7 +10,7 @@ const accentClasses: Record<Member["accent"], string> = {
 };
 
 export function Avatar({ member, size = "md", className, ring }: { member: Pick<Member, "initial" | "accent" | "displayName">; size?: "xs" | "sm" | "md" | "lg"; className?: string; ring?: boolean }) {
-  const dims = size === "xs" ? "h-6 w-6 text-[11px]" : size === "sm" ? "h-8 w-8 text-[13px]" : size === "lg" ? "h-14 w-14 text-[22px]" : "h-10 w-10 text-[16px]";
+  const dims = size === "xs" ? "h-6 w-6 text-[0.6875rem]" : size === "sm" ? "h-8 w-8 text-[0.8125rem]" : size === "lg" ? "h-14 w-14 text-[1.375rem]" : "h-10 w-10 text-[1rem]";
   return (
     <span
       role="img"

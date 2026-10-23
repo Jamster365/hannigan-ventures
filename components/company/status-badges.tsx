@@ -39,11 +39,11 @@ export function AiPriorityPill({ priority, score }: { priority: AiPriority; scor
 
 /** Compact "AI: High" text with a status dot, as used in card footers. */
 export function AiInline({ priority }: { priority: AiPriority | null }) {
-  if (!priority) return <span className="text-[12px] text-tertiary">AI: Not rated</span>;
+  if (!priority) return <span className="text-[0.75rem] text-tertiary">AI: Not rated</span>;
   const dot = priority === "high" ? "bg-green" : priority === "medium" ? "bg-amber" : priority === "low" ? "bg-tertiary" : "bg-hairline-strong";
   const text = priority === "high" ? "text-green" : priority === "medium" ? "text-amber" : "text-secondary";
   return (
-    <span className={`inline-flex items-center gap-1.5 text-[12px] font-semibold ${text}`}>
+    <span className={`inline-flex items-center gap-1.5 text-[0.75rem] font-semibold ${text}`}>
       <span className={`h-2 w-2 rounded-full ${dot}`} aria-hidden />
       {priorityLabel(priority)}
     </span>
@@ -54,7 +54,7 @@ export function UpdateCue({ summary }: { summary: CompanySummary }) {
   if (summary.recentUpdateCount === 0) return null;
   const label = summary.latestUpdate?.updateType === "research" && summary.recentUpdateCount === 1 ? "New research" : `${summary.recentUpdateCount} update${summary.recentUpdateCount === 1 ? "" : "s"}`;
   return (
-    <span className="inline-flex items-center gap-1 text-[12px] font-medium text-blue">
+    <span className="inline-flex items-center gap-1 text-[0.75rem] font-medium text-blue">
       <Zap size={12} aria-hidden />
       {label}
     </span>

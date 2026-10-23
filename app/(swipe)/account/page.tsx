@@ -27,22 +27,22 @@ export default async function AccountPage() {
         <Card className="flex items-center gap-3 p-4">
           <Avatar member={member} size="lg" />
           <div className="min-w-0 flex-1">
-            <p className="font-serif text-[18px] font-semibold text-ink">{member.displayName}</p>
-            <p className="truncate text-[13px] text-secondary">{member.email ?? (mode === "demo" ? "Sample member — no email" : "")}</p>
+            <p className="font-serif text-[1.125rem] font-semibold text-ink">{member.displayName}</p>
+            <p className="truncate text-[0.8125rem] text-secondary">{member.email ?? (mode === "demo" ? "Sample member — no email" : "")}</p>
           </div>
           <Pill tone={member.role === "owner" ? "blue" : "neutral"}>{member.role === "owner" ? "Owner" : "Member"}</Pill>
         </Card>
         <AccountForms mode={mode} member={member} invitations={invitations} />
         <section className="mt-6">
-          <h2 className="mb-2 font-serif text-[18px] font-semibold text-ink">Household members</h2>
+          <h2 className="mb-2 font-serif text-[1.125rem] font-semibold text-ink">Household members</h2>
           <Card className="overflow-hidden p-0">
-            {mode === "supabase" && member.role === "owner" ? <p className="border-b border-hairline px-4 py-2.5 text-[12px] text-secondary">If someone’s sign-in email doesn’t arrive (BT and some other mail providers can hold it back), make them a sign-in link here and send it to them directly.</p> : null}
+            {mode === "supabase" && member.role === "owner" ? <p className="border-b border-hairline px-4 py-2.5 text-[0.75rem] text-secondary">If someone’s sign-in email doesn’t arrive (BT and some other mail providers can hold it back), make them a sign-in link here and send it to them directly.</p> : null}
             <ul className="divide-y divide-hairline">
               {members.map((m) => (
                 <li key={m.userId} className="flex flex-wrap items-center gap-3 px-4 py-3">
                   <Avatar member={m} size="sm" />
-                  <span className="flex-1 text-[14px] font-medium text-ink">{m.displayName}</span>
-                  <span className="text-[12px] text-tertiary">Joined {formatDate(m.joinedAt)}</span>
+                  <span className="flex-1 text-[0.875rem] font-medium text-ink">{m.displayName}</span>
+                  <span className="text-[0.75rem] text-tertiary">Joined {formatDate(m.joinedAt)}</span>
                   {mode === "supabase" && member.role === "owner" && m.userId !== member.userId ? <SignInLinkButton userId={m.userId} name={m.displayName} /> : null}
                 </li>
               ))}

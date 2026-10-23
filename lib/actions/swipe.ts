@@ -88,3 +88,24 @@ export async function markMatchReadAction(ids: string[]): Promise<ActionResult> 
     return { ok: false, error: e instanceof Error ? e.message : "Could not update notifications" };
   }
 }
+
+const reasonSchema = z.object({
+  companyId: z.string().min(1),
+  slug: z.string().min(1),
+  note: z.string().trim().max(500),
+});
+
+/** Optional "why?" for a yes or no. Private like the vote; used later to learn what the family likes. */
+export async function saveReasonAction(input: z.input<typeof reasonSchema>): Promise<ActionResult> {
+  const parsed = reasonSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Keep the reason under 500 characters." };
+  try {
+    const member = await requireMember();
+    const repo = await getRepository();
+    await repo.setVoteNote({ userId: member.userId, companyId: parsed.data.companyId, note: parsed.data.note || null });
+    revalidatePath("/decisions");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Could not save the reason" };
+  }
+}

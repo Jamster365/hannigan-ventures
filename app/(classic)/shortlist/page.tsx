@@ -25,7 +25,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Se
     <>
       <PageHeader title="Shortlist" actions={<ShortlistSort value={sort} />} />
       <div className="mx-auto max-w-[900px] px-4 pt-4">
-        <p className="mb-3 text-[13px] text-secondary">Companies where at least 2 of {members.length} members are Interested. The list updates the moment a vote changes; nothing is added or removed by hand.</p>
+        <p className="mb-3 text-[0.8125rem] text-secondary">Companies where at least 2 of {members.length} members are Interested. The list updates the moment a vote changes; nothing is added or removed by hand.</p>
         {list.length === 0 ? (
           <EmptyState
             title="No shortlist yet"

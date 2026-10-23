@@ -35,7 +35,7 @@ export function CommentThread({ companyId, slug, comments, members, currentUserI
   return (
     <div>
       {visible.length === 0 ? (
-        <p className="rounded-[14px] bg-surface-muted px-4 py-5 text-center text-[13px] text-secondary">No discussion yet. Share a view or a question for the others.</p>
+        <p className="rounded-[14px] bg-surface-muted px-4 py-5 text-center text-[0.8125rem] text-secondary">No discussion yet. Share a view or a question for the others.</p>
       ) : (
         <ol className="space-y-3">
           {visible.map((c) => (
@@ -62,14 +62,14 @@ export function CommentThread({ companyId, slug, comments, members, currentUserI
           maxLength={2000}
           placeholder="Add a comment…"
           aria-label="Add a comment"
-          className="max-h-32 min-h-[40px] flex-1 resize-none bg-transparent px-2 py-2 text-[15px] text-ink placeholder:text-tertiary focus:outline-none"
+          className="max-h-32 min-h-[40px] flex-1 resize-none bg-transparent px-2 py-2 text-[0.9375rem] text-ink placeholder:text-tertiary focus:outline-none"
         />
         <button type="submit" disabled={pending || !draft.trim()} aria-label="Post comment" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-white disabled:opacity-40">
           <SendHorizontal size={17} />
         </button>
       </form>
       {error ? (
-        <p role="alert" className="mt-2 text-[13px] text-red">
+        <p role="alert" className="mt-2 text-[0.8125rem] text-red">
           {error}
         </p>
       ) : null}
@@ -86,9 +86,9 @@ function CommentItem({ comment, author, mine, slug }: { comment: Comment; author
       {author ? <Avatar member={author} size="sm" className="mt-0.5" /> : <span className="h-8 w-8 shrink-0 rounded-full bg-violet-pale" />}
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-[14px] font-semibold text-ink">{comment.authorUserId === RESEARCH_AUTHOR_ID ? "Research (AI)" : (author?.displayName ?? "Member")}</span>
-          <span className="text-[11px] text-tertiary">{relativeTime(comment.createdAt)}</span>
-          {comment.editedAt ? <span className="text-[11px] text-tertiary">(edited)</span> : null}
+          <span className="text-[0.875rem] font-semibold text-ink">{comment.authorUserId === RESEARCH_AUTHOR_ID ? "Research (AI)" : (author?.displayName ?? "Member")}</span>
+          <span className="text-[0.6875rem] text-tertiary">{relativeTime(comment.createdAt)}</span>
+          {comment.editedAt ? <span className="text-[0.6875rem] text-tertiary">(edited)</span> : null}
         </div>
         {editing ? (
           <form
@@ -101,8 +101,8 @@ function CommentItem({ comment, author, mine, slug }: { comment: Comment; author
             }}
             className="mt-1"
           >
-            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={2000} className="w-full rounded-[12px] border border-hairline-strong px-3 py-2 text-[14px] text-ink" aria-label="Edit comment" />
-            <div className="mt-1 flex gap-2 text-[12px]">
+            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={2000} className="w-full rounded-[12px] border border-hairline-strong px-3 py-2 text-[0.875rem] text-ink" aria-label="Edit comment" />
+            <div className="mt-1 flex gap-2 text-[0.75rem]">
               <button type="submit" disabled={pending} className="font-medium text-blue">
                 Save
               </button>
@@ -112,10 +112,10 @@ function CommentItem({ comment, author, mine, slug }: { comment: Comment; author
             </div>
           </form>
         ) : (
-          <p className={cn("mt-0.5 whitespace-pre-wrap text-[14px] leading-relaxed text-text", comment.id.startsWith("tmp-") && "opacity-60")}>{comment.body}</p>
+          <p className={cn("mt-0.5 whitespace-pre-wrap text-[0.875rem] leading-relaxed text-text", comment.id.startsWith("tmp-") && "opacity-60")}>{comment.body}</p>
         )}
         {mine && !editing && !comment.id.startsWith("tmp-") ? (
-          <div className="mt-1 flex gap-3 text-[12px]">
+          <div className="mt-1 flex gap-3 text-[0.75rem]">
             <button type="button" onClick={() => setEditing(true)} className="text-secondary hover:text-ink">
               Edit
             </button>

@@ -48,13 +48,13 @@ export default async function MorePage() {
         <Card className="flex items-center gap-3 p-4">
           <Avatar member={member} size="lg" />
           <div className="min-w-0">
-            <p className="font-serif text-[18px] font-semibold text-ink">{member.displayName}</p>
-            <p className="text-[13px] text-secondary">{member.role === "owner" ? "Household owner" : "Household member"}</p>
+            <p className="font-serif text-[1.125rem] font-semibold text-ink">{member.displayName}</p>
+            <p className="text-[0.8125rem] text-secondary">{member.role === "owner" ? "Household owner" : "Household member"}</p>
           </div>
         </Card>
         {groups.map((g) => (
           <section key={g.title} className="mt-5">
-            <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">{g.title}</h2>
+            <h2 className="mb-2 px-1 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-tertiary">{g.title}</h2>
             <Card className="overflow-hidden p-0">
               <ul className="divide-y divide-hairline">
                 {g.items.map((it) => (
@@ -64,10 +64,10 @@ export default async function MorePage() {
                         <it.Icon size={17} aria-hidden />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-[15px] font-medium text-ink">{it.label}</span>
-                        <span className="block truncate text-[12px] text-secondary">{it.sub}</span>
+                        <span className="block text-[0.9375rem] font-medium text-ink">{it.label}</span>
+                        <span className="block truncate text-[0.75rem] text-secondary">{it.sub}</span>
                       </span>
-                      {"badge" in it && it.badge ? <span className="rounded-full bg-red px-2 py-0.5 text-[11px] font-semibold text-white">{it.badge}</span> : null}
+                      {"badge" in it && it.badge ? <span className="rounded-full bg-red px-2 py-0.5 text-[0.6875rem] font-semibold text-white">{it.badge}</span> : null}
                       <ChevronRight size={18} className="text-tertiary" aria-hidden />
                     </Link>
                   </li>

@@ -1,10 +1,10 @@
 "use client";
 
-import { Check, RotateCcw, X } from "lucide-react";
+import { Check, MessageSquarePlus, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { CompanyArtwork } from "@/components/company/company-artwork";
-import { swipeAction, undoSwipeAction } from "@/lib/actions/swipe";
+import { saveReasonAction, swipeAction, undoSwipeAction } from "@/lib/actions/swipe";
 import type { DecisionRow } from "@/lib/domain/swipe";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 export function DecisionItem({ row }: { row: DecisionRow }) {
   const [vote, setVote] = useState(row.vote);
   const [message, setMessage] = useState<string | null>(null);
+  const [note, setNote] = useState(row.note ?? "");
+  const [editingNote, setEditingNote] = useState(false);
   const [pending, start] = useTransition();
   const { company } = row;
 
@@ -28,7 +30,10 @@ export function DecisionItem({ row }: { row: DecisionRow }) {
         if (!res.ok) {
           setVote(before);
           setMessage(res.error);
-        } else if (res.data?.outcome.kind === "match") setMessage("It’s a match. The chat is open.");
+        } else {
+          setNote("");
+          if (res.data?.outcome.kind === "match") setMessage("It’s a match. The chat is open.");
+        }
         return;
       }
       const res = await undoSwipeAction({ companyId: company.id, slug: company.slug, previousVote: null });
@@ -50,15 +55,15 @@ export function DecisionItem({ row }: { row: DecisionRow }) {
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           {row.status === "match" ? (
-            <Link href={`/matches/${company.slug}`} className="truncate text-[15px] font-semibold text-ink underline-offset-2 hover:underline">
+            <Link href={`/matches/${company.slug}`} className="truncate text-[0.9375rem] font-semibold text-ink underline-offset-2 hover:underline">
               {company.name}
             </Link>
           ) : (
-            <span className="truncate text-[15px] font-semibold text-ink">{company.name}</span>
+            <span className="truncate text-[0.9375rem] font-semibold text-ink">{company.name}</span>
           )}
-          {status ? <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", status.cls)}>{status.label}</span> : null}
+          {status ? <span className={cn("rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold", status.cls)}>{status.label}</span> : null}
         </div>
-        <p className="mt-0.5 line-clamp-2 text-[13px] text-secondary">{company.teaser}</p>
+        <p className="mt-0.5 line-clamp-2 text-[0.8125rem] text-secondary">{company.teaser}</p>
         <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label={`Your decision on ${company.name}`}>
           <Choice active={vote === "interested"} disabled={pending} onClick={() => change("interested")} tone="green" name="Interested">
             <Check size={17} strokeWidth={2.6} aria-hidden />
@@ -72,8 +77,44 @@ export function DecisionItem({ row }: { row: DecisionRow }) {
             </Choice>
           ) : null}
         </div>
+        {vote !== "unsure" ? (
+          editingNote ? (
+            <form
+              className="mt-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                start(async () => {
+                  const res = await saveReasonAction({ companyId: company.id, slug: company.slug, note });
+                  if (res.ok) {
+                    setEditingNote(false);
+                    setMessage(note.trim() ? "Reason saved." : "Reason removed.");
+                  } else setMessage(res.error);
+                });
+              }}
+            >
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={500} autoFocus placeholder={vote === "interested" ? "Why yes?" : "Why no?"} aria-label={`Why you said ${vote === "interested" ? "yes" : "no"} to ${company.name}`} className="w-full rounded-[12px] border border-hairline-strong bg-page px-3 py-2 text-[0.875rem] text-ink" />
+              <div className="mt-1 flex gap-3 text-[0.8125rem]">
+                <button type="submit" disabled={pending} className="font-semibold text-blue">
+                  Save
+                </button>
+                <button type="button" onClick={() => { setEditingNote(false); setNote(row.note ?? ""); }} className="text-secondary">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : note ? (
+            <button type="button" onClick={() => setEditingNote(true)} className="mt-1.5 block text-left text-[0.8125rem] text-secondary">
+              <span className="font-medium text-ink">Why: </span>
+              {note}
+            </button>
+          ) : (
+            <button type="button" onClick={() => setEditingNote(true)} className="mt-1.5 inline-flex items-center gap-1 text-[0.75rem] font-medium text-secondary">
+              <MessageSquarePlus size={13} aria-hidden /> Add why
+            </button>
+          )
+        ) : null}
         {message ? (
-          <p role="status" className="mt-1.5 text-[12px] text-secondary">
+          <p role="status" className="mt-1.5 text-[0.75rem] text-secondary">
             {message}
           </p>
         ) : null}
@@ -91,7 +132,7 @@ function Choice({ active, tone, label, name, children, ...rest }: { active: bool
       title={label ?? name}
       aria-pressed={label ? undefined : active}
       className={cn(
-        "inline-flex min-h-[34px] items-center gap-1 rounded-full border px-3 text-[13px] font-medium transition-colors disabled:opacity-60",
+        "inline-flex min-h-[34px] items-center gap-1 rounded-full border px-3 text-[0.8125rem] font-medium transition-colors disabled:opacity-60",
         active && tone === "green" && "border-green bg-green text-white",
         active && tone === "red" && "border-red bg-red text-white",
         !active && "border-hairline-strong bg-surface text-ink",

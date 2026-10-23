@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getDemoRepository } from "@/lib/data/demo-repository";
 import { DEMO_MEMBERS } from "@/lib/demo/members";
-import { buildSwipeCard, decisionsFor, deckFor, matchesFor, someoneWaiting } from "@/lib/domain/swipe";
+import { buildSwipeCard, decisionsFor, deckFor, fitScore, isUk, matchesFor } from "@/lib/domain/swipe";
 import type { CompanyBundle, Vote } from "@/lib/domain/types";
 
 const [a, b, c] = DEMO_MEMBERS;
@@ -33,14 +33,6 @@ describe("deckFor", () => {
     one.accessChecks = [{ ...one.accessChecks[0], id: "closed-check", accessStatus: "closed", checkedAt: "2026-10-22T00:00:00Z" } as (typeof one.accessChecks)[number]];
     expect(deckFor([one], a.userId)).toHaveLength(0);
     expect(decisionsFor([one], a.userId).watching.map((r) => r.company.id)).toEqual([one.company.id]);
-  });
-
-  it("knows when my tick could decide something, without saying which", async () => {
-    const [one, two] = await bundles();
-    one.votes = [vote(b.userId, "interested")];
-    two.votes = [];
-    expect(someoneWaiting([one, two], a.userId)).toBe(true);
-    expect(someoneWaiting([two], a.userId)).toBe(false);
   });
 });
 
@@ -80,5 +72,24 @@ describe("cards and matches", () => {
     const rows = matchesFor([closed, open], DEMO_MEMBERS, []);
     expect(rows.find((r) => r.company.id === closed.company.id)?.archived).toBe(true);
     expect(rows.find((r) => r.company.id === open.company.id)?.archived).toBe(false);
+  });
+});
+
+describe("deck fit", () => {
+  it("keeps UK companies only and puts EIS/SEIS, early, small rounds first", async () => {
+    const all = (await bundles()).filter((x) => !x.accessChecks.some((k) => k.accessStatus === "closed") && !x.rounds.some((r) => r.isCurrent && r.claimedStatus === "closed")).slice(0, 3);
+    const [eis, plain, abroad] = all;
+    for (const x of all) {
+      x.votes = [];
+      x.accessChecks = [];
+      x.rounds = [];
+      x.company = { ...x.company, country: "United Kingdom", stage: "Series A", eisStatus: "unknown" };
+    }
+    eis.company = { ...eis.company, eisStatus: "confirmed_documented", stage: "Pre-seed" };
+    plain.company = { ...plain.company, eisStatus: "not_applicable" };
+    abroad.company = { ...abroad.company, country: "Germany", eisStatus: "confirmed_documented" };
+    expect(fitScore(eis)).toBeGreaterThan(fitScore(plain));
+    expect(isUk(abroad)).toBe(false);
+    expect(deckFor(all, a.userId).map((x) => x.company.id)).toEqual([eis.company.id, plain.company.id]);
   });
 });

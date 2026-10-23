@@ -133,6 +133,11 @@ class DemoRepository implements Repository {
     return { transition };
   }
 
+  async setVoteNote({ userId, companyId, note }: { userId: string; companyId: string; note: string | null }) {
+    const v = this.companies.find((c) => c.company.id === companyId)?.votes.find((x) => x.userId === userId);
+    if (v) v.note = note ?? undefined;
+  }
+
   async addComment({ userId, companyId, body }: { userId: string; companyId: string; body: string }) {
     const bundle = this.companies.find((c) => c.company.id === companyId);
     if (!bundle) throw new Error("Company not found");

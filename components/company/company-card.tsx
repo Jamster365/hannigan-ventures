@@ -28,16 +28,16 @@ export function CompanyCard({ summary, members, currentUserId, className, imageC
       {/* Labels and the bookmark sit below the image so they never cover text inside company imagery. */}
       <div className="flex flex-1 flex-col px-4 pb-4 pt-3">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="pt-1.5 font-serif text-[19px] font-semibold leading-tight text-ink">{company.name}</h3>
+          <h3 className="pt-1.5 font-serif text-[1.1875rem] font-semibold leading-tight text-ink">{company.name}</h3>
           <div className="relative z-[2] -mr-2 -mt-0.5 shrink-0">
             <BookmarkButton companyId={company.id} slug={company.slug} bookmarked={bookmarked} variant="plain" />
           </div>
         </div>
-        <p className="mt-0.5 text-[12px] text-secondary">
+        <p className="mt-0.5 text-[0.75rem] text-secondary">
           {company.sector} · {company.city} · {company.stage}
         </p>
         <CardLabels summary={summary} priorityText={priorityText} />
-        <p className="mt-2 text-[14px] leading-snug text-text clamp-2">{company.teaser}</p>
+        <p className="mt-2 text-[0.875rem] leading-snug text-text clamp-2">{company.teaser}</p>
         <div className="mt-3 flex items-center justify-between gap-2">
           <AiInline priority={summary.assessment?.aiPriority ?? null} />
           {summary.access.canInvestNow ? <AccessPill access={summary.access} /> : <UpdateCue summary={summary} />}
@@ -45,7 +45,7 @@ export function CompanyCard({ summary, members, currentUserId, className, imageC
         {summary.familyStage !== "unreviewed" ? (
           <div className="mt-3 flex items-center gap-2 border-t border-hairline pt-3">
             <ConsensusStrip members={members} votes={summary.votes} hidden={summary.votesHidden} />
-            <span className="text-[12px] text-secondary">{summary.votesHidden ? "Votes private until a match" : consensusSummary(summary.votes, members.length)}</span>
+            <span className="text-[0.75rem] text-secondary">{summary.votesHidden ? "Votes private until a match" : consensusSummary(summary.votes, members.length)}</span>
           </div>
         ) : null}
       </div>
@@ -75,13 +75,13 @@ export function CompactCompanyCard({ summary, members, className }: { summary: C
         <CompanyArtwork company={company} media={summary.primaryMedia} logo={summary.logoMedia} variant="thumb" />
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="truncate font-serif text-[16px] font-semibold text-ink">{company.name}</h3>
-        <p className="truncate text-[12px] text-secondary">
+        <h3 className="truncate font-serif text-[1rem] font-semibold text-ink">{company.name}</h3>
+        <p className="truncate text-[0.75rem] text-secondary">
           {company.sector} · {company.city}
         </p>
         <div className="mt-2 flex items-center gap-2">
           <ConsensusStrip members={members} votes={summary.votes} hidden={summary.votesHidden} />
-          <span className="truncate text-[12px] text-secondary">{summary.votesHidden ? "Votes private until a match" : consensusSummary(summary.votes, members.length)}</span>
+          <span className="truncate text-[0.75rem] text-secondary">{summary.votesHidden ? "Votes private until a match" : consensusSummary(summary.votes, members.length)}</span>
         </div>
       </div>
     </Card>
@@ -101,8 +101,8 @@ export function ShortlistCard({ summary, members, currentUserId }: { summary: Co
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <h3 className="truncate font-serif text-[18px] font-semibold text-ink">{company.name}</h3>
-              <p className="truncate text-[12px] text-secondary">
+              <h3 className="truncate font-serif text-[1.125rem] font-semibold text-ink">{company.name}</h3>
+              <p className="truncate text-[0.75rem] text-secondary">
                 {company.sector} · {company.city} · {company.stage}
               </p>
             </div>
@@ -112,13 +112,13 @@ export function ShortlistCard({ summary, members, currentUserId }: { summary: Co
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
             <ConsensusStrip members={members} votes={summary.votes} hidden={summary.votesHidden} />
-            <span className="text-[12px] text-secondary tnum">{summary.familyAverage !== null ? `Family ${summary.familyAverage}/10 · ${summary.raters} rated` : "No family ratings yet"}</span>
-            <span className="text-[12px] text-secondary tnum">{summary.assessment?.aiScore != null ? `AI ${summary.assessment.aiScore.toFixed(1)}/10` : "AI not rated"}</span>
+            <span className="text-[0.75rem] text-secondary tnum">{summary.familyAverage !== null ? `Family ${summary.familyAverage}/10 · ${summary.raters} rated` : "No family ratings yet"}</span>
+            <span className="text-[0.75rem] text-secondary tnum">{summary.assessment?.aiScore != null ? `AI ${summary.assessment.aiScore.toFixed(1)}/10` : "AI not rated"}</span>
           </div>
         </div>
       </div>
       <div className="flex items-center justify-between gap-2 border-t border-hairline px-4 py-2.5">
-        <p className="min-w-0 truncate text-[12px] text-secondary">
+        <p className="min-w-0 truncate text-[0.75rem] text-secondary">
           {summary.latestUpdate ? (
             <>
               <span className="font-medium text-ink">{summary.latestUpdate.headline}</span> · {relativeTime(summary.latestUpdate.effectiveAt)}
@@ -145,18 +145,18 @@ export function CompanyRow({ summary, members }: { summary: CompanySummary; memb
             <CompanyArtwork company={company} media={summary.primaryMedia} logo={summary.logoMedia} variant="thumb" />
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-[14px] font-semibold text-ink">{company.name}</span>
-            <span className="block truncate text-[12px] text-secondary">{company.teaser}</span>
+            <span className="block truncate text-[0.875rem] font-semibold text-ink">{company.name}</span>
+            <span className="block truncate text-[0.75rem] text-secondary">{company.teaser}</span>
           </span>
         </Link>
       </td>
-      <td className="px-2 text-[13px] text-secondary">{company.sector}</td>
-      <td className="px-2 text-[13px] text-secondary">{company.stage}</td>
-      <td className="px-2 text-[13px] text-secondary tnum">
+      <td className="px-2 text-[0.8125rem] text-secondary">{company.sector}</td>
+      <td className="px-2 text-[0.8125rem] text-secondary">{company.stage}</td>
+      <td className="px-2 text-[0.8125rem] text-secondary tnum">
         {round ? (
           <>
             <span className="text-ink">{formatMoney(round.targetAmount, round.currency)}</span>
-            <span className="block text-[11px]">{round.preMoney ? `${formatMoney(round.preMoney, round.currency)} pre-money` : "Valuation undisclosed"}</span>
+            <span className="block text-[0.6875rem]">{round.preMoney ? `${formatMoney(round.preMoney, round.currency)} pre-money` : "Valuation undisclosed"}</span>
           </>
         ) : (
           "Unknown"

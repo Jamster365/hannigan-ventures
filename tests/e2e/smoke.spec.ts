@@ -112,7 +112,7 @@ test("swipe: skip, almost a match, undo, two ticks make a match, and Decisions c
 
   await page.getByRole("button", { name: "Interested", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "It’s a match!" })).toContainText("You and Jamie are interested in");
-  await page.getByRole("button", { name: "Keep swiping" }).click();
+  await page.getByRole("button", { name: "Keep going" }).click();
   await page.getByRole("button", { name: "Undo last swipe" }).click();
   await page.waitForTimeout(600);
   await page.goto("/matches");
@@ -251,4 +251,21 @@ test("three tabs: Your picks lives under Profile", async ({ page }) => {
   await nav.getByRole("link", { name: "Profile" }).click();
   await page.getByRole("link", { name: /Your picks/ }).click();
   await expect(page.getByRole("heading", { name: "Your picks" })).toBeVisible();
+});
+
+test("an optional reason can be added after a yes or no, and edited in Your picks", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("hv-deck-tip-seen", "1"));
+  await viewAs(page, "Brother");
+  await deckWith(page, "northgate-surgical", "Northgate Surgical");
+  await page.getByRole("button", { name: "Not interested", exact: true }).click();
+  await page.getByRole("button", { name: /Say why you said no to Northgate Surgical/ }).click();
+  const sheet = page.getByRole("dialog", { name: "Why no to Northgate Surgical?" });
+  await sheet.getByRole("button", { name: "Valuation too high" }).click();
+  await sheet.getByRole("button", { name: "Save reason" }).click();
+  await expect(sheet).toHaveCount(0);
+  await go(page, "/decisions");
+  const row = page.getByRole("listitem").filter({ hasText: "Northgate Surgical" });
+  await expect(row.getByText("Valuation too high")).toBeVisible();
+  await row.getByRole("button", { name: "Back to my deck" }).click();
+  await expect(row).toHaveCount(0);
 });

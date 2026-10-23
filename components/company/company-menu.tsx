@@ -56,7 +56,7 @@ export function CompanyMenu({ company, sources, whatsNew, overlay }: { company: 
             </Item>
             {company.domain && !company.isDemo ? (
               <DropdownMenu.Item asChild>
-                <a href={`https://${company.domain}`} target="_blank" rel="noopener noreferrer" className="flex min-h-[40px] cursor-pointer items-center gap-2.5 rounded-[10px] px-3 text-[14px] text-ink outline-none data-[highlighted]:bg-surface-muted">
+                <a href={`https://${company.domain}`} target="_blank" rel="noopener noreferrer" className="flex min-h-[40px] cursor-pointer items-center gap-2.5 rounded-[10px] px-3 text-[0.875rem] text-ink outline-none data-[highlighted]:bg-surface-muted">
                   <ExternalLink size={16} /> Company website
                 </a>
               </DropdownMenu.Item>
@@ -66,21 +66,21 @@ export function CompanyMenu({ company, sources, whatsNew, overlay }: { company: 
       </DropdownMenu.Root>
 
       <Sheet open={dialog === "why"} onClose={() => setDialog(null)} title="Why am I seeing this?">
-        <dl className="space-y-3 text-[14px]">
+        <dl className="space-y-3 text-[0.875rem]">
           <div>
-            <dt className="text-[12px] font-semibold uppercase tracking-[0.06em] text-tertiary">Discovery signal</dt>
+            <dt className="text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-tertiary">Discovery signal</dt>
             <dd className="mt-0.5 text-ink">{company.discoverySignal ?? "Not recorded"}</dd>
           </div>
           <div>
-            <dt className="text-[12px] font-semibold uppercase tracking-[0.06em] text-tertiary">Research rule matched</dt>
+            <dt className="text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-tertiary">Research rule matched</dt>
             <dd className="mt-0.5 text-ink">{company.researchRuleMatched ?? "Not recorded"}</dd>
           </div>
           <div>
-            <dt className="text-[12px] font-semibold uppercase tracking-[0.06em] text-tertiary">What is new since yesterday</dt>
+            <dt className="text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-tertiary">What is new since yesterday</dt>
             <dd className="mt-0.5 text-ink">{whatsNew ?? "No material change recorded in the last day."}</dd>
           </div>
           <div>
-            <dt className="text-[12px] font-semibold uppercase tracking-[0.06em] text-tertiary">Sources</dt>
+            <dt className="text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-tertiary">Sources</dt>
             <dd className="mt-1">
               {sources.length ? (
                 <ul className="space-y-1.5">
@@ -101,7 +101,7 @@ export function CompanyMenu({ company, sources, whatsNew, overlay }: { company: 
               )}
             </dd>
           </div>
-          <p className="text-[12px] text-tertiary">Last researched {company.lastResearchedAt ? formatDate(company.lastResearchedAt) : "never"}.</p>
+          <p className="text-[0.75rem] text-tertiary">Last researched {company.lastResearchedAt ? formatDate(company.lastResearchedAt) : "never"}.</p>
         </dl>
       </Sheet>
 
@@ -114,7 +114,7 @@ export function CompanyMenu({ company, sources, whatsNew, overlay }: { company: 
 
 function Item({ icon, children, onSelect }: { icon: React.ReactNode; children: React.ReactNode; onSelect: () => void }) {
   return (
-    <DropdownMenu.Item onSelect={onSelect} className="flex min-h-[40px] cursor-pointer items-center gap-2.5 rounded-[10px] px-3 text-[14px] text-ink outline-none data-[highlighted]:bg-surface-muted">
+    <DropdownMenu.Item onSelect={onSelect} className="flex min-h-[40px] cursor-pointer items-center gap-2.5 rounded-[10px] px-3 text-[0.875rem] text-ink outline-none data-[highlighted]:bg-surface-muted">
       {icon}
       {children}
     </DropdownMenu.Item>
@@ -128,7 +128,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
         <Dialog.Overlay className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px]" />
         <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 max-h-[88dvh] overflow-y-auto rounded-t-[22px] bg-surface p-5 pb-[calc(20px+var(--safe-bottom))] shadow-[var(--shadow-float)] sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-[480px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[22px]">
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-hairline-strong sm:hidden" aria-hidden />
-          <Dialog.Title className="font-serif text-[20px] font-semibold text-ink">{title}</Dialog.Title>
+          <Dialog.Title className="font-serif text-[1.25rem] font-semibold text-ink">{title}</Dialog.Title>
           <Dialog.Description className="sr-only">{title}</Dialog.Description>
           <div className="mt-3">{children}</div>
         </Dialog.Content>
@@ -154,10 +154,10 @@ function ImproveForm({ company, onDone }: { company: Company; onDone: () => void
       }}
       className="space-y-3"
     >
-      <p className="text-[13px] text-secondary">Feedback about {company.name} becomes a proposed change to the research instructions. Nothing changes until a member applies it.</p>
+      <p className="text-[0.8125rem] text-secondary">Feedback about {company.name} becomes a proposed change to the research instructions. Nothing changes until a member applies it.</p>
       <div className="grid gap-1.5">
         {FEEDBACK_OPTIONS.map((o) => (
-          <label key={o.key} className={cn("flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-[12px] border px-3 text-[14px]", type === o.key ? "border-ink bg-surface-muted" : "border-hairline")}>
+          <label key={o.key} className={cn("flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-[12px] border px-3 text-[0.875rem]", type === o.key ? "border-ink bg-surface-muted" : "border-hairline")}>
             <input type="radio" name="type" value={o.key} checked={type === o.key} onChange={() => setType(o.key)} className="accent-ink" />
             {o.label}
           </label>
@@ -170,9 +170,9 @@ function ImproveForm({ company, onDone }: { company: Company; onDone: () => void
         placeholder={needsText ? "Tell the research what to look for…" : "Optional detail"}
         rows={3}
         maxLength={1000}
-        className="w-full rounded-[12px] border border-hairline-strong bg-surface px-3 py-2 text-[14px] text-ink"
+        className="w-full rounded-[12px] border border-hairline-strong bg-surface px-3 py-2 text-[0.875rem] text-ink"
       />
-      {result ? <p className={cn("text-[13px]", result.ok ? "text-green" : "text-red")}>{result.message}</p> : null}
+      {result ? <p className={cn("text-[0.8125rem]", result.ok ? "text-green" : "text-red")}>{result.message}</p> : null}
       <div className="flex justify-end gap-2">
         <Button type="button" variant="ghost" onClick={onDone}>
           {result?.ok ? "Close" : "Cancel"}

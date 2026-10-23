@@ -52,7 +52,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pa
   const compact = (
     <div className="flex min-h-[56px] items-center gap-1 px-2">
       <BackLink href={backHref} />
-      <p className="min-w-0 flex-1 truncate text-center font-serif text-[18px] font-semibold text-ink">{company.name}</p>
+      <p className="min-w-0 flex-1 truncate text-center font-serif text-[1.125rem] font-semibold text-ink">{company.name}</p>
       <BookmarkButton companyId={company.id} slug={company.slug} bookmarked={bookmarked} variant="plain" />
       <CompanyMenu company={company} sources={bundle.sources} whatsNew={whatsNew} />
     </div>
@@ -71,13 +71,13 @@ export default async function CompanyPage({ params, searchParams }: { params: Pa
         </div>
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-ink sm:aspect-[16/9] xl:aspect-[21/9] xl:rounded-[var(--radius-lg)]">
           <CompanyArtwork company={company} media={primary} logo={media.find((m) => m.kind === "logo" && m.url && m.rightsStatus !== "fallback") ?? null} variant="hero" priority />
-          {company.isDemo ? <span className="absolute right-3 bottom-3 rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-white/90">Sample company</span> : null}
+          {company.isDemo ? <span className="absolute right-3 bottom-3 rounded-full bg-black/40 px-2 py-0.5 text-[0.625rem] font-medium uppercase tracking-[0.08em] text-white/90">Sample company</span> : null}
         </div>
-        {primary?.attribution ? <p className="px-4 pt-1.5 text-right text-[11px] text-tertiary xl:px-0">{primary.attribution}</p> : null}
+        {primary?.attribution ? <p className="px-4 pt-1.5 text-right text-[0.6875rem] text-tertiary xl:px-0">{primary.attribution}</p> : null}
 
         <header className="px-4 pt-4">
           <div className="flex items-start justify-between gap-3">
-            <h1 className="font-serif text-[30px] font-semibold leading-[1.05] text-ink">{company.name}</h1>
+            <h1 className="font-serif text-[1.875rem] font-semibold leading-[1.05] text-ink">{company.name}</h1>
             <FamilyStagePill stage={stage} />
           </div>
           <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -88,11 +88,11 @@ export default async function CompanyPage({ params, searchParams }: { params: Pa
             </Chip>
             <Chip>{company.stage}</Chip>
           </div>
-          <p className="mt-3 text-[16px] leading-snug text-text">{company.teaser}</p>
+          <p className="mt-3 text-[1rem] leading-snug text-text">{company.teaser}</p>
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
             <AccessPill access={access} />
             {assessment ? <AiPriorityPill priority={assessment.aiPriority} score={assessment.aiScore} /> : null}
-            <span className="inline-flex items-center gap-1 text-[12px] text-tertiary">
+            <span className="inline-flex items-center gap-1 text-[0.75rem] text-tertiary">
               <Clock3 size={12} aria-hidden />
               {company.lastResearchedAt ? `Researched ${relativeTime(company.lastResearchedAt)}` : "Not yet researched"}
             </span>
@@ -126,8 +126,8 @@ export default async function CompanyPage({ params, searchParams }: { params: Pa
       <aside className="hidden xl:block">
         <div className="sticky top-6 space-y-4">
           <div className="rounded-[var(--radius-card)] border border-hairline bg-surface p-4 shadow-[var(--shadow-card)]">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-tertiary">Summary</p>
-            <dl className="mt-2 space-y-2 text-[13px]">
+            <p className="text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-tertiary">Summary</p>
+            <dl className="mt-2 space-y-2 text-[0.8125rem]">
               <Row label="Family" value={<FamilyStagePill stage={stage} />} />
               <Row label="Access" value={<AccessPill access={access} />} />
               <Row label="AI" value={assessment ? <AiPriorityPill priority={assessment.aiPriority} score={assessment.aiScore} /> : <span className="text-secondary">Not rated</span>} />
@@ -137,8 +137,8 @@ export default async function CompanyPage({ params, searchParams }: { params: Pa
           </div>
           {assessment ? (
             <div className="rounded-[var(--radius-card)] border border-hairline bg-surface p-4 shadow-[var(--shadow-card)]">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-tertiary">Next action</p>
-              <p className="mt-1 text-[14px] text-ink">{assessment.nextAction}</p>
+              <p className="text-[0.75rem] font-semibold uppercase tracking-[0.06em] text-tertiary">Next action</p>
+              <p className="mt-1 text-[0.875rem] text-ink">{assessment.nextAction}</p>
             </div>
           ) : null}
         </div>

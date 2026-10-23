@@ -72,7 +72,7 @@ export function FilterBar({ sectors, stages, totalLabel }: { sectors: string[]; 
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search companies, sectors, founders…"
               aria-label="Search companies"
-              className="min-h-[44px] w-full rounded-full border border-hairline bg-surface pl-9 pr-9 text-[15px] text-ink placeholder:text-tertiary focus:border-blue"
+              className="min-h-[44px] w-full rounded-full border border-hairline bg-surface pl-9 pr-9 text-[0.9375rem] text-ink placeholder:text-tertiary focus:border-blue"
             />
             {q ? (
               <button type="button" onClick={() => setQ("")} className="absolute right-2 inline-flex h-8 w-8 items-center justify-center rounded-full text-tertiary hover:bg-surface-muted" aria-label="Clear search">
@@ -84,7 +84,7 @@ export function FilterBar({ sectors, stages, totalLabel }: { sectors: string[]; 
             type="button"
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
-            className={cn("inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-medium", advancedCount ? "border-ink bg-ink text-white" : "border-hairline bg-surface text-ink")}
+            className={cn("inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3.5 text-[0.8125rem] font-medium", advancedCount ? "border-ink bg-ink text-white" : "border-hairline bg-surface text-ink")}
           >
             <SlidersHorizontal size={15} aria-hidden />
             Filters{advancedCount ? ` · ${advancedCount}` : ""}
@@ -97,7 +97,7 @@ export function FilterBar({ sectors, stages, totalLabel }: { sectors: string[]; 
               role="tab"
               aria-selected={filter === f.key}
               onClick={() => set({ filter: f.key })}
-              className={cn("min-h-[34px] shrink-0 rounded-full border px-3.5 text-[13px] font-medium transition-colors", filter === f.key ? "border-ink bg-ink text-white" : "border-hairline bg-surface text-ink hover:bg-surface-muted")}
+              className={cn("min-h-[34px] shrink-0 rounded-full border px-3.5 text-[0.8125rem] font-medium transition-colors", filter === f.key ? "border-ink bg-ink text-white" : "border-hairline bg-surface text-ink hover:bg-surface-muted")}
             >
               {f.label}
             </button>
@@ -112,13 +112,13 @@ export function FilterBar({ sectors, stages, totalLabel }: { sectors: string[]; 
             <Select label="AI priority" value={params.get("ai")} onChange={(v) => set({ ai: v })} options={["High", "Medium", "Low", "Not rated"]} />
             <Select label="Sort" value={params.get("sort")} onChange={(v) => set({ sort: v })} options={SORTS.map((s) => s.label)} keys={SORTS.map((s) => s.key)} />
             {advancedCount || params.get("sort") ? (
-              <button type="button" onClick={() => set({ sector: null, stage: null, access: null, eis: null, ai: null, sort: null })} className="col-span-full justify-self-start text-[13px] font-medium text-blue">
+              <button type="button" onClick={() => set({ sector: null, stage: null, access: null, eis: null, ai: null, sort: null })} className="col-span-full justify-self-start text-[0.8125rem] font-medium text-blue">
                 Reset filters
               </button>
             ) : null}
           </div>
         ) : null}
-        <p className="px-4 pb-2 text-[12px] text-tertiary">{totalLabel}</p>
+        <p className="px-4 pb-2 text-[0.75rem] text-tertiary">{totalLabel}</p>
       </div>
     </div>
   );
@@ -127,8 +127,8 @@ export function FilterBar({ sectors, stages, totalLabel }: { sectors: string[]; 
 function Select({ label, value, onChange, options, keys }: { label: string; value: string | null; onChange: (v: string | null) => void; options: string[]; keys?: string[] }) {
   return (
     <label className="block">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-tertiary">{label}</span>
-      <select value={value ?? ""} onChange={(e) => onChange(e.target.value || null)} className="mt-0.5 block min-h-[40px] w-full rounded-[10px] border border-hairline bg-surface px-2 text-[14px] text-ink">
+      <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.06em] text-tertiary">{label}</span>
+      <select value={value ?? ""} onChange={(e) => onChange(e.target.value || null)} className="mt-0.5 block min-h-[40px] w-full rounded-[10px] border border-hairline bg-surface px-2 text-[0.875rem] text-ink">
         <option value="">Any</option>
         {options.map((o, i) => (
           <option key={o} value={keys ? keys[i] : o}>

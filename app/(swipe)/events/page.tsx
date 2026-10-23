@@ -17,7 +17,7 @@ export default async function EventsPage() {
     <>
       <PageHeader title="Events" backHref="/me" variant="back" />
       <div className="mx-auto max-w-[900px] px-4 pt-4">
-        <p className="mb-3 text-[13px] text-secondary">Founder and investor events found by research, in London local time. Registration status is shown as of the date it was checked; unverified listings say so.</p>
+        <p className="mb-3 text-[0.8125rem] text-secondary">Founder and investor events found by research, in London local time. Registration status is shown as of the date it was checked; unverified listings say so.</p>
         {upcoming.length === 0 ? (
           <EmptyState title="No upcoming events" body="Verified events will appear here when research finds them." />
         ) : (
@@ -31,7 +31,7 @@ export default async function EventsPage() {
         )}
         {past.length > 0 ? (
           <section className="mt-8">
-            <h2 className="mb-2 font-serif text-[18px] font-semibold text-ink">Archive</h2>
+            <h2 className="mb-2 font-serif text-[1.125rem] font-semibold text-ink">Archive</h2>
             <ul className="space-y-2">
               {past.map((e) => (
                 <li key={e.id}>

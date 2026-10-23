@@ -79,8 +79,8 @@ export function SignInForm({ mode }: { mode: "demo" | "supabase" }) {
   if (mode === "demo") {
     return (
       <div className="mt-5">
-        <p className="rounded-[12px] bg-amber-pale px-3 py-2 text-[13px] text-amber">Demo mode: Supabase is not configured, so sign-in is bypassed and you are viewing as a sample member.</p>
-        <Link href="/" className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-ink px-5 text-[14px] font-medium text-white">
+        <p className="rounded-[12px] bg-amber-pale px-3 py-2 text-[0.8125rem] text-amber">Demo mode: Supabase is not configured, so sign-in is bypassed and you are viewing as a sample member.</p>
+        <Link href="/" className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-ink px-5 text-[0.875rem] font-medium text-white">
           Continue to the demo
         </Link>
       </div>
@@ -90,16 +90,16 @@ export function SignInForm({ mode }: { mode: "demo" | "supabase" }) {
   if (waiting) {
     return (
       <div className="mt-5" role="status">
-        <div className="rounded-[12px] bg-green-pale px-3 py-3 text-[14px] text-green">
+        <div className="rounded-[12px] bg-green-pale px-3 py-3 text-[0.875rem] text-green">
           Check your email. If <span className="font-semibold">{waiting.email}</span> belongs to an invited member, a sign-in link is on its way from noreply@mail.app.supabase.io. Not there after a couple of minutes? Check Junk or Spam, or ask the household owner for a direct sign-in link.
         </div>
-        <p className="mt-4 text-[14px] text-secondary">Tap the link, even if it opens in another browser. Confirm this code there and this screen signs in by itself:</p>
-        <p className="mt-3 text-center font-serif text-[40px] font-semibold tracking-[0.2em] text-ink" aria-label={`Code ${waiting.code.split("").join(" ")}`}>
+        <p className="mt-4 text-[0.875rem] text-secondary">Tap the link, even if it opens in another browser. Confirm this code there and this screen signs in by itself:</p>
+        <p className="mt-3 text-center font-serif text-[2.5rem] font-semibold tracking-[0.2em] text-ink" aria-label={`Code ${waiting.code.split("").join(" ")}`}>
           {waiting.code}
         </p>
         <button
           type="button"
-          className="mt-3 w-full text-center text-[13px] text-tertiary underline"
+          className="mt-3 w-full text-center text-[0.8125rem] text-tertiary underline"
           onClick={() => {
             clearHandoff();
             setClosedId(waiting.id);
@@ -113,7 +113,7 @@ export function SignInForm({ mode }: { mode: "demo" | "supabase" }) {
 
   if (state.status === "sent" && !state.handoff) {
     return (
-      <div className="mt-5 rounded-[12px] bg-green-pale px-3 py-3 text-[14px] text-green" role="status">
+      <div className="mt-5 rounded-[12px] bg-green-pale px-3 py-3 text-[0.875rem] text-green" role="status">
         Check your email. If <span className="font-semibold">{state.email}</span> belongs to an invited member, a sign-in link is on its way from noreply@mail.app.supabase.io. Not there after a couple of minutes? Check Junk or Spam, or ask the household owner for a direct sign-in link.
       </div>
     );
@@ -122,24 +122,24 @@ export function SignInForm({ mode }: { mode: "demo" | "supabase" }) {
   return (
     <form action={action} className="mt-5 space-y-3">
       <label className="block">
-        <span className="text-[13px] font-medium text-ink">Email</span>
+        <span className="text-[0.8125rem] font-medium text-ink">Email</span>
         <input
           name="email"
           type="email"
           required
           autoComplete="email"
           inputMode="email"
-          className="mt-1 block min-h-[44px] w-full rounded-[12px] border border-hairline-strong bg-surface px-3 text-[15px] text-ink focus:border-blue"
+          className="mt-1 block min-h-[44px] w-full rounded-[12px] border border-hairline-strong bg-surface px-3 text-[0.9375rem] text-ink focus:border-blue"
           placeholder="you@example.com"
         />
       </label>
       {expired ? (
-        <p className="text-[13px] text-red" role="alert">
+        <p className="text-[0.8125rem] text-red" role="alert">
           That sign-in request has expired. Request a new link.
         </p>
       ) : null}
       {state.status === "error" ? (
-        <p className="text-[13px] text-red" role="alert">
+        <p className="text-[0.8125rem] text-red" role="alert">
           {state.message}
         </p>
       ) : null}

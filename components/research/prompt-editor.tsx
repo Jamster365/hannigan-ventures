@@ -34,7 +34,7 @@ export function PromptEditor({ active, config }: { active: PromptVersion; config
   return (
     <div className="rounded-[var(--radius-card)] border border-hairline bg-surface p-4 shadow-[var(--shadow-card)]">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[14px] font-semibold text-ink">
+        <p className="text-[0.875rem] font-semibold text-ink">
           Current instructions <span className="text-secondary">(v{active.version})</span>
         </p>
         {mode === "read" ? (
@@ -47,9 +47,9 @@ export function PromptEditor({ active, config }: { active: PromptVersion; config
       {mode === "read" ? (
         <ReadView text={active.promptText} />
       ) : mode === "edit" ? (
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={18} className="mt-3 w-full rounded-[12px] border border-hairline-strong bg-page px-3 py-2 font-sans text-[14px] leading-relaxed text-ink" aria-label="Research instructions" />
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={18} className="mt-3 w-full rounded-[12px] border border-hairline-strong bg-page px-3 py-2 font-sans text-[0.875rem] leading-relaxed text-ink" aria-label="Research instructions" />
       ) : (
-        <pre className="mt-3 max-h-[480px] overflow-auto whitespace-pre-wrap rounded-[12px] border border-hairline bg-page p-3 text-[13px] leading-relaxed">
+        <pre className="mt-3 max-h-[480px] overflow-auto whitespace-pre-wrap rounded-[12px] border border-hairline bg-page p-3 text-[0.8125rem] leading-relaxed">
           {diff.map((l, i) => (
             <span key={i} className={cn("block px-1", l.kind === "added" && "bg-green-pale text-green", l.kind === "removed" && "bg-red-pale text-red line-through")}>
               {l.kind === "added" ? "+ " : l.kind === "removed" ? "− " : "  "}
@@ -61,7 +61,7 @@ export function PromptEditor({ active, config }: { active: PromptVersion; config
 
       {mode !== "read" ? (
         <div className="mt-3 space-y-2">
-          <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} placeholder="What changed and why (optional)" className="min-h-[44px] w-full rounded-[12px] border border-hairline-strong bg-surface px-3 text-[14px] text-ink" aria-label="Change note" />
+          <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} placeholder="What changed and why (optional)" className="min-h-[44px] w-full rounded-[12px] border border-hairline-strong bg-surface px-3 text-[0.875rem] text-ink" aria-label="Change note" />
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="ghost" onClick={() => { setMode("read"); setText(active.promptText); setStatus(null); }} disabled={pending}>
               Cancel
@@ -83,7 +83,7 @@ export function PromptEditor({ active, config }: { active: PromptVersion; config
       ) : null}
 
       {status ? (
-        <div role="status" className={cn("mt-3 rounded-[12px] px-3 py-2 text-[13px]", status.tone === "green" && "bg-green-pale text-green", status.tone === "red" && "bg-red-pale text-red", status.tone === "amber" && "bg-amber-pale text-amber")}>
+        <div role="status" className={cn("mt-3 rounded-[12px] px-3 py-2 text-[0.8125rem]", status.tone === "green" && "bg-green-pale text-green", status.tone === "red" && "bg-red-pale text-red", status.tone === "amber" && "bg-amber-pale text-amber")}>
           {status.text}
           {status.conflict ? (
             <span className="mt-1 block">
@@ -92,7 +92,7 @@ export function PromptEditor({ active, config }: { active: PromptVersion; config
           ) : null}
         </div>
       ) : null}
-      <p className="mt-3 text-[12px] text-tertiary">All members can edit. Every save creates a numbered, attributable version. Evidence, security and formatting rules are enforced separately and cannot be edited here.</p>
+      <p className="mt-3 text-[0.75rem] text-tertiary">All members can edit. Every save creates a numbered, attributable version. Evidence, security and formatting rules are enforced separately and cannot be edited here.</p>
     </div>
   );
 }
@@ -102,11 +102,11 @@ function ReadView({ text }: { text: string }) {
   const short = text.length > 700 && !expanded;
   return (
     <div className="mt-3">
-      <p className={cn("whitespace-pre-wrap text-[14px] leading-relaxed text-text", short && "clamp-6")} style={short ? { display: "-webkit-box", WebkitLineClamp: 8, WebkitBoxOrient: "vertical", overflow: "hidden" } : undefined}>
+      <p className={cn("whitespace-pre-wrap text-[0.875rem] leading-relaxed text-text", short && "clamp-6")} style={short ? { display: "-webkit-box", WebkitLineClamp: 8, WebkitBoxOrient: "vertical", overflow: "hidden" } : undefined}>
         {text}
       </p>
       {text.length > 700 ? (
-        <button type="button" onClick={() => setExpanded((e) => !e)} className="mt-1 text-[13px] font-medium text-blue">
+        <button type="button" onClick={() => setExpanded((e) => !e)} className="mt-1 text-[0.8125rem] font-medium text-blue">
           {expanded ? "Show less" : "Show more"}
         </button>
       ) : null}

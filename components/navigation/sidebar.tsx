@@ -47,7 +47,7 @@ export function Sidebar({ unread, lastRunLabel }: { unread: number; lastRunLabel
       <nav className="flex-1 overflow-y-auto px-3" aria-label="Sidebar">
         {groups.map((g, i) => (
           <div key={i} className="mb-4">
-            {g.title ? <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">{g.title}</p> : null}
+            {g.title ? <p className="px-3 pb-1 pt-2 text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-white/40">{g.title}</p> : null}
             <ul className="space-y-0.5">
               {g.items.map((item) => {
                 const active = "exact" in item && item.exact ? pathname === item.href : pathname.startsWith(item.href);
@@ -59,11 +59,11 @@ export function Sidebar({ unread, lastRunLabel }: { unread: number; lastRunLabel
                       // Fully prefetch the main tabs (data included), as the bottom nav does on phones.
                       prefetch={MAIN_TABS.has(item.href) ? true : undefined}
                       aria-current={active ? "page" : undefined}
-                      className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors", active ? "bg-white/12 text-white" : "text-white/70 hover:bg-white/8 hover:text-white")}
+                      className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.875rem] font-medium transition-colors", active ? "bg-white/12 text-white" : "text-white/70 hover:bg-white/8 hover:text-white")}
                     >
                       <Icon size={18} aria-hidden />
                       <span className="flex-1">{item.label}</span>
-                      {item.label === "Updates" && unread > 0 ? <span className="rounded-full bg-red px-1.5 text-[11px] font-semibold text-white">{unread}</span> : null}
+                      {item.label === "Updates" && unread > 0 ? <span className="rounded-full bg-red px-1.5 text-[0.6875rem] font-semibold text-white">{unread}</span> : null}
                     </Link>
                   </li>
                 );
@@ -73,9 +73,9 @@ export function Sidebar({ unread, lastRunLabel }: { unread: number; lastRunLabel
         ))}
       </nav>
       <div className="m-3 rounded-2xl bg-white/8 p-4">
-        <p className="text-[12px] font-semibold text-white/90">Daily research</p>
-        <p className="mt-1 text-[12px] text-white/60">{lastRunLabel ?? "No research run recorded yet"}</p>
-        <Link href="/research/history" className="mt-3 inline-flex min-h-[36px] items-center rounded-full bg-white px-4 text-[13px] font-medium text-ink">
+        <p className="text-[0.75rem] font-semibold text-white/90">Daily research</p>
+        <p className="mt-1 text-[0.75rem] text-white/60">{lastRunLabel ?? "No research run recorded yet"}</p>
+        <Link href="/research/history" className="mt-3 inline-flex min-h-[36px] items-center rounded-full bg-white px-4 text-[0.8125rem] font-medium text-ink">
           View history
         </Link>
       </div>

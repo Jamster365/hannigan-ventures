@@ -30,10 +30,10 @@ function Shell({ title, body, action }: { title: string; body: string; action?: 
     <div className="flex min-h-dvh flex-col items-center justify-center bg-page px-6 py-10">
       <Wordmark />
       <div className="mt-8 w-full max-w-[380px] rounded-[var(--radius-lg)] border border-hairline bg-surface p-6 shadow-[var(--shadow-card)]">
-        <h1 className="font-serif text-[24px] font-semibold text-ink">{title}</h1>
-        <p className="mt-2 text-[14px] text-secondary">{body}</p>
+        <h1 className="font-serif text-[1.5rem] font-semibold text-ink">{title}</h1>
+        <p className="mt-2 text-[0.875rem] text-secondary">{body}</p>
         {action ? (
-          <Link href={action.href} className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-ink px-5 text-[14px] font-medium text-white">
+          <Link href={action.href} className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-ink px-5 text-[0.875rem] font-medium text-white">
             {action.label}
           </Link>
         ) : null}

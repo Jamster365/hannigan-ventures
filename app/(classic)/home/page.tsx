@@ -45,15 +45,15 @@ export default async function HomePage() {
       <div className="mx-auto w-full max-w-[1200px] xl:grid xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-8 xl:px-6">
         <div className="min-w-0">
           <section className="px-4 pb-2 pt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">{formatLongDate(now)}</p>
-            <h1 className="mt-1 font-serif text-[30px] font-semibold leading-[1.1] text-ink xl:text-[36px]">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-tertiary">{formatLongDate(now)}</p>
+            <h1 className="mt-1 font-serif text-[1.875rem] font-semibold leading-[1.1] text-ink xl:text-[2.25rem]">
               {greeting(now)}, {member.displayName}.
             </h1>
-            <p className="mt-1 text-[14px] text-secondary">{contextLine ? `${contextLine}.` : "Nothing new since you last looked."}</p>
+            <p className="mt-1 text-[0.875rem] text-secondary">{contextLine ? `${contextLine}.` : "Nothing new since you last looked."}</p>
           </section>
 
           {freshness.stale ? (
-            <div className="mx-4 mb-3 flex items-start gap-2 rounded-[14px] border border-amber/30 bg-amber-pale px-3.5 py-2.5 text-[13px] text-amber" role="status">
+            <div className="mx-4 mb-3 flex items-start gap-2 rounded-[14px] border border-amber/30 bg-amber-pale px-3.5 py-2.5 text-[0.8125rem] text-amber" role="status">
               <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden />
               <p>
                 {freshness.message}{" "}
@@ -152,27 +152,27 @@ export default async function HomePage() {
         {/* Desktop right rail */}
         <aside className="hidden xl:block xl:pt-6">
           <Card className="p-5">
-            <h2 className="font-serif text-[18px] font-semibold text-ink">Today&rsquo;s key points</h2>
+            <h2 className="font-serif text-[1.125rem] font-semibold text-ink">Today&rsquo;s key points</h2>
             {stories.length > 0 ? (
               <ol className="mt-3 space-y-3">
                 {stories.slice(0, 5).map((s, i) => (
                   <li key={s.id} className="flex gap-3">
-                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-muted text-[12px] font-semibold text-secondary tnum">{i + 1}</span>
+                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-muted text-[0.75rem] font-semibold text-secondary tnum">{i + 1}</span>
                     <div>
-                      <p className="text-[14px] font-semibold leading-snug text-ink">{s.headline}</p>
-                      <p className="text-[13px] text-secondary">{s.teaser}</p>
+                      <p className="text-[0.875rem] font-semibold leading-snug text-ink">{s.headline}</p>
+                      <p className="text-[0.8125rem] text-secondary">{s.teaser}</p>
                     </div>
                   </li>
                 ))}
               </ol>
             ) : (
-              <p className="mt-2 text-[13px] text-secondary">No highlights published today.</p>
+              <p className="mt-2 text-[0.8125rem] text-secondary">No highlights published today.</p>
             )}
           </Card>
           <Card className="mt-4 p-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-[18px] font-semibold text-ink">Upcoming events</h2>
-              <Link href="/events" className="text-[13px] font-medium text-blue">
+              <h2 className="font-serif text-[1.125rem] font-semibold text-ink">Upcoming events</h2>
+              <Link href="/events" className="text-[0.8125rem] font-medium text-blue">
                 View all
               </Link>
             </div>
@@ -184,8 +184,8 @@ export default async function HomePage() {
           </Card>
           <Card className="mt-4 p-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-[18px] font-semibold text-ink">Recent activity</h2>
-              <Link href="/updates" className="text-[13px] font-medium text-blue">
+              <h2 className="font-serif text-[1.125rem] font-semibold text-ink">Recent activity</h2>
+              <Link href="/updates" className="text-[0.8125rem] font-medium text-blue">
                 View all
               </Link>
             </div>

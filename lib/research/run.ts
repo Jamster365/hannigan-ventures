@@ -70,7 +70,7 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
   const householdId = householdFromEnv();
   const { createSupabaseResearchStore } = await import("./supabase-store");
   const store = createSupabaseResearchStore();
-  const report: { advanced: { runId: string; status: string }[]; failedStale: string[]; started: PipelineResult | null; localDate: string } = { advanced: [], failedStale: [], started: null, localDate: londonDate(now) };
+  const report: { advanced: { runId: string; status: string }[]; failedStale: string[]; started: PipelineResult | null; localDate: string; imagery: number } = { advanced: [], failedStale: [], started: null, localDate: londonDate(now), imagery: 0 };
 
   let importsProcessed = 0;
   for (const run of await store.listActiveRuns(householdId)) {
@@ -88,6 +88,8 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
     report.advanced.push({ runId: run.id, status: result.status });
   }
 
+  report.imagery = await backfillImagery(store, householdId, now).catch(() => 0);
+
   // Operator-triggered one-off first fill: a manual run with deep discovery and a larger cap.
   if (opts.firstFill) {
     report.started = await beginResearch({ runKind: "manual", triggeredBy: null, householdId, firstFill: true });
@@ -100,4 +102,20 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
     report.started = await beginResearch({ runKind: "scheduled", triggeredBy: null, householdId, updateOnly: (config.preferences.dailyMode ?? "update_only") === "update_only" });
   }
   return report;
+}
+
+/**
+ * A few companies per heartbeat that still have no picture get another look
+ * at their own website (each at most once a week). Only pictures from the
+ * company's own site, which must be one of its stored sources, are used.
+ */
+async function backfillImagery(store: import("./supabase-store").SupabaseResearchStore, householdId: string, now: Date, limit = 3): Promise<number> {
+  const [{ findCompanyImagery }, { safeFetch }] = await Promise.all([import("./imagery"), import("./fetch")]);
+  let saved = 0;
+  for (const c of await store.companiesMissingHero(householdId, limit)) {
+    const heroes = (await findCompanyImagery({ website: c.website, verifiedUrls: c.verifiedUrls }, safeFetch)).filter((i) => i.kind === "hero");
+    if (heroes.length) saved += await store.saveImagery({ householdId, companyId: c.companyId, companyName: c.name, images: heroes });
+    await store.audit({ householdId, runId: `imagery:${now.toISOString().slice(0, 10)}`, action: "imagery.backfill", objectType: "company", objectId: c.companyId, after: { found: heroes.length } });
+  }
+  return saved;
 }

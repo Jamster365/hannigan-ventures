@@ -30,15 +30,15 @@ export function SourcesTab({ bundle, type }: { bundle: CompanyBundle; type: stri
             scroll={false}
             role="tab"
             aria-selected={type === t.key}
-            className={cn("min-h-[34px] shrink-0 rounded-full border px-3.5 text-[13px] font-medium leading-[32px]", type === t.key ? "border-ink bg-ink text-white" : "border-hairline bg-surface text-ink")}
+            className={cn("min-h-[34px] shrink-0 rounded-full border px-3.5 text-[0.8125rem] font-medium leading-[32px]", type === t.key ? "border-ink bg-ink text-white" : "border-hairline bg-surface text-ink")}
           >
             {t.label}
           </Link>
         ))}
       </div>
-      {company.isDemo ? <p className="mb-3 rounded-[12px] bg-amber-pale px-3 py-2 text-[12px] text-amber">Sample sources for a fictional company. Links use a reserved domain and do not resolve.</p> : null}
+      {company.isDemo ? <p className="mb-3 rounded-[12px] bg-amber-pale px-3 py-2 text-[0.75rem] text-amber">Sample sources for a fictional company. Links use a reserved domain and do not resolve.</p> : null}
       {list.length === 0 ? (
-        <p className="rounded-[14px] bg-surface-muted px-4 py-6 text-center text-[14px] text-secondary">No sources of this type. Claims without a source are labelled as inference or omitted.</p>
+        <p className="rounded-[14px] bg-surface-muted px-4 py-6 text-center text-[0.875rem] text-secondary">No sources of this type. Claims without a source are labelled as inference or omitted.</p>
       ) : (
         <ol className="divide-y divide-hairline rounded-[var(--radius-card)] border border-hairline bg-surface">
           {list.map((s) => {
@@ -49,17 +49,17 @@ export function SourcesTab({ bundle, type }: { bundle: CompanyBundle; type: stri
                 <a href={s.canonicalUrl} target="_blank" rel="noopener noreferrer" className="flex gap-3 px-4 py-3 hover:bg-surface-muted/70">
                   <span className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-secondary">
                     <Icon size={16} aria-hidden />
-                    <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-pale px-1 text-[9px] font-semibold text-blue tnum">{n}</span>
+                    <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-pale px-1 text-[0.5625rem] font-semibold text-blue tnum">{n}</span>
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[14px] font-semibold leading-snug text-ink">{s.title}</span>
-                    <span className="mt-0.5 block text-[12px] text-secondary">
+                    <span className="block text-[0.875rem] font-semibold leading-snug text-ink">{s.title}</span>
+                    <span className="mt-0.5 block text-[0.75rem] text-secondary">
                       {s.publisher} · {formatDate(s.publishedAt)}
                     </span>
                     <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
                       {s.claimType ? <Pill tone="neutral">{s.claimType}</Pill> : null}
                       <Pill tone={s.trustTier === "primary" ? "green" : s.trustTier === "reputable" ? "blue" : s.trustTier === "secondary" ? "amber" : "neutral"}>{trustLabel(s.trustTier)}</Pill>
-                      <span className="text-[11px] text-tertiary">Checked {formatDate(s.retrievedAt)}</span>
+                      <span className="text-[0.6875rem] text-tertiary">Checked {formatDate(s.retrievedAt)}</span>
                     </span>
                   </span>
                   <ExternalLink size={15} className="mt-1 shrink-0 text-tertiary" aria-hidden />

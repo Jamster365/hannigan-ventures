@@ -72,6 +72,13 @@ html {
   background: var(--page);
 }
 
+/* Touch tablets (iPad): text a step larger. Font sizes are in rem for this. */
+@media (min-width: 768px) and (pointer: coarse) {
+  html {
+    font-size: 110%;
+  }
+}
+
 body {
   background: var(--page);
   color: var(--text);

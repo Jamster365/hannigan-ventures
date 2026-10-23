@@ -52,7 +52,7 @@ export function MatchChat({ companyId, slug, companyName, comments, members, cur
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4" aria-label={`Chat about ${companyName}`}>
-        <p className="mx-auto mb-4 max-w-[34ch] rounded-full bg-green-pale px-4 py-1.5 text-center text-[12px] font-medium text-green">{intro}</p>
+        <p className="mx-auto mb-4 max-w-[34ch] rounded-full bg-green-pale px-4 py-1.5 text-center text-[0.75rem] font-medium text-green">{intro}</p>
         <ol className="mx-auto max-w-[760px] space-y-1.5">
           {visible.map((c, i) => {
             const mine = c.authorUserId === currentUserId;
@@ -63,7 +63,7 @@ export function MatchChat({ companyId, slug, companyName, comments, members, cur
               <li key={c.id} className={cn("flex items-end gap-2", mine ? "justify-end" : "justify-start", firstOfRun && i > 0 && "pt-2")}>
                 {!mine ? <span className="w-8 shrink-0">{firstOfRun ? research ? <ResearchAvatar /> : author ? <Avatar member={author} size="sm" /> : null : null}</span> : null}
                 <div className={cn("max-w-[78%]", mine && "flex flex-col items-end")}>
-                  {!mine && firstOfRun ? <p className="mb-0.5 ml-3 text-[11px] font-medium text-tertiary">{research ? "Research · AI" : (author?.displayName ?? "Member")}</p> : null}
+                  {!mine && firstOfRun ? <p className="mb-0.5 ml-3 text-[0.6875rem] font-medium text-tertiary">{research ? "Research · AI" : (author?.displayName ?? "Member")}</p> : null}
                   <Bubble comment={c} mine={mine} research={research} slug={slug} selected={selected === c.id} onSelect={() => setSelected(selected === c.id ? null : c.id)} />
                 </div>
               </li>
@@ -74,7 +74,7 @@ export function MatchChat({ companyId, slug, companyName, comments, members, cur
       </div>
 
       {error ? (
-        <p role="alert" className="px-4 pb-1 text-[13px] text-red">
+        <p role="alert" className="px-4 pb-1 text-[0.8125rem] text-red">
           {error}
         </p>
       ) : null}
@@ -98,7 +98,7 @@ export function MatchChat({ companyId, slug, companyName, comments, members, cur
           maxLength={2000}
           placeholder="Message"
           aria-label="Message"
-          className="max-h-32 min-h-[42px] flex-1 resize-none rounded-[21px] border border-hairline-strong bg-page px-4 py-2.5 text-[15px] text-ink placeholder:text-tertiary focus:outline-none"
+          className="max-h-32 min-h-[42px] flex-1 resize-none rounded-[21px] border border-hairline-strong bg-page px-4 py-2.5 text-[0.9375rem] text-ink placeholder:text-tertiary focus:outline-none"
         />
         <button type="submit" disabled={pending || !draft.trim()} aria-label="Send" className="inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-ink text-white disabled:opacity-40">
           <ArrowUp size={20} strokeWidth={2.4} />
@@ -138,13 +138,13 @@ function Bubble({ comment, mine, research, slug, selected, onSelect }: { comment
         }}
         className="w-[min(78vw,360px)]"
       >
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={2000} className="w-full rounded-[16px] border border-hairline-strong px-3 py-2 text-[15px] text-ink" aria-label="Edit message" />
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={2000} className="w-full rounded-[16px] border border-hairline-strong px-3 py-2 text-[0.9375rem] text-ink" aria-label="Edit message" />
         {failed ? (
-          <p role="alert" className="mt-1 text-right text-[12px] text-red">
+          <p role="alert" className="mt-1 text-right text-[0.75rem] text-red">
             {failed}
           </p>
         ) : null}
-        <div className="mt-1 flex justify-end gap-3 text-[13px]">
+        <div className="mt-1 flex justify-end gap-3 text-[0.8125rem]">
           <button type="button" onClick={() => { setEditing(false); setText(comment.body); setFailed(null); }} className="text-secondary">
             Cancel
           </button>
@@ -162,7 +162,7 @@ function Bubble({ comment, mine, research, slug, selected, onSelect }: { comment
         type="button"
         onClick={onSelect}
         className={cn(
-          "whitespace-pre-wrap break-words rounded-[20px] px-3.5 py-2 text-left text-[15px] leading-snug",
+          "whitespace-pre-wrap break-words rounded-[20px] px-3.5 py-2 text-left text-[0.9375rem] leading-snug",
           mine ? "rounded-br-[6px] bg-ink text-white" : research ? "rounded-bl-[6px] border border-violet/20 bg-violet-pale text-ink" : "rounded-bl-[6px] bg-surface-muted text-ink",
           temp && "opacity-60",
         )}
@@ -177,7 +177,7 @@ function Bubble({ comment, mine, research, slug, selected, onSelect }: { comment
         )}
       </button>
       {selected ? (
-        <p className={cn("mt-0.5 flex gap-3 px-2 text-[11px] text-tertiary", mine ? "justify-end" : "justify-start")}>
+        <p className={cn("mt-0.5 flex gap-3 px-2 text-[0.6875rem] text-tertiary", mine ? "justify-end" : "justify-start")}>
           <span>
             {formatDateTime(comment.createdAt)}
             {comment.editedAt ? " · edited" : ""}
@@ -206,7 +206,7 @@ function Bubble({ comment, mine, research, slug, selected, onSelect }: { comment
         </p>
       ) : null}
       {failed ? (
-        <p role="alert" className={cn("mt-0.5 px-2 text-[11px] text-red", mine ? "text-right" : "text-left")}>
+        <p role="alert" className={cn("mt-0.5 px-2 text-[0.6875rem] text-red", mine ? "text-right" : "text-left")}>
           {failed}
         </p>
       ) : null}

@@ -15,8 +15,8 @@ export function Wordmark({ className, dark }: { className?: string; dark?: boole
     <span className={cn("flex items-center gap-2", className)}>
       <LogoMark />
       <span className="leading-none">
-        <span className={cn("block font-serif text-[19px] font-semibold tracking-[-0.01em]", dark ? "text-white" : "text-ink")}>{APP_NAME}</span>
-        <span className={cn("mt-0.5 block text-[9px] font-semibold uppercase tracking-[0.14em]", dark ? "text-white/60" : "text-tertiary")}>{APP_TAGLINE}</span>
+        <span className={cn("block font-serif text-[1.1875rem] font-semibold tracking-[-0.01em]", dark ? "text-white" : "text-ink")}>{APP_NAME}</span>
+        <span className={cn("mt-0.5 block text-[0.5625rem] font-semibold uppercase tracking-[0.14em]", dark ? "text-white/60" : "text-tertiary")}>{APP_TAGLINE}</span>
       </span>
     </span>
   );
