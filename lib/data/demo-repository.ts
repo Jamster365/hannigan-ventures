@@ -1,3 +1,4 @@
+import { DEFAULT_MEMBER_PREFERENCES, type MemberPreferences } from "@/lib/domain/learning";
 import { applyVote, computeFamilyStage } from "@/lib/domain/family-consensus";
 import type {
   AuditEvent,
@@ -136,6 +137,16 @@ class DemoRepository implements Repository {
   async setVoteNote({ userId, companyId, note }: { userId: string; companyId: string; note: string | null }) {
     const v = this.companies.find((c) => c.company.id === companyId)?.votes.find((x) => x.userId === userId);
     if (v) v.note = note ?? undefined;
+  }
+
+  private prefs = new Map<string, MemberPreferences>();
+
+  async getPreferences(userId: string): Promise<MemberPreferences> {
+    return { ...DEFAULT_MEMBER_PREFERENCES, ...(this.prefs.get(userId) ?? {}) };
+  }
+
+  async savePreferences({ userId, prefs }: { userId: string; prefs: MemberPreferences }) {
+    this.prefs.set(userId, prefs);
   }
 
   async recordMemberRoundCheck({ userId, companyId, open }: { userId: string; companyId: string; open: boolean }) {

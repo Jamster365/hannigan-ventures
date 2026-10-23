@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { requireMember } from "@/lib/auth/current-member";
 import { getRepository } from "@/lib/data";
@@ -48,6 +49,8 @@ export async function swipeAction(input: z.input<typeof swipeSchema>): Promise<A
       if (liked) outcome = { kind: "almost", likedBy: liked.map((m) => m.displayName) };
     }
     revalidateSwipe(parsed.data.slug);
+    // Every so many answers, draft research guidance from them (a proposal to approve).
+    after(() => import("@/lib/learning/propose").then((m) => m.maybeProposeFromAnswers(repo)).catch(() => undefined));
     return { ok: true, data: { outcome } };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not save your swipe" };

@@ -1,6 +1,7 @@
 import { accessLabel, effectiveAccess, eisLabel } from "./company-status";
 import { computeFamilyStage } from "./family-consensus";
 import { formatMoney } from "./format";
+import { buildMatcher, type MemberPreferences } from "./learning";
 import type { Assessment, Company, CompanyBundle, CompanyMedia, EvidenceStatus, Member, Notification, VoteValue } from "./types";
 
 /**
@@ -36,6 +37,10 @@ export interface SwipeCard {
    * stays "reported" until a member checks it.
    */
   platform: { name: string; url: string | null; checkedBy: string | null } | null;
+  /** Why the matcher put this company here (learned from answers), if anything. */
+  why: string | null;
+  /** An explore pick, outside this member's usual pattern. */
+  explore: boolean;
   /** This member's current vote, if any (only "unsure" can be left over from the classic app). */
   myVote: VoteValue | null;
 }
@@ -132,7 +137,7 @@ export function evidenceHint(status: EvidenceStatus): string | undefined {
   }
 }
 
-export function buildSwipeCard(bundle: CompanyBundle, userId: string, opts: { now?: Date; maxChequeGbp?: number } = {}): SwipeCard {
+export function buildSwipeCard(bundle: CompanyBundle, userId: string, opts: { now?: Date; maxChequeGbp?: number; why?: string | null; explore?: boolean } = {}): SwipeCard {
   const { company, media, rounds, accessChecks, assessment, founders, facts, sources, votes } = bundle;
   const access = effectiveAccess(accessChecks, opts);
   const round = rounds.find((r) => r.isCurrent) ?? null;
@@ -184,19 +189,37 @@ export function buildSwipeCard(bundle: CompanyBundle, userId: string, opts: { no
           checkedBy: access.check?.verifier.startsWith("member:") ? access.check.notes : null,
         }
       : null,
+    why: opts.why ?? null,
+    explore: opts.explore ?? false,
     myVote: votes.find((v) => v.userId === userId)?.vote ?? null,
   };
 }
 
+/** One place in a member's deck, with why it is there. */
+export interface DeckEntry {
+  bundle: CompanyBundle;
+  /** One line on why the matcher put it here, if it learned something. */
+  why: string | null;
+  /** An "explore" pick: outside this member's usual pattern, to learn more. */
+  explore: boolean;
+}
+
+/** Every EXPLORE_EVERY-th card is an explore pick (once the member has given some answers). */
+export const EXPLORE_EVERY = 8;
+
 /**
- * A member's deck: companies they have not ticked or crossed, that are not
- * already a match or ended (two crosses), and whose round is not closed
- * (closed ones wait on the watch list). UK companies only. Ordered by how
- * investable and how good a fit (EIS/SEIS, early, small valuation), then
- * newest. Everyone still decides: one "not interested" does not hide a company.
+ * A member's deck: companies they have not answered, that are not already a
+ * match or ended (two crosses), and whose round is not closed (closed ones
+ * wait on the watch list). UK companies only: that and closed rounds are the
+ * only hard rules. Everything else orders the deck: how investable, how well
+ * it fits the family's brief (SEIS/EIS, early, small valuation), and what the
+ * matcher has learned from this member's answers, reasons and preferences
+ * (plus, more lightly, the family's). Every 8th card explores something new.
+ * Everyone still decides: one "not interested" does not hide a company.
  */
-export function deckFor(bundles: CompanyBundle[], userId: string, opts: { now?: Date; maxChequeGbp?: number; memberCount?: number } = {}): CompanyBundle[] {
-  return bundles
+export function rankDeck(bundles: CompanyBundle[], userId: string, opts: { now?: Date; maxChequeGbp?: number; memberCount?: number; prefs?: MemberPreferences | null } = {}): DeckEntry[] {
+  const matcher = buildMatcher(bundles, userId, opts.prefs);
+  const scored = bundles
     .filter((b) => {
       const mine = b.votes.find((v) => v.userId === userId);
       if (mine && mine.vote !== "unsure") return false;
@@ -204,9 +227,35 @@ export function deckFor(bundles: CompanyBundle[], userId: string, opts: { now?: 
       if (stage === "shortlisted" || stage === "passed") return false;
       return isUk(b) && !isClosedRound(b, opts);
     })
-    .map((b) => ({ b, score: investability(b, opts) + fitScore(b) }))
-    .sort((x, y) => y.score - x.score || y.b.company.firstDiscoveredAt.localeCompare(x.b.company.firstDiscoveredAt))
-    .map((x) => x.b);
+    .map((b) => {
+      const learned = matcher.score(b);
+      return { b, score: investability(b, opts) + fitScore(b) + learned.points, why: learned.why, novelty: learned.novelty };
+    })
+    .sort((x, y) => y.score - x.score || y.b.company.firstDiscoveredAt.localeCompare(x.b.company.firstDiscoveredAt));
+
+  const out: DeckEntry[] = [];
+  const rest = [...scored];
+  const learning = matcher.mine.answers >= 5;
+  while (rest.length) {
+    if (learning && (out.length + 1) % EXPLORE_EVERY === 0 && rest.length > 1) {
+      // From the better half, the one this member's answers say least about.
+      const pool = rest.slice(0, Math.max(2, Math.ceil(rest.length / 2)));
+      const pick = pool.reduce((best, x) => (x.novelty > best.novelty ? x : best), pool[pool.length - 1]);
+      if (pick.novelty > 0 && pick !== rest[0]) {
+        rest.splice(rest.indexOf(pick), 1);
+        out.push({ bundle: pick.b, why: "Something a bit different, to learn what you think.", explore: true });
+        continue;
+      }
+    }
+    const next = rest.shift()!;
+    out.push({ bundle: next.b, why: next.why, explore: false });
+  }
+  return out;
+}
+
+/** The deck as companies only (see rankDeck). */
+export function deckFor(bundles: CompanyBundle[], userId: string, opts: { now?: Date; maxChequeGbp?: number; memberCount?: number; prefs?: MemberPreferences | null } = {}): CompanyBundle[] {
+  return rankDeck(bundles, userId, opts).map((e) => e.bundle);
 }
 
 export type DecisionStatus = "match" | "waiting" | "ended";

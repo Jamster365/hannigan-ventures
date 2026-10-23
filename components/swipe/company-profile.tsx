@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, MapPin } from "lucide-react";
+import { ExternalLink, MapPin, Sparkles } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import { Pill, type Tone } from "@/components/ui/primitives";
 import type { SwipeCard } from "@/lib/domain/swipe";
@@ -45,7 +45,14 @@ export function CompanyProfile({ card, className }: { card: SwipeCard; className
             {card.raising.label}
           </Pill>
           {card.crowdfunding ? <Pill tone="violet">Crowdfunding</Pill> : null}
+          {card.explore ? <Pill tone="amber">Something different</Pill> : null}
         </div>
+        {card.why && !card.explore ? (
+          <p className="mt-2 flex items-center gap-1.5 text-[0.8125rem] text-secondary">
+            <Sparkles size={13} className="shrink-0 text-blue" aria-hidden />
+            {card.why}
+          </p>
+        ) : null}
 
         <p className="mt-4 text-[1.0625rem] leading-relaxed text-text">{company.teaser}</p>
 

@@ -70,7 +70,7 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
   const householdId = householdFromEnv();
   const { createSupabaseResearchStore } = await import("./supabase-store");
   const store = createSupabaseResearchStore();
-  const report: { advanced: { runId: string; status: string }[]; failedStale: string[]; started: PipelineResult | null; localDate: string; imagery: number } = { advanced: [], failedStale: [], started: null, localDate: londonDate(now), imagery: 0 };
+  const report: { advanced: { runId: string; status: string }[]; failedStale: string[]; started: PipelineResult | null; localDate: string; imagery: number; poolQueued: string[] } = { advanced: [], failedStale: [], started: null, localDate: londonDate(now), imagery: 0, poolQueued: [] };
 
   let importsProcessed = 0;
   for (const run of await store.listActiveRuns(householdId)) {
@@ -89,6 +89,8 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
   }
 
   report.imagery = await backfillImagery(store, householdId, now).catch(() => 0);
+  // Research batches shipped with the app are queued once, then processed like uploads.
+  report.poolQueued = await import("./queue-import").then((m) => m.queueBundledPool(householdId)).catch(() => []);
 
   // Operator-triggered one-off first fill: a manual run with deep discovery and a larger cap.
   if (opts.firstFill) {

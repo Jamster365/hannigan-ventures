@@ -22,6 +22,7 @@ import { RESEARCH_AUTHOR_ID } from "@/lib/domain/types";
 import { DEFAULT_PREFERENCES } from "@/lib/research/default-prompt";
 import { applyPatch } from "@/lib/research/patch";
 import { requireSessionContext } from "@/lib/supabase/member";
+import { DEFAULT_MEMBER_PREFERENCES, type MemberPreferences } from "@/lib/domain/learning";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   num,
@@ -264,6 +265,19 @@ class SupabaseRepository implements Repository {
     if (member.userId !== userId) throw new Error("You can only change your own answer");
     const { error } = await supabase.from("member_votes").update({ note }).eq("company_id", companyId).eq("user_id", userId);
     this.fail(error, "save reason");
+  }
+
+  async getPreferences(userId: string): Promise<MemberPreferences> {
+    const { supabase, householdId } = await this.ctx();
+    const { data } = await supabase.from("member_preferences").select("prefs").eq("household_id", householdId).eq("user_id", userId).maybeSingle<{ prefs: Partial<MemberPreferences> }>();
+    return { ...DEFAULT_MEMBER_PREFERENCES, ...(data?.prefs ?? {}) };
+  }
+
+  async savePreferences({ userId, prefs }: { userId: string; prefs: MemberPreferences }): Promise<void> {
+    const { supabase, householdId, member } = await this.ctx();
+    if (member.userId !== userId) throw new Error("You can only change your own preferences");
+    const { error } = await supabase.from("member_preferences").upsert({ household_id: householdId, user_id: userId, prefs, updated_at: new Date().toISOString() });
+    this.fail(error, "save preferences");
   }
 
   async recordMemberRoundCheck({ userId, companyId, open }: { userId: string; companyId: string; open: boolean }): Promise<void> {

@@ -269,3 +269,16 @@ test("an optional reason can be added after a yes or no, and edited in Your pick
   await row.getByRole("button", { name: "Back to my deck" }).click();
   await expect(row).toHaveCount(0);
 });
+
+test("Your taste shows what the app learned and saves preferences", async ({ page }) => {
+  await viewAs(page, "Brother");
+  await go(page, "/me");
+  await page.getByRole("link", { name: /Your taste/ }).click();
+  await expect(page.getByRole("heading", { name: "Your taste" })).toBeVisible();
+  await expect(page.getByText("What the app has learned about you")).toBeVisible();
+  await page.getByRole("button", { name: "Essential", exact: true }).click();
+  await page.getByRole("button", { name: "Pre-seed", exact: true }).click();
+  await page.getByRole("button", { name: "Save preferences" }).click();
+  await expect(page.getByText("Saved. Your deck now uses these.")).toBeVisible();
+  await expect(page.getByText("What the family’s answers say")).toBeVisible();
+});

@@ -25,7 +25,7 @@ export function SuggestionReview({ suggestion, members, feedbackAuthor }: { sugg
             <Pill tone={suggestion.status === "proposed" ? "amber" : suggestion.status === "applied" ? "green" : "neutral"}>{suggestion.status}</Pill>
           </div>
           <p className="mt-0.5 text-[0.75rem] text-secondary">
-            Suggested by {suggestion.suggestedBy === "ai" ? "research assistant" : "a member"}
+            Suggested by {suggestion.suggestedBy === "ai" ? "research assistant" : suggestion.suggestedBy === "learning" ? "the family’s answers" : "a member"}
             {feedbackAuthor ? ` from ${feedbackAuthor}'s feedback` : ""} · {relativeTime(suggestion.createdAt)}
             {approver ? ` · ${suggestion.status} by ${approver}` : ""}
           </p>

@@ -1,3 +1,4 @@
+import type { MemberPreferences } from "@/lib/domain/learning";
 import type {
   AngelNetwork,
   AuditEvent,
@@ -52,6 +53,8 @@ export interface Repository {
   setVote(input: { userId: string; companyId: string; vote: VoteValue | null; score?: number | null }): Promise<{ transition: StageTransition }>;
   /** The member's optional reason for their current answer (private, like the vote). */
   setVoteNote(input: { userId: string; companyId: string; note: string | null }): Promise<void>;
+  getPreferences(userId: string): Promise<MemberPreferences>;
+  savePreferences(input: { userId: string; prefs: MemberPreferences }): Promise<void>;
   /** A member opened the round's page and says whether it is live (open: expires after 48h). */
   recordMemberRoundCheck(input: { userId: string; companyId: string; open: boolean }): Promise<void>;
   addComment(input: { userId: string; companyId: string; body: string }): Promise<Comment>;
