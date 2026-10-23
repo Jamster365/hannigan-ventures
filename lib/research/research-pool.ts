@@ -5,9 +5,10 @@
  * then the normal pipeline verifies every source before anything is published.
  * Add a batch by dropping its file in data/research-pool and listing it here.
  */
+import accelerators from "@/data/research-pool/2026-10-23-accelerators.json";
 import angelNetworks from "@/data/research-pool/2026-10-23-angel-networks.json";
 import eisPlatforms from "@/data/research-pool/2026-10-23-eis-platforms.json";
 
 type PoolFile = { label: string; payload: unknown };
 
-export const RESEARCH_POOL: { label: string; data: unknown }[] = ([eisPlatforms, angelNetworks] as PoolFile[]).map((f) => ({ label: f.label, data: f.payload }));
+export const RESEARCH_POOL: { label: string; data: unknown }[] = ([eisPlatforms, angelNetworks, accelerators] as PoolFile[]).map((f) => ({ label: f.label, data: f.payload }));
