@@ -2,6 +2,14 @@
 
 Read this first, then `IMPLEMENTATION_STATUS.md` (section "Live environment") and `README.md`.
 
+## Learning matcher and research pool (23 October 2026, live)
+- **Matcher** (`lib/domain/learning.ts`, `rankDeck` in `lib/domain/swipe.ts`): each company is described by features (sector, stage bucket, SEIS/EIS yes/no/unknown, valuation band, route, UK region). A member's taste = smoothed log-odds per feature from their yes/no answers; a reason chip naming a feature counts double; their saved preferences (Profile → Your taste, table `member_preferences`, migration 0017) are a head start. Family taste weighs half and is relearned without the company being ranked, so another member's vote on it can't move it (tested). Deck order = investability + brief fit + learned points. Every 8th card is an explore pick once a member has 5 answers. Cards show one "why this is here" line.
+- **Only two hard rules:** UK, and no closed rounds. Cheque size is advisory (a high minimum is flagged, `Can invest now` still allowed).
+- **Answers → research:** every 25 answers (`after()` in `swipeAction`) or on request (Your taste → "Suggest research changes now"), the family's totals become a proposed research-instruction change (`suggested_by = 'learning'`, adds/replaces a "Learned from the family's answers" section). A member must approve it on Research instructions.
+- **Crowdfunding:** Crowdcube/Seedrs/Republic listings show "On <platform> · probably open"; members can record "I checked: it's open" (48h) or "It's closed" (migration 0016 lets members insert their own `member:<uid>` access checks).
+- **Research pool:** `data/research-pool/*.json`, listed in `lib/research/research-pool.ts`. The heartbeat queues each labelled batch once ("Research pool …") and processes one run of 12 per tick through the normal verify/publish pipeline. 23 Oct: 81 UK companies from six source areas (AIN single-company SEIS/EIS listings, angel networks, accelerator cohorts, SETsquared spin-outs, crowdfunding, recently funded watch list). Most SEIS/EIS statuses are company claims or unknown; no advance-assurance letters were seen. To add more: research to the template, validate with `scripts/check-research-import.ts`, dedupe, drop the file in and list it.
+- Lesson: `tests/` is type-checked by the Vercel build. Run `npm run build` before pushing.
+
 ## Tap-only deck, reasons and UK SEIS/EIS focus (23 October 2026, `efc817b`, live)
 - Swiping is gone: answers are the two round buttons only. The "family is waiting on your view" banner is gone; the deck banner shows matches only.
 - After an answer that isn't a match, a "Say why…" pill shows for 9 seconds and opens an optional reason sheet (chips + text, max 500 chars) stored in `member_votes.note` via `saveReasonAction`. Reasons can be added or edited later in Profile → Your picks. A new answer clears the old note.
