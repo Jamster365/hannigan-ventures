@@ -37,7 +37,7 @@ export default async function MorePage() {
     },
     {
       title: "App style",
-      items: [{ href: "/", label: "Swipe app", sub: "Back to tick-or-cross and match chats", Icon: Heart }],
+      items: [{ href: "/", label: "Swipe app", sub: "Back to the deck and match chats", Icon: Heart }],
     },
   ];
 

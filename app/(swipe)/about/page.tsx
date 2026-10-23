@@ -7,11 +7,11 @@ export const metadata = { title: "About & methodology" };
 const sections = [
   {
     title: "What this is",
-    body: "A private research journal for three family members. It discovers early-stage companies each morning, checks sources, and lets each member tick or cross each one. It is not a brokerage, does not move money and gives no investment advice.",
+    body: "A private research journal for three family members. It discovers early-stage companies each morning, checks sources, and lets each member say whether they are interested in each one. It is not a brokerage, does not move money and gives no investment advice.",
   },
   {
     title: "How matches work",
-    body: "Each member ticks, crosses or skips every company in their deck, and everyone's choices stay private until there is a match. When two of you tick the same company it is a match: it moves to Matches and opens a chat for the whole family. Two crosses end it. If your cross was the deciding vote and your tick would have made a match, you are told it was almost a match and can undo. Change any decision later in Decisions. Companies whose round has closed wait on the watch list until a new round appears. A match means \"worth a conversation\", never \"let's invest\". Nothing is overridden by hand or by the AI.",
+    body: "Each member marks every company in their deck as interested or not interested (or skips it), and everyone's answers stay private until there is a match. When two of you are interested in the same company it is a match: it moves to Matches and opens a chat for the whole family. Two “not interested” answers end it. If your “not interested” was the deciding answer and “interested” would have made a match, you are told it was almost a match and can undo. Change any decision later in Decisions. Companies whose round has closed wait on the watch list until a new round appears. A match means \"worth a conversation\", never \"let's invest\". Nothing is overridden by hand or by the AI.",
   },
   {
     title: "How the AI rating works",

@@ -116,7 +116,7 @@ describe("family stage is computed server-side (two of three)", () => {
     expect(await stage()).toBe("shortlisted");
     const updates = await h.admin.query<{ headline: string; summary: string }>("select headline, summary from company_updates where company_id = $1 and update_type = 'family'", [company]);
     expect(updates.map((u) => u.headline)).toEqual(["It's a match"]);
-    expect(updates[0].summary).toBe("Jamie and Brother ticked Larkspur Photonics.");
+    expect(updates[0].summary).toBe("Jamie and Brother are interested in Larkspur Photonics.");
     const notes = await h.admin.query<{ recipient_user_id: string; href: string }>("select recipient_user_id, href from notifications where notification_type = 'shortlist_promoted' and company_id = $1", [company]);
     expect(notes.map((n) => n.recipient_user_id).sort()).toEqual([dad, jamie].sort());
     expect(notes.every((n) => n.href === "/matches/larkspur-photonics")).toBe(true);

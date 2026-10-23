@@ -140,7 +140,7 @@ export function CompanyProfile({ card, className, essentialsFirst = false }: { c
               </Prompt>
             ) : null}
 
-            <p className="mt-5 text-[12px] text-tertiary">Anything shown as Unknown or Undisclosed has no source yet. A tick means “worth a conversation”, not “let’s invest”.</p>
+            <p className="mt-5 text-[12px] text-tertiary">Anything shown as Unknown or Undisclosed has no source yet. Interested means “worth a conversation”, not “let’s invest”.</p>
           </>
         )}
       </div>

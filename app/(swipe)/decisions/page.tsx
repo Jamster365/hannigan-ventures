@@ -13,21 +13,21 @@ export default async function DecisionsPage() {
   const repo = await getRepository();
   const [members, bundles] = await Promise.all([repo.getMembers(), repo.listCompanies()]);
   const { decided, watching } = decisionsFor(bundles, member.userId, { memberCount: members.length });
-  const ticked = decided.filter((d) => d.vote === "interested");
-  const crossed = decided.filter((d) => d.vote === "pass");
+  const interested = decided.filter((d) => d.vote === "interested");
+  const notInterested = decided.filter((d) => d.vote === "pass");
 
   return (
     <>
       <PageHeader title="Decisions" />
       <div className="mx-auto w-full max-w-[640px] pb-8">
-        <p className="px-4 pt-3 text-[13px] text-secondary">Everything you’ve ticked or crossed. Change your mind any time; only you can see your picks until there’s a match.</p>
+        <p className="px-4 pt-3 text-[13px] text-secondary">Every company you’ve said you’re interested or not interested in. Change your mind any time; only you can see your picks until there’s a match.</p>
         {decided.length === 0 && watching.length === 0 ? (
           <div className="pt-8">
-            <EmptyState icon={<ListChecks size={28} />} title="Nothing decided yet" body="Companies you tick or cross in Discover appear here." />
+            <EmptyState icon={<ListChecks size={28} />} title="Nothing decided yet" body="Companies you decide on in Discover appear here." />
           </div>
         ) : null}
-        <Group title="Ticked" count={ticked.length} rows={ticked} />
-        <Group title="Crossed" count={crossed.length} rows={crossed} />
+        <Group title="Interested" count={interested.length} rows={interested} />
+        <Group title="Not interested" count={notInterested.length} rows={notInterested} />
         <Group title="Watch list" count={watching.length} rows={watching} note="Rounds that have closed. They return to your deck when research finds a new round." />
       </div>
     </>

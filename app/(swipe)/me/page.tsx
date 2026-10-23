@@ -56,7 +56,7 @@ export default async function MePage() {
             </div>
           </div>
           <p className="mt-3 text-[13px] text-secondary">
-            A company becomes a match when two of you ({members.map((m) => m.displayName).join(", ")}) tick it. Your ticks and crosses stay private until then.
+            A company becomes a match when two of you ({members.map((m) => m.displayName).join(", ")}) are interested in it. Your answers stay private until then.
           </p>
         </Card>
         <section className="mt-5">

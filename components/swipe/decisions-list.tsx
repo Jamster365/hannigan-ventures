@@ -40,7 +40,7 @@ export function DecisionItem({ row }: { row: DecisionRow }) {
   };
 
   const status =
-    row.status === "match" ? { label: "Match", cls: "bg-green-pale text-green" } : row.status === "ended" ? { label: "Ended: two crosses", cls: "bg-surface-muted text-secondary" } : row.closed ? { label: "Round closed", cls: "bg-amber-pale text-amber" } : vote === "unsure" ? null : { label: "Waiting on the others", cls: "bg-surface-muted text-secondary" };
+    row.status === "match" ? { label: "Match", cls: "bg-green-pale text-green" } : row.status === "ended" ? { label: "Ended: two not interested", cls: "bg-surface-muted text-secondary" } : row.closed ? { label: "Round closed", cls: "bg-amber-pale text-amber" } : vote === "unsure" ? null : { label: "Waiting on the others", cls: "bg-surface-muted text-secondary" };
 
   return (
     <li className="flex gap-3 px-4 py-3">
@@ -60,11 +60,11 @@ export function DecisionItem({ row }: { row: DecisionRow }) {
         </div>
         <p className="mt-0.5 line-clamp-2 text-[13px] text-secondary">{company.teaser}</p>
         <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label={`Your decision on ${company.name}`}>
-          <Choice active={vote === "interested"} disabled={pending} onClick={() => change("interested")} tone="green">
-            <Check size={15} aria-hidden /> Tick
+          <Choice active={vote === "interested"} disabled={pending} onClick={() => change("interested")} tone="green" name="Interested">
+            <Check size={17} strokeWidth={2.6} aria-hidden />
           </Choice>
-          <Choice active={vote === "pass"} disabled={pending} onClick={() => change("pass")} tone="red">
-            <X size={15} aria-hidden /> Cross
+          <Choice active={vote === "pass"} disabled={pending} onClick={() => change("pass")} tone="red" name="Not interested">
+            <X size={17} strokeWidth={2.6} aria-hidden />
           </Choice>
           {vote !== "unsure" ? (
             <Choice active={false} disabled={pending} onClick={() => change(null)} tone="neutral" label="Back to my deck">
@@ -82,12 +82,13 @@ export function DecisionItem({ row }: { row: DecisionRow }) {
   );
 }
 
-function Choice({ active, tone, label, children, ...rest }: { active: boolean; tone: "green" | "red" | "neutral"; label?: string; children: React.ReactNode; disabled?: boolean; onClick: () => void }) {
+/** `label` marks an action button; `name` labels an icon-only on/off choice. */
+function Choice({ active, tone, label, name, children, ...rest }: { active: boolean; tone: "green" | "red" | "neutral"; label?: string; name?: string; children: React.ReactNode; disabled?: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
-      aria-label={label}
-      title={label}
+      aria-label={label ?? name}
+      title={label ?? name}
       aria-pressed={label ? undefined : active}
       className={cn(
         "inline-flex min-h-[34px] items-center gap-1 rounded-full border px-3 text-[13px] font-medium transition-colors disabled:opacity-60",

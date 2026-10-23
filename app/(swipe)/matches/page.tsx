@@ -30,7 +30,7 @@ export default async function MatchesPage() {
       <div className="mx-auto w-full max-w-[640px] pb-6">
         {rows.length === 0 ? (
           <div className="pt-8">
-            <EmptyState icon={<MessageCircle size={28} />} title="No matches yet" body="When two of you tick the same company, it lands here with its own chat." />
+            <EmptyState icon={<MessageCircle size={28} />} title="No matches yet" body="When two of you are interested in the same company, it lands here with its own chat." />
           </div>
         ) : null}
         {active.length ? <MatchList rows={active} nameOf={nameOf} /> : null}

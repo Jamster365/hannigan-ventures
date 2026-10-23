@@ -114,13 +114,13 @@ class DemoRepository implements Repository {
     const now = new Date().toISOString();
     const tickers = bundle.votes.filter((v) => v.vote === "interested").map((v) => DEMO_MEMBERS.find((m) => m.userId === v.userId)?.displayName ?? "A member").join(" and ");
     if (transition.promoted) {
-      bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "It's a match", summary: `${tickers} ticked ${bundle.company.name}.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
+      bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "It's a match", summary: `${tickers} are interested in ${bundle.company.name}.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
       if (!bundle.comments.some((c) => c.authorUserId === RESEARCH_AUTHOR_ID)) {
         const latest = bundle.assessment?.summary;
         const opener = `I'm Research, the family's AI analyst. I'll post here whenever something changes for ${bundle.company.name}: the round, the team, risks or how to invest.${latest ? `\n\nWhere things stand: ${latest.slice(0, 700)}` : ""}`;
         bundle.comments.push({ id: this.nextId("c"), companyId, authorUserId: RESEARCH_AUTHOR_ID, body: opener, createdAt: now, editedAt: null, deletedAt: null, likedBy: [] });
       }
-      this.pushNotification(others, { notificationType: "shortlist_promoted", companyId, updateId: null, commentId: null, title: `It's a match: ${bundle.company.name}`, body: `${tickers} ticked ${bundle.company.name}. The chat is open.`, importance: "high", href: `/matches/${bundle.company.slug}`, dedupe: `promote:${companyId}:${now}` });
+      this.pushNotification(others, { notificationType: "shortlist_promoted", companyId, updateId: null, commentId: null, title: `It's a match: ${bundle.company.name}`, body: `${tickers} are interested in ${bundle.company.name}. The chat is open.`, importance: "high", href: `/matches/${bundle.company.slug}`, dedupe: `promote:${companyId}:${now}` });
     } else if (transition.demoted) {
       // The chat has closed: unread match and chat notifications would point at nothing.
       for (const n of this.notifications) {

@@ -100,23 +100,23 @@ test("first visit shows a one-time tip", async ({ page }) => {
 
 test("swipe: skip, almost a match, undo, two ticks make a match, and Decisions changes your mind", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("hv-deck-tip-seen", "1"));
-  // Quillon Verify: Jamie ticked. Dad crosses it, so Brother's vote decides it.
+  // Quillon Verify: Jamie is interested. Dad says no, so Brother's vote decides it.
   await viewAs(page, "Dad");
   await go(page, "/");
   await skipTo(page, "Quillon Verify");
-  await page.getByRole("button", { name: "Cross: not for us" }).click();
+  await page.getByRole("button", { name: "Not interested", exact: true }).click();
   await page.waitForTimeout(600);
 
   await viewAs(page, "Brother");
   await go(page, "/");
   await skipTo(page, "Quillon Verify");
-  await page.getByRole("button", { name: "Cross: not for us" }).click();
-  await expect(page.getByRole("dialog", { name: "Almost a match" })).toContainText("Jamie ticked");
-  await page.getByRole("button", { name: "Undo my cross" }).click();
+  await page.getByRole("button", { name: "Not interested", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Almost a match" })).toContainText("Jamie is interested in");
+  await page.getByRole("button", { name: "Undo my answer" }).click();
   await expect(topCard(page)).toHaveText("Quillon Verify");
 
-  await page.getByRole("button", { name: "Tick: interested" }).click();
-  await expect(page.getByRole("dialog", { name: "It’s a match!" })).toContainText("You and Jamie ticked");
+  await page.getByRole("button", { name: "Interested", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "It’s a match!" })).toContainText("You and Jamie are interested in");
   await page.getByRole("button", { name: "Keep swiping" }).click();
   await page.getByRole("button", { name: "Undo last swipe" }).click();
   await page.waitForTimeout(600);

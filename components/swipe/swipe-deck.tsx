@@ -261,11 +261,11 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
 
       {shown && dx !== 0 ? (
         <div className="pointer-events-none fixed inset-x-0 top-28 z-30 mx-auto flex max-w-[640px] justify-between px-6" aria-hidden>
-          <span className="rotate-[-12deg] rounded-[10px] border-[3px] border-green bg-surface/90 px-3 py-1 text-[22px] font-bold uppercase tracking-[0.08em] text-green" style={{ opacity: dx > 0 ? strength : 0 }}>
-            Tick
+          <span className="inline-flex h-16 w-16 rotate-[-12deg] items-center justify-center rounded-full border-[3px] border-green bg-surface/90 text-green" style={{ opacity: dx > 0 ? strength : 0 }}>
+            <Check size={36} strokeWidth={3} />
           </span>
-          <span className="rotate-[12deg] rounded-[10px] border-[3px] border-red bg-surface/90 px-3 py-1 text-[22px] font-bold uppercase tracking-[0.08em] text-red" style={{ opacity: dx < 0 ? strength : 0 }}>
-            Cross
+          <span className="inline-flex h-16 w-16 rotate-[12deg] items-center justify-center rounded-full border-[3px] border-red bg-surface/90 text-red" style={{ opacity: dx < 0 ? strength : 0 }}>
+            <X size={36} strokeWidth={3} />
           </span>
         </div>
       ) : null}
@@ -277,11 +277,11 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
             <button
               type="button"
               onClick={() => commit("left")}
-              aria-label="Cross: not for us"
-              className="inline-flex h-12 flex-1 items-center justify-center gap-1.5 rounded-full border border-hairline-strong bg-surface text-[15px] font-semibold text-red transition-transform active:scale-95"
+              aria-label="Not interested"
+              title="Not interested"
+              className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-hairline-strong bg-surface text-red transition-transform active:scale-95"
             >
-              <X size={22} strokeWidth={2.6} aria-hidden />
-              Cross
+              <X size={26} strokeWidth={2.6} aria-hidden />
             </button>
             <button
               type="button"
@@ -306,11 +306,11 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
             <button
               type="button"
               onClick={() => commit("right")}
-              aria-label="Tick: interested"
-              className="inline-flex h-12 flex-1 items-center justify-center gap-1.5 rounded-full bg-green text-[15px] font-semibold text-white transition-transform active:scale-95"
+              aria-label="Interested"
+              title="Interested"
+              className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-green text-white transition-transform active:scale-95"
             >
-              <Check size={22} strokeWidth={2.8} aria-hidden />
-              Tick
+              <Check size={26} strokeWidth={2.8} aria-hidden />
             </button>
           </div>
         </div>
@@ -341,7 +341,7 @@ function CaughtUp() {
 function MatchOverlay({ card, members, tickedBy, onClose }: { card: SwipeCard; members: Member[]; tickedBy: string[]; onClose: () => void }) {
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="match-title" className="fixed inset-0 z-50 flex animate-[fade-in_200ms_ease-out] flex-col items-center justify-center bg-ink-deep px-8 text-center text-white">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/60">Two ticks</p>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/60">Two of you are interested</p>
       <h2 id="match-title" className="mt-2 animate-[match-pop_420ms_cubic-bezier(.2,1.4,.4,1)] font-serif text-[44px] font-semibold leading-none">
         It’s a match!
       </h2>
@@ -351,7 +351,7 @@ function MatchOverlay({ card, members, tickedBy, onClose }: { card: SwipeCard; m
         ))}
       </div>
       <p className="mt-6 max-w-[30ch] text-[16px] leading-relaxed text-white/85">
-        You{tickedBy.length ? ` and ${joinNames(tickedBy)}` : ""} ticked <span className="font-semibold text-white">{card.company.name}</span>. The chat is open to the whole family.
+        You{tickedBy.length ? ` and ${joinNames(tickedBy)}` : ""} are interested in <span className="font-semibold text-white">{card.company.name}</span>. The chat is open to the whole family.
       </p>
       <Link href={`/matches/${card.company.slug}`} className="mt-8 inline-flex min-h-[50px] w-full max-w-[300px] items-center justify-center rounded-full bg-white px-6 text-[15px] font-semibold text-ink">
         Open the chat
@@ -373,7 +373,7 @@ function DeckTip({ onClose }: { onClose: () => void }) {
         <ul className="mt-3 space-y-2.5 text-[15px] leading-relaxed text-text">
           <li className="flex gap-3">
             <Check size={20} className="mt-0.5 shrink-0 text-green" aria-hidden />
-            <span><b>Tick</b> if it’s worth a conversation, <b>cross</b> if not. Swiping sideways works too.</span>
+            <span><b>Interested</b> if it’s worth a conversation, <b>not interested</b> if not. Swiping right or left works too.</span>
           </li>
           <li className="flex gap-3">
             <SkipForward size={20} className="mt-0.5 shrink-0 text-secondary" aria-hidden />
@@ -381,7 +381,7 @@ function DeckTip({ onClose }: { onClose: () => void }) {
           </li>
           <li className="flex gap-3">
             <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[11px] font-bold text-white">2</span>
-            <span>When <b>two of you tick</b> the same company it’s a match, and a family chat opens.</span>
+            <span>When <b>two of you are interested</b> in the same company it’s a match, and a family chat opens.</span>
           </li>
           <li className="flex gap-3">
             <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-muted text-[11px] font-bold text-secondary">?</span>
@@ -411,15 +411,15 @@ function AlmostSheet({ card, likedBy, onUndo, onClose }: { card: SwipeCard; like
           Almost a match
         </h2>
         <p className="mt-2 text-[15px] leading-relaxed text-secondary">
-          {joinNames(likedBy)} ticked <span className="font-semibold text-ink">{card.company.name}</span>. Your tick would have made it a match.
+          {joinNames(likedBy)} {likedBy.length === 1 ? "is" : "are"} interested in <span className="font-semibold text-ink">{card.company.name}</span>. If you were too, it would have been a match.
         </p>
         <div className="mt-5 flex flex-col gap-2">
           <Button onClick={onUndo} size="lg">
             <RotateCcw size={17} aria-hidden />
-            Undo my cross
+            Undo my answer
           </Button>
           <Button variant="outline" size="lg" onClick={onClose}>
-            Keep my cross
+            Keep my answer
           </Button>
         </div>
       </div>
