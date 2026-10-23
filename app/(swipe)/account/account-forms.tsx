@@ -62,7 +62,7 @@ export function AccountForms({ mode, member, invitations }: { mode: "demo" | "su
 }
 
 function StatusLine({ state, demo }: { state: AccountActionState; demo: boolean }) {
-  if (demo) return <p className="mt-2 text-[0.75rem] text-tertiary">Account changes require Supabase to be configured.</p>;
+  if (demo) return <p className="mt-2 text-[0.75rem] text-tertiary">Account changes work in the live app, not the demo.</p>;
   if (state.status === "ok") return <p className="mt-2 text-[0.75rem] text-green">{state.message}</p>;
   if (state.status === "error") return <p className="mt-2 text-[0.75rem] text-red">{state.message}</p>;
   return null;

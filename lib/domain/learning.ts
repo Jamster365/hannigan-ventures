@@ -245,8 +245,13 @@ export function buildMatcher(bundles: CompanyBundle[], userId: string, prefs?: M
   };
 }
 
+/** Features that are not a taste anyone holds ("unknown SEIS/EIS") are never shown or quoted. */
+export function isTasteFeature(f: string): boolean {
+  return !f.endsWith(":unknown");
+}
+
 function explain(parts: Contribution[], prefs?: MemberPreferences | null): string | null {
-  const top = parts.find((p) => p.points >= 5);
+  const top = parts.find((p) => p.points >= 5 && isTasteFeature(p.feature));
   if (!top) return null;
   const [kind, value] = [top.feature.slice(0, top.feature.indexOf(":")), top.feature.slice(top.feature.indexOf(":") + 1)];
   // Stated preferences are quoted as such; answers are quoted only once there are a few.
@@ -260,7 +265,7 @@ function explain(parts: Contribution[], prefs?: MemberPreferences | null): strin
 
 /** A member's strongest learned likes and dislikes, for the taste page. */
 export function tasteSummary(taste: Taste): { likes: Contribution[]; dislikes: Contribution[] } {
-  const all = [...taste.counts.keys()].map((f) => scoreWithTaste(taste, [f]).parts[0]).filter(Boolean);
+  const all = [...taste.counts.keys()].filter(isTasteFeature).map((f) => scoreWithTaste(taste, [f]).parts[0]).filter((p) => p && p.yes + p.no >= 3);
   return {
     likes: all.filter((p) => p.points >= 2).sort((a, b) => b.points - a.points).slice(0, 6),
     dislikes: all.filter((p) => p.points <= -2).sort((a, b) => a.points - b.points).slice(0, 6),

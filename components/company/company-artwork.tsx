@@ -9,7 +9,7 @@ import { SectorArt } from "./sector-art";
  * illustration of its field, labelled as such. Nothing here ever pretends to
  * show a real product, place or person that it isn't.
  */
-export function CompanyArtwork({ company, media, logo = null, className, variant = "card", priority: _priority }: { company: Company; media: CompanyMedia | null; logo?: CompanyMedia | null; className?: string; variant?: "card" | "hero" | "thumb"; priority?: boolean }) {
+export function CompanyArtwork({ company, media, logo = null, className, variant = "card", showText = true, priority: _priority }: { company: Company; media: CompanyMedia | null; logo?: CompanyMedia | null; className?: string; variant?: "card" | "hero" | "thumb"; showText?: boolean; priority?: boolean }) {
   if (media?.url && media.rightsStatus !== "fallback") {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -36,5 +36,5 @@ export function CompanyArtwork({ company, media, logo = null, className, variant
       </div>
     );
   }
-  return <SectorArt company={company} className={className} variant={variant} />;
+  return <SectorArt company={company} className={className} variant={variant} showText={showText} />;
 }

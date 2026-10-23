@@ -30,7 +30,7 @@ export function effectiveAccess(
   const freshnessHours = opts.freshnessHours ?? ACCESS_FRESHNESS_HOURS;
   const maxCheque = opts.maxChequeGbp ?? 250_000;
   if (checks.length === 0) {
-    return { status: "unknown", canInvestNow: false, reason: "No verified access route recorded.", check: null, isStale: false };
+    return { status: "unknown", canInvestNow: false, reason: "No way in has been found yet.", check: null, isStale: false };
   }
   const latest = [...checks].sort((a, b) => b.checkedAt.localeCompare(a.checkedAt))[0];
   const ageHours = (now.getTime() - new Date(latest.checkedAt).getTime()) / 36e5;
@@ -45,14 +45,14 @@ export function effectiveAccess(
       return {
         status: "stale",
         canInvestNow: false,
-        reason: `Last verified ${Math.round(ageHours)}h ago; live access cannot be claimed without re-verification.`,
+        reason: `Last checked ${ageHours >= 48 ? `${Math.round(ageHours / 24)} days` : `${Math.round(ageHours)} hours`} ago; it needs checking again before we can say it is open.`,
         check: latest,
         isStale: true,
       };
     }
     const hasRoute = Boolean(latest.contactOrUrl) && latest.routeType !== "none";
     if (!hasRoute) {
-      return { status: "contactable", canInvestNow: false, reason: "Verified status recorded without an actionable route.", check: latest, isStale: false };
+      return { status: "contactable", canInvestNow: false, reason: "The round looked open, but there is no link or contact to use yet.", check: latest, isStale: false };
     }
     // The family's cheque size is a preference, not a rule (owner, 23 Oct
     // 2026): a high minimum is flagged, never hidden or blocked.
@@ -60,7 +60,7 @@ export function effectiveAccess(
     return {
       status: latest.accessStatus,
       canInvestNow: true,
-      reason: `Live route verified within the freshness window. An application route does not guarantee allocation.${aboveUsual ? ` Minimum cheque £${latest.minCheque!.toLocaleString("en-GB")} is above the usual £${maxCheque.toLocaleString("en-GB")} per member.` : ""}`,
+      reason: `A live way in was checked recently. Being able to apply does not guarantee an allocation.${aboveUsual ? ` Minimum cheque £${latest.minCheque!.toLocaleString("en-GB")} is above the usual £${maxCheque.toLocaleString("en-GB")} per member.` : ""}`,
       check: latest,
       isStale: false,
     };

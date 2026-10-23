@@ -23,13 +23,13 @@ export default async function UploadResearchPage() {
   if (member.role !== "owner") notFound();
   const repo = await getRepository();
   const [bundles, prompt, runs] = await Promise.all([repo.listCompanies(), repo.getActivePrompt(), repo.listRuns()]);
-  const known = bundles.filter((b) => !b.company.isDemo).map((b) => b.company.name).sort();
+  const known = bundles.map((b) => b.company.name).sort();
   const uploads = runs.filter((r) => r.model.startsWith("Upload:") || r.model.startsWith("Claude chat research")).slice(0, 15);
 
   return (
     <>
       <PageHeader title="Upload research" backHref="/me" variant="back" />
-      <div className="mx-auto max-w-[720px] space-y-5 px-4 pb-10 pt-4">
+      <div className="mx-auto w-full max-w-[720px] space-y-5 px-4 pb-10 pt-4">
         <p className="text-[0.8125rem] text-secondary">
           Only you can see this page. New companies come from big research sessions in a Claude chat; the daily automatic run only keeps existing companies up to date.
         </p>

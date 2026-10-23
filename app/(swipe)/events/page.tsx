@@ -16,7 +16,7 @@ export default async function EventsPage() {
   return (
     <>
       <PageHeader title="Events" backHref="/me" variant="back" />
-      <div className="mx-auto max-w-[900px] px-4 pt-4">
+      <div className="mx-auto w-full max-w-[900px] px-4 pt-4">
         <p className="mb-3 text-[0.8125rem] text-secondary">Founder and investor events found by research, in London local time. Registration status is shown as of the date it was checked; unverified listings say so.</p>
         {upcoming.length === 0 ? (
           <EmptyState title="No upcoming events" body="Verified events will appear here when research finds them." />

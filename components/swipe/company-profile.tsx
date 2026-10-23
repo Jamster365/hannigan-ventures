@@ -22,7 +22,7 @@ export function CompanyProfile({ card, className }: { card: SwipeCard; className
   const moreRisks = card.risks.slice(1);
 
   return (
-    <article className={cn("bg-surface", className)} aria-label={company.name}>
+    <article className={cn("bg-surface pb-[104px]", className)} aria-label={company.name}>
       <ProfileHero card={card} />
 
       <div className="px-5 pb-6 pt-4">
@@ -166,7 +166,7 @@ function ProfileHero({ card }: { card: SwipeCard }) {
   }
   return (
     <div className={box}>
-      <CompanyArtwork company={company} media={null} logo={logo} variant="hero" />
+      <CompanyArtwork company={company} media={null} logo={logo} variant="hero" showText={false} />
     </div>
   );
 }
@@ -174,7 +174,7 @@ function ProfileHero({ card }: { card: SwipeCard }) {
 function Facts({ facts }: { facts: SwipeCard["facts"] }) {
   if (!facts.length) return null;
   return (
-    <dl className="mt-4 grid grid-cols-2 gap-2">
+    <dl className="mt-4 grid grid-cols-2 gap-2 [&>*:last-child:nth-child(odd)]:col-span-2">
       {facts.map((f, i) => (
         <div key={`${f.label}-${i}`} className="rounded-[14px] bg-surface-muted px-3.5 py-2.5">
           <dt className="text-[0.75rem] text-secondary">{f.label}</dt>

@@ -43,7 +43,7 @@ export default async function ResearchSettingsPage({ searchParams }: { searchPar
           ))}
         </div>
       </PageHeader>
-      <div className="mx-auto max-w-[840px] space-y-6 px-4 pt-4">
+      <div className="mx-auto w-full max-w-[840px] space-y-6 px-4 pt-4">
         {tab === "instructions" ? (
           <>
             <section>

@@ -1,4 +1,4 @@
-import { companyFeatures, featureName, reasonChips } from "./learning";
+import { companyFeatures, featureName, isTasteFeature, reasonChips } from "./learning";
 import type { CompanyBundle, PromptSuggestion } from "./types";
 
 /**
@@ -57,7 +57,7 @@ export function familyInsights(bundles: CompanyBundle[]): FamilyInsights {
   const logit = (p: number) => Math.log(p / (1 - p));
   const all = [...counts.entries()]
     .map(([feature, c]) => ({ feature, ...c, lean: logit((c.yes + 2 * base) / (c.total + 2)) - logit(base) }))
-    .filter((x) => x.total >= MIN_ANSWERS_PER_KIND);
+    .filter((x) => x.total >= MIN_ANSWERS_PER_KIND && isTasteFeature(x.feature));
   return {
     answers,
     reasons,

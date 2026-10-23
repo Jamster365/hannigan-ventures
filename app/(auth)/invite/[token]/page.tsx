@@ -9,7 +9,7 @@ export const metadata = { title: "Invitation" };
 export default async function InvitePage({ params }: { params: Params<{ token: string }> }) {
   const { token } = await params;
   if (dataMode() === "demo") {
-    return <Shell title="Invitations need Supabase" body="This deployment runs in demo mode without accounts. Configure Supabase to enable invitations." />;
+    return <Shell title="Invitations need the live app" body="This is the demo, which has no accounts. Invitations work in the live app." />;
   }
   const { createSupabaseServerClient } = await import("@/lib/supabase/server");
   const supabase = await createSupabaseServerClient();

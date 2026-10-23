@@ -46,7 +46,7 @@ export function DecisionItem({ row }: { row: DecisionRow }) {
   };
 
   const status =
-    row.status === "match" ? { label: "Match", cls: "bg-green-pale text-green" } : row.status === "ended" ? { label: "Ended: two not interested", cls: "bg-surface-muted text-secondary" } : row.closed ? { label: "Round closed", cls: "bg-amber-pale text-amber" } : vote === "unsure" ? null : { label: "Waiting on the others", cls: "bg-surface-muted text-secondary" };
+    row.status === "match" ? { label: "Match", cls: "bg-green-pale text-green" } : row.status === "ended" ? { label: "Ended: two not interested", cls: "bg-surface-muted text-secondary" } : row.closed ? { label: "Round closed", cls: "bg-amber-pale text-amber" } : vote === "unsure" ? null : vote === "pass" ? { label: "Only you so far", cls: "bg-surface-muted text-secondary" } : { label: "Waiting on the others", cls: "bg-surface-muted text-secondary" };
 
   return (
     <li className="flex gap-3 px-4 py-3">

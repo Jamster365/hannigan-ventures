@@ -48,8 +48,6 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
   const [tip, setTip] = useState(false);
   const [, startTransition] = useTransition();
   const top = deck[0] ?? null;
-  // While a profile animates away it stays on screen; the deck has already moved on.
-  const shown = leaving?.card ?? top;
 
   const toTop = () => document.getElementById("main")?.scrollTo({ top: 0 });
 
@@ -124,12 +122,22 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
     }
   };
 
-  const finishLeaving = () => {
+  const finishLeaving = useCallback(() => {
+    setLeaving((l) => {
+      if (!l) return l;
+      setEntering("next");
+      toTop();
+      return null;
+    });
+  }, []);
+
+  // The fly-out animation normally ends itself; if a re-render ever swallows
+  // the event, this clears it anyway so the deck can never stick or go blank.
+  useEffect(() => {
     if (!leaving) return;
-    setLeaving(null);
-    setEntering("next");
-    toTop();
-  };
+    const t = setTimeout(finishLeaving, 320);
+    return () => clearTimeout(t);
+  }, [leaving, finishLeaving]);
 
   useEffect(() => {
     if (!entering) return;
@@ -185,25 +193,24 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
         </p>
       ) : null}
 
-      {shown ? (
+      {/* The answered profile flies out on its own layer while the next one is already in place underneath. */}
+      {leaving ? (
         <div
-          key={shown.company.id}
-          className={cn(
-            "mx-auto w-full max-w-[640px] flex-1",
-            entering === "back" && "animate-[card-return_300ms_ease-out]",
-            entering === "next" && "animate-[profile-in_260ms_ease-out]",
-          )}
-          style={
-            leaving
-              ? ({ animation: `${leaving.dir === "right" ? "fly-right" : "fly-left"} 260ms ease-in forwards`, "--from-x": `${leaving.fromX}px`, "--from-r": `${Math.max(-6, Math.min(6, leaving.fromX / 40))}deg` } as CSSProperties)
-              : undefined
-          }
+          key={`leaving-${leaving.card.company.id}`}
+          className="pointer-events-none absolute inset-x-0 top-14 z-20 mx-auto w-full max-w-[640px]"
+          style={{ animation: `${leaving.dir === "right" ? "fly-right" : "fly-left"} 260ms ease-in forwards`, "--from-x": `${leaving.fromX}px`, "--from-r": `${Math.max(-6, Math.min(6, leaving.fromX / 40))}deg` } as CSSProperties}
           onAnimationEnd={(e) => {
-            if (e.target === e.currentTarget && leaving) finishLeaving();
+            if (e.target === e.currentTarget) finishLeaving();
           }}
-          inert={leaving ? true : undefined}
+          inert
+          aria-hidden
         >
-          <CompanyProfile card={shown} />
+          <CompanyProfile card={leaving.card} />
+        </div>
+      ) : null}
+      {top ? (
+        <div key={top.company.id} className={cn("mx-auto w-full max-w-[640px] flex-1", entering === "back" && "animate-[card-return_300ms_ease-out]", entering === "next" && "animate-[profile-in_260ms_ease-out]")}>
+          <CompanyProfile card={top} />
         </div>
       ) : (
         <CaughtUp />

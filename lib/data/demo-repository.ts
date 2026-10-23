@@ -1,4 +1,5 @@
 import { DEFAULT_MEMBER_PREFERENCES, type MemberPreferences } from "@/lib/domain/learning";
+import { safeDocumentName, type Deal, type DealCheck, type DealCheckStatus, type DealDecision, type DealDocument } from "@/lib/domain/deal";
 import { almostMatch, applyVote, computeFamilyStage } from "@/lib/domain/family-consensus";
 import type {
   AuditEvent,
@@ -145,6 +146,48 @@ class DemoRepository implements Repository {
   }
 
   private prefs = new Map<string, MemberPreferences>();
+  private deals = new Map<string, Deal>();
+
+  private dealOf(companyId: string): Deal {
+    let d = this.deals.get(companyId);
+    if (!d) this.deals.set(companyId, (d = { checks: [], documents: [], decision: null }));
+    return d;
+  }
+
+  async getDeal(companyId: string): Promise<Deal> {
+    return structuredClone(this.dealOf(companyId));
+  }
+
+  async listDeals(): Promise<Record<string, Deal>> {
+    return Object.fromEntries([...this.deals.entries()].map(([k, v]) => [k, structuredClone(v)]));
+  }
+
+  async setDealCheck({ userId, companyId, key, status, note, label }: { userId: string; companyId: string; key: string; status: DealCheckStatus; note?: string; label?: string }): Promise<DealCheck> {
+    const deal = this.dealOf(companyId);
+    const existing = deal.checks.find((c) => c.key === key);
+    const next: DealCheck = { companyId, key, status, note: note ?? existing?.note ?? "", label: label ?? existing?.label, updatedBy: userId, updatedAt: new Date().toISOString() };
+    if (existing) Object.assign(existing, next);
+    else deal.checks.push(next);
+    return structuredClone(next);
+  }
+
+  async saveDealDecision({ userId, companyId, decision }: { userId: string; companyId: string; decision: Omit<DealDecision, "companyId" | "updatedBy" | "updatedAt"> }): Promise<DealDecision> {
+    const deal = this.dealOf(companyId);
+    deal.decision = { ...decision, companyId, updatedBy: userId, updatedAt: new Date().toISOString() };
+    return structuredClone(deal.decision);
+  }
+
+  async addDealDocument({ userId, companyId, name, mime, bytes }: { userId: string; companyId: string; name: string; mime: string; bytes: Uint8Array }): Promise<DealDocument> {
+    const deal = this.dealOf(companyId);
+    const doc: DealDocument = { id: this.nextId("doc"), companyId, name: safeDocumentName(name), mime, sizeBytes: bytes.byteLength, uploadedBy: userId, createdAt: new Date().toISOString(), url: `data:${mime};base64,${Buffer.from(bytes).toString("base64")}` };
+    deal.documents.unshift(doc);
+    return structuredClone(doc);
+  }
+
+  async removeDealDocument({ companyId, documentId }: { userId: string; companyId: string; documentId: string }): Promise<void> {
+    const deal = this.dealOf(companyId);
+    deal.documents = deal.documents.filter((d) => d.id !== documentId);
+  }
 
   async getPreferences(userId: string): Promise<MemberPreferences> {
     return { ...DEFAULT_MEMBER_PREFERENCES, ...(this.prefs.get(userId) ?? {}) };

@@ -79,7 +79,7 @@ export function SignInForm({ mode }: { mode: "demo" | "supabase" }) {
   if (mode === "demo") {
     return (
       <div className="mt-5">
-        <p className="rounded-[12px] bg-amber-pale px-3 py-2 text-[0.8125rem] text-amber">Demo mode: Supabase is not configured, so sign-in is bypassed and you are viewing as a sample member.</p>
+        <p className="rounded-[12px] bg-amber-pale px-3 py-2 text-[0.8125rem] text-amber">Demo mode: there is no live database here, so sign-in is skipped and you are viewing as a sample member.</p>
         <Link href="/" className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-ink px-5 text-[0.875rem] font-medium text-white">
           Continue to the demo
         </Link>

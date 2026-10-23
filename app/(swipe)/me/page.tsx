@@ -1,4 +1,4 @@
-import { Building2, ListChecks, Sparkles, Upload, CalendarDays, ChevronRight, FlaskConical, Info, LayoutGrid, Network, Settings } from "lucide-react";
+import { Briefcase, Building2, ListChecks, Sparkles, Upload, CalendarDays, ChevronRight, FlaskConical, Info, LayoutGrid, Network, Settings } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/navigation/page-header";
@@ -21,10 +21,11 @@ export default async function MePage() {
 
   const groups: { title: string; items: Item[] }[] = [
     {
-      title: "Your picks",
+      title: "Your activity",
       items: [
         { href: "/decisions", label: "Your picks", sub: "Everything you’ve said yes or no to. Change your mind any time.", Icon: ListChecks },
         { href: "/taste", label: "Your taste", sub: "What the app has learned, and your preferences", Icon: Sparkles },
+        { href: "/portfolio", label: "Investments", sub: "What we invested in, what is in due diligence", Icon: Briefcase },
       ],
     },
     {

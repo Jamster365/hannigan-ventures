@@ -15,7 +15,7 @@ export default async function NetworksPage() {
   return (
     <>
       <PageHeader title="Angel networks" backHref="/me" variant="back" />
-      <div className="mx-auto max-w-[900px] px-4 pt-4">
+      <div className="mx-auto w-full max-w-[900px] px-4 pt-4">
         <p className="mb-3 text-[0.8125rem] text-secondary">Access routes into early rounds. Details are shown only once a research run has checked them against a source. Membership of a network never guarantees access to an allocation.</p>
         <ul className="grid gap-3 md:grid-cols-2">
           {networks.map((n) => (

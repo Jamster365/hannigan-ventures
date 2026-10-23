@@ -282,3 +282,34 @@ test("Your taste shows what the app learned and saves preferences", async ({ pag
   await expect(page.getByText("Saved. Your deck now uses these.")).toBeVisible();
   await expect(page.getByText("What the family’s answers say")).toBeVisible();
 });
+
+test("the deal room: checklist, decision and documents for a match", async ({ page }) => {
+  await viewAs(page, "Brother");
+  await go(page, "/matches");
+  const match = page.getByRole("link", { name: /Larkspur Photonics/ }).first();
+  await match.click();
+  await page.getByRole("link", { name: /Deal room/ }).click();
+  await expect(page.getByRole("heading", { name: "Due diligence" })).toBeVisible();
+  await page.getByRole("checkbox", { name: "Speak to the founders" }).click();
+  await expect(page.getByText("1 of 16 done")).toBeVisible();
+  await page.getByRole("button", { name: "Invested", exact: true }).click();
+  await page.getByLabel("Brother").fill("25,000");
+  await page.getByRole("button", { name: "SEIS", exact: true }).click();
+  await page.getByRole("button", { name: "Save decision" }).click();
+  await expect(page.getByText("Saved.")).toBeVisible();
+  await page.setInputFiles('input[type="file"]', { name: "term-sheet.txt", mimeType: "text/plain", buffer: Buffer.from("Sample term sheet") });
+  await expect(page.getByRole("link", { name: "term-sheet.txt" })).toBeVisible();
+  await go(page, "/matches/larkspur-photonics");
+  await expect(page.getByText(/Invested £25,000 · due diligence 1 of 16 · 1 document/)).toBeVisible();
+  await expect(page.getByText("added a document: term-sheet.txt").first()).toBeVisible();
+  await go(page, "/portfolio");
+  await expect(page.getByText("£25,000", { exact: false }).first()).toBeVisible();
+  // Put the demo back.
+  await go(page, "/matches/larkspur-photonics/deal");
+  await page.getByRole("checkbox", { name: "Speak to the founders" }).click();
+  await page.getByRole("button", { name: "Considering", exact: true }).click();
+  await page.getByRole("button", { name: "Save decision" }).click();
+  page.on("dialog", (d) => d.accept());
+  await page.getByRole("button", { name: "Remove term-sheet.txt" }).click();
+  await expect(page.getByRole("link", { name: "term-sheet.txt" })).toHaveCount(0);
+});

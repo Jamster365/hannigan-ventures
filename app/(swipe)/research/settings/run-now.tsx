@@ -69,7 +69,7 @@ export function RunNowButton({ mode }: { mode: "demo" | "supabase" }) {
     };
   }, [active, router]);
 
-  if (mode === "demo") return <p className="text-[0.8125rem] text-tertiary">Manual runs need Supabase and a research API key. See README for setup.</p>;
+  if (mode === "demo") return <p className="text-[0.8125rem] text-tertiary">Running research works in the live app, not the demo.</p>;
 
   const run = async () => {
     setResult(null);

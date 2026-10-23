@@ -19,7 +19,7 @@ const swipeSchema = z.object({
 });
 
 function revalidateSwipe(slug: string) {
-  revalidatePath("/");
+  // Not "/": the deck is client state, and a refresh mid-animation used to blank it.
   revalidatePath("/decisions");
   revalidatePath("/matches");
   revalidatePath(`/matches/${slug}`);

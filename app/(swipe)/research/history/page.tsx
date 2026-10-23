@@ -24,7 +24,7 @@ export default async function ResearchHistoryPage() {
   return (
     <>
       <PageHeader title="Research history" backHref="/me" variant="back" />
-      <div className="mx-auto max-w-[840px] px-4 pt-4">
+      <div className="mx-auto w-full max-w-[840px] px-4 pt-4">
         <p className="mb-3 text-[0.8125rem] text-secondary">
           Every run with its date, instruction version, status, source counts and estimated cost. Total estimated cost shown: ${totalCost.toFixed(2)}.
         </p>

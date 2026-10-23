@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CompanyArtwork } from "@/components/company/company-artwork";
 import { BackLink } from "@/components/navigation/page-header";
+import { DealBanner } from "@/components/swipe/deal-banner";
 import { MatchChat } from "@/components/swipe/match-chat";
 import { Pill, type Tone } from "@/components/ui/primitives";
 import { requireMember } from "@/lib/auth/current-member";
@@ -17,7 +18,7 @@ export default async function MatchChatPage({ params }: { params: Promise<{ slug
   const repo = await getRepository();
   const bundle = await repo.getCompanyBySlug(slug);
   if (!bundle) notFound();
-  const [members, notifications, prompt] = await Promise.all([repo.getMembers(), repo.listNotifications(member.userId), repo.getActivePrompt()]);
+  const [members, notifications, prompt, deal] = await Promise.all([repo.getMembers(), repo.listNotifications(member.userId), repo.getActivePrompt(), repo.getDeal(bundle.company.id)]);
   const card = buildSwipeCard(bundle, member.userId, { maxChequeGbp: prompt.config.maxChequeGbp });
   const isMatch = familyStageOf(bundle, members.length) === "shortlisted";
   const row = matchesFor([bundle], members, notifications)[0];
@@ -33,19 +34,21 @@ export default async function MatchChatPage({ params }: { params: Promise<{ slug
           </span>
           <span className="min-w-0">
             <span className="block truncate font-serif text-[1.0625rem] font-semibold text-ink">{company.name}</span>
-            <span className="block truncate text-[0.75rem] text-secondary">Tap for profile · {company.teaser}</span>
+            <span className="block truncate text-[0.75rem] text-secondary">Tap for profile<span className="hidden sm:inline"> · {company.teaser}</span></span>
           </span>
         </Link>
       </header>
 
       <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-hairline bg-page px-4 py-2 md:px-[max(16px,calc((100%-760px)/2))]">
         <Pill tone={card.raising.tone as Tone}>{card.raising.label}</Pill>
-        {card.facts.slice(0, 3).map((f) => (
+        {card.facts.filter((f) => f.label !== "Raising").slice(0, 3).map((f) => (
           <Pill key={f.label}>
             {f.label}: {f.value}
           </Pill>
         ))}
       </div>
+
+      {isMatch ? <DealBanner slug={slug} deal={deal} className="shrink-0 md:px-[max(16px,calc((100%-760px)/2))]" /> : null}
 
       {isMatch ? (
         <MatchChat

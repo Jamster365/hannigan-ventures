@@ -23,6 +23,7 @@ import { DEFAULT_PREFERENCES } from "@/lib/research/default-prompt";
 import { applyPatch } from "@/lib/research/patch";
 import { requireSessionContext } from "@/lib/supabase/member";
 import { DEFAULT_MEMBER_PREFERENCES, type MemberPreferences } from "@/lib/domain/learning";
+import { EMPTY_DEAL, safeDocumentName, type Deal, type DealCheck, type DealCheckStatus, type DealDecision, type DealDocument } from "@/lib/domain/deal";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   num,
@@ -48,6 +49,9 @@ import {
   type SourceRow,
   type StoryRow,
   type SuggestionRow,
+  type DealCheckRow,
+  type DealDecisionRow,
+  type DealDocumentRow,
   type UpdateRow,
   type VoteRow,
 } from "@/lib/supabase/rows";
@@ -425,6 +429,101 @@ class SupabaseRepository implements Repository {
     const { supabase } = await this.ctx();
     const { error } = await supabase.from("prompt_suggestions").update({ status: "dismissed", approved_by: userId }).eq("id", suggestionId).eq("status", "proposed");
     this.fail(error, "dismiss suggestion");
+  }
+
+  // Deal room
+
+  private dealCheckFromRow(r: DealCheckRow): DealCheck {
+    return { companyId: r.company_id, key: r.key, status: r.status, note: r.note, updatedBy: r.updated_by, updatedAt: r.updated_at, label: r.label ?? undefined };
+  }
+
+  private dealDecisionFromRow(r: DealDecisionRow): DealDecision {
+    return { companyId: r.company_id, status: r.status, amounts: r.amounts ?? {}, investedAt: r.invested_at, scheme: r.scheme, stakePct: num(r.stake_pct), instrument: r.instrument, certificateReceived: r.certificate_received, notes: r.notes, updatedBy: r.updated_by, updatedAt: r.updated_at };
+  }
+
+  private dealDocumentFromRow(r: DealDocumentRow): DealDocument {
+    return { id: r.id, companyId: r.company_id, name: r.name, mime: r.mime, sizeBytes: Number(r.size_bytes), uploadedBy: r.uploaded_by ?? "", createdAt: r.created_at, url: null };
+  }
+
+  async getDeal(companyId: string): Promise<Deal> {
+    const { supabase } = await this.ctx();
+    const [checks, docs, decision] = await Promise.all([
+      supabase.from("deal_checks").select("*").eq("company_id", companyId).returns<DealCheckRow[]>(),
+      supabase.from("deal_documents").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).returns<DealDocumentRow[]>(),
+      supabase.from("deal_decisions").select("*").eq("company_id", companyId).maybeSingle<DealDecisionRow>(),
+    ]);
+    // Download links are short-lived and made here, server-side, for a member who passed the RLS read above.
+    const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+    const admin = createSupabaseAdminClient();
+    const documents = await Promise.all(
+      (docs.data ?? []).map(async (r) => {
+        const signed = await admin.storage.from("deal-documents").createSignedUrl(r.storage_path, 3600, { download: r.name });
+        return { ...this.dealDocumentFromRow(r), url: signed.data?.signedUrl ?? null };
+      }),
+    );
+    return { checks: (checks.data ?? []).map((r) => this.dealCheckFromRow(r)), documents, decision: decision.data ? this.dealDecisionFromRow(decision.data) : null };
+  }
+
+  async listDeals(): Promise<Record<string, Deal>> {
+    const { supabase, householdId } = await this.ctx();
+    const [checks, docs, decisions] = await Promise.all([
+      supabase.from("deal_checks").select("*").eq("household_id", householdId).returns<DealCheckRow[]>(),
+      supabase.from("deal_documents").select("*").eq("household_id", householdId).returns<DealDocumentRow[]>(),
+      supabase.from("deal_decisions").select("*").eq("household_id", householdId).returns<DealDecisionRow[]>(),
+    ]);
+    const out: Record<string, Deal> = {};
+    const dealOf = (id: string) => (out[id] ??= { checks: [], documents: [], decision: null });
+    for (const r of checks.data ?? []) dealOf(r.company_id).checks.push(this.dealCheckFromRow(r));
+    for (const r of docs.data ?? []) dealOf(r.company_id).documents.push(this.dealDocumentFromRow(r));
+    for (const r of decisions.data ?? []) dealOf(r.company_id).decision = this.dealDecisionFromRow(r);
+    return out;
+  }
+
+  async setDealCheck({ userId, companyId, key, status, note, label }: { userId: string; companyId: string; key: string; status: DealCheckStatus; note?: string; label?: string }): Promise<DealCheck> {
+    const { supabase, householdId } = await this.ctx();
+    const row: Record<string, unknown> = { company_id: companyId, household_id: householdId, key, status, updated_by: userId, updated_at: new Date().toISOString() };
+    if (note !== undefined) row.note = note;
+    if (label !== undefined) row.label = label;
+    const { data, error } = await supabase.from("deal_checks").upsert(row, { onConflict: "company_id,key" }).select("*").single<DealCheckRow>();
+    this.fail(error, "save check");
+    return this.dealCheckFromRow(data!);
+  }
+
+  async saveDealDecision({ userId, companyId, decision }: { userId: string; companyId: string; decision: Omit<DealDecision, "companyId" | "updatedBy" | "updatedAt"> }): Promise<DealDecision> {
+    const { supabase, householdId } = await this.ctx();
+    const { data, error } = await supabase
+      .from("deal_decisions")
+      .upsert({ company_id: companyId, household_id: householdId, status: decision.status, amounts: decision.amounts, invested_at: decision.investedAt, scheme: decision.scheme, stake_pct: decision.stakePct, instrument: decision.instrument, certificate_received: decision.certificateReceived, notes: decision.notes, updated_by: userId, updated_at: new Date().toISOString() }, { onConflict: "company_id" })
+      .select("*")
+      .single<DealDecisionRow>();
+    this.fail(error, "save decision");
+    return this.dealDecisionFromRow(data!);
+  }
+
+  async addDealDocument({ userId, companyId, name, mime, bytes }: { userId: string; companyId: string; name: string; mime: string; bytes: Uint8Array }): Promise<DealDocument> {
+    const { supabase, householdId } = await this.ctx();
+    const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+    const admin = createSupabaseAdminClient();
+    const safe = safeDocumentName(name);
+    const path = `${householdId}/${companyId}/${crypto.randomUUID()}-${safe}`;
+    const up = await admin.storage.from("deal-documents").upload(path, bytes, { contentType: mime, upsert: false });
+    if (up.error) throw new Error(`upload: ${up.error.message}`);
+    const { data, error } = await supabase.from("deal_documents").insert({ company_id: companyId, household_id: householdId, name: safe, storage_path: path, mime, size_bytes: bytes.byteLength, uploaded_by: userId }).select("*").single<DealDocumentRow>();
+    if (error) {
+      await admin.storage.from("deal-documents").remove([path]);
+      this.fail(error, "save document");
+    }
+    return this.dealDocumentFromRow(data!);
+  }
+
+  async removeDealDocument({ companyId, documentId }: { userId: string; companyId: string; documentId: string }): Promise<void> {
+    const { supabase } = await this.ctx();
+    const { data, error } = await supabase.from("deal_documents").delete().eq("id", documentId).eq("company_id", companyId).select("storage_path").maybeSingle<{ storage_path: string }>();
+    this.fail(error, "remove document");
+    if (data) {
+      const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+      await createSupabaseAdminClient().storage.from("deal-documents").remove([data.storage_path]);
+    }
   }
 
   async listRuns(): Promise<ResearchRun[]> {

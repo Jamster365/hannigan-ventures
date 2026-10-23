@@ -43,7 +43,7 @@ export default function AboutPage() {
   return (
     <>
       <PageHeader title="About & methodology" backHref="/me" variant="back" />
-      <div className="mx-auto max-w-[760px] px-4 pt-4">
+      <div className="mx-auto w-full max-w-[760px] px-4 pt-4">
         <div className="space-y-3">
           {sections.map((s) => (
             <Card key={s.title} className="p-4">

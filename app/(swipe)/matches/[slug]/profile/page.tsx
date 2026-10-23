@@ -20,7 +20,10 @@ export default async function MatchProfilePage({ params }: { params: Promise<{ s
       <PageHeader variant="back" title={bundle.company.name} backHref={`/matches/${slug}`} />
       <div className="mx-auto w-full max-w-[560px] pb-8">
         <CompanyProfile card={card} />
-        <div className="px-5">
+        <div className="grid gap-2 px-5">
+          <LinkButton href={`/matches/${slug}/deal`} className="w-full">
+            Deal room: checklist, documents, decision
+          </LinkButton>
           {/* The classic seven-tab profile holds the full research: funding detail, analysis, sources and history. */}
           <LinkButton href={`/companies/${slug}?from=match`} variant="outline" className="w-full">
             Full research

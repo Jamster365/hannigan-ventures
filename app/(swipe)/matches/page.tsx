@@ -9,6 +9,7 @@ import { dataMode } from "@/lib/config";
 import { getRepository } from "@/lib/data";
 import { relativeTime } from "@/lib/domain/format";
 import { RESEARCH_AUTHOR_ID } from "@/lib/domain/types";
+import { dealProgress, dealStatusLabel, type Deal } from "@/lib/domain/deal";
 import { matchesFor, type MatchRow } from "@/lib/domain/swipe";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,7 @@ export const metadata = { title: "Matches" };
 export default async function MatchesPage() {
   const member = await requireMember();
   const repo = await getRepository();
-  const [members, bundles, notifications] = await Promise.all([repo.getMembers(), repo.listCompanies(), repo.listNotifications(member.userId)]);
+  const [members, bundles, notifications, deals] = await Promise.all([repo.getMembers(), repo.listCompanies(), repo.listNotifications(member.userId), repo.listDeals()]);
   const rows = matchesFor(bundles, members, notifications);
   const active = rows.filter((r) => !r.archived);
   const archived = rows.filter((r) => r.archived);
@@ -33,11 +34,11 @@ export default async function MatchesPage() {
             <EmptyState icon={<MessageCircle size={28} />} title="No matches yet" body="When two of you are interested in the same company, it lands here with its own chat." />
           </div>
         ) : null}
-        {active.length ? <MatchList rows={active} nameOf={nameOf} /> : null}
+        {active.length ? <MatchList rows={active} nameOf={nameOf} deals={deals} /> : null}
         {archived.length ? (
           <details className="mt-4 border-t border-hairline">
             <summary className="flex min-h-[44px] cursor-pointer items-center px-4 text-[0.8125rem] font-semibold text-secondary">Archived · round closed ({archived.length})</summary>
-            <MatchList rows={archived} nameOf={nameOf} muted />
+            <MatchList rows={archived} nameOf={nameOf} deals={deals} muted />
           </details>
         ) : null}
       </div>
@@ -45,7 +46,7 @@ export default async function MatchesPage() {
   );
 }
 
-function MatchList({ rows, nameOf, muted }: { rows: MatchRow[]; nameOf: (id: string) => string; muted?: boolean }) {
+function MatchList({ rows, nameOf, deals, muted }: { rows: MatchRow[]; nameOf: (id: string) => string; deals: Record<string, Deal>; muted?: boolean }) {
   return (
     <ul className={cn("divide-y divide-hairline", muted && "opacity-75")}>
       {rows.map((r) => (
@@ -69,6 +70,11 @@ function MatchList({ rows, nameOf, muted }: { rows: MatchRow[]; nameOf: (id: str
                   <span className="shrink-0 rounded-full bg-green px-2 text-[0.6875rem] font-semibold leading-[18px] text-white">New</span>
                 ) : null}
               </span>
+              {deals[r.company.id] ? (
+                <span className="mt-0.5 block truncate text-[0.75rem] text-tertiary">
+                  {(() => { const p = dealProgress(deals[r.company.id]); return `${dealStatusLabel(p.status)} · due diligence ${p.done} of ${p.total}${p.documents ? ` · ${p.documents} doc${p.documents === 1 ? "" : "s"}` : ""}`; })()}
+                </span>
+              ) : null}
             </span>
           </Link>
         </li>

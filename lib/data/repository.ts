@@ -1,3 +1,4 @@
+import type { Deal, DealCheck, DealCheckStatus, DealDecision, DealDocument } from "@/lib/domain/deal";
 import type { MemberPreferences } from "@/lib/domain/learning";
 import type {
   AngelNetwork,
@@ -82,6 +83,15 @@ export interface Repository {
   createSuggestion(input: Omit<PromptSuggestion, "id" | "createdAt" | "status" | "approvedBy" | "appliedVersionId">): Promise<PromptSuggestion>;
   applySuggestion(input: { userId: string; suggestionId: string }): Promise<{ ok: true; version: PromptVersion } | { ok: false; reason: string }>;
   dismissSuggestion(input: { userId: string; suggestionId: string }): Promise<void>;
+
+  // Deal room (after a match): shared checklist, documents and decision
+  getDeal(companyId: string): Promise<Deal>;
+  /** Every company with any deal-room data, keyed by company id (document links not filled in). */
+  listDeals(): Promise<Record<string, Deal>>;
+  setDealCheck(input: { userId: string; companyId: string; key: string; status: DealCheckStatus; note?: string; label?: string }): Promise<DealCheck>;
+  saveDealDecision(input: { userId: string; companyId: string; decision: Omit<DealDecision, "companyId" | "updatedBy" | "updatedAt"> }): Promise<DealDecision>;
+  addDealDocument(input: { userId: string; companyId: string; name: string; mime: string; bytes: Uint8Array }): Promise<DealDocument>;
+  removeDealDocument(input: { userId: string; companyId: string; documentId: string }): Promise<void>;
 
   // Research runs
   listRuns(): Promise<ResearchRun[]>;
