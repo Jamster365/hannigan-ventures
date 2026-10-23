@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PREFIXES = ["/auth/", "/invite/", "/api/", "/manifest.webmanifest", "/icons/", "/_next/", "/favicon.ico"];
+const PUBLIC_PREFIXES = ["/auth/", "/invite/", "/api/", "/manifest.webmanifest", "/icons/", "/_next/", "/favicon.ico", "/sw.js"];
 
 /**
  * Refreshes the Supabase session cookie on every request and redirects
@@ -40,5 +40,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icons/).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icons/|sw.js).*)"],
 };

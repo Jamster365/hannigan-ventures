@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isResearchConfigured } from "@/lib/config";
+import { dataMode, isResearchConfigured } from "@/lib/config";
 import { authorisedSchedulerRequest } from "@/lib/research/tick-auth";
 
 export const dynamic = "force-dynamic";
@@ -13,9 +13,22 @@ export const maxDuration = 300;
  */
 export async function POST(request: NextRequest) {
   if (!(await authorisedSchedulerRequest(request))) return NextResponse.json({ error: "unauthorised" }, { status: 401 });
-  if (!isResearchConfigured()) return NextResponse.json({ skipped: true, reason: "research not configured (Supabase + OPENAI_API_KEY required)" });
+  const push = await pushFallback();
+  if (!isResearchConfigured()) return NextResponse.json({ skipped: true, reason: "research not configured (Supabase + OPENAI_API_KEY required)", push });
   const { tickResearch } = await import("@/lib/research/run");
-  return NextResponse.json(await tickResearch());
+  return NextResponse.json({ ...(await tickResearch()), push });
 }
 
 export const GET = POST;
+
+/** Phone notifications the trigger-driven dispatch missed (e.g. a failed call) go out here. */
+async function pushFallback() {
+  if (dataMode() !== "supabase") return null;
+  try {
+    const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+    const { dispatchPush } = await import("@/lib/push/dispatch");
+    return await dispatchPush(createSupabaseAdminClient());
+  } catch (error) {
+    return { error: (error as Error).message };
+  }
+}

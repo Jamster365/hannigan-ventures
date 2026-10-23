@@ -203,7 +203,8 @@ export interface BookmarkRow {
 export interface CommentRow {
   id: string;
   company_id: string;
-  author_user_id: string;
+  author_user_id: string | null;
+  author_kind: "member" | "research";
   body: string;
   created_at: string;
   edited_at: string | null;

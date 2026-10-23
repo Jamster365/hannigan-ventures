@@ -1,19 +1,23 @@
 "use client";
 
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Sparkles } from "lucide-react";
 import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
+import { useLiveRefresh } from "@/components/live/use-live-refresh";
 import { Avatar } from "@/components/ui/avatar";
 import { addCommentAction, deleteCommentAction, editCommentAction } from "@/lib/actions/family";
 import { markMatchReadAction } from "@/lib/actions/swipe";
 import { formatDateTime } from "@/lib/domain/format";
-import type { Comment, Member } from "@/lib/domain/types";
+import { RESEARCH_AUTHOR_ID, type Comment, type Member } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
 
 /**
  * The match chat: the company's one shared comment thread, shown as chat
- * bubbles. Opening it clears the match's unread notifications.
+ * bubbles, with the Research AI member posting company updates. Opening it
+ * clears the match's unread notifications; with `live`, new messages appear
+ * as they are sent.
  */
-export function MatchChat({ companyId, slug, companyName, comments, members, currentUserId, unreadIds, intro }: { companyId: string; slug: string; companyName: string; comments: Comment[]; members: Member[]; currentUserId: string; unreadIds: string[]; intro: string }) {
+export function MatchChat({ companyId, slug, companyName, comments, members, currentUserId, unreadIds, intro, live }: { companyId: string; slug: string; companyName: string; comments: Comment[]; members: Member[]; currentUserId: string; unreadIds: string[]; intro: string; live: boolean }) {
+  useLiveRefresh({ enabled: live, channel: `chat:${companyId}`, table: "comments", filter: `company_id=eq.${companyId}` });
   const [pending, start] = useTransition();
   const [optimistic, addOptimistic] = useOptimistic(comments, (state: Comment[], next: Comment) => [...state, next]);
   const [draft, setDraft] = useState("");
@@ -52,14 +56,15 @@ export function MatchChat({ companyId, slug, companyName, comments, members, cur
         <ol className="space-y-1.5">
           {visible.map((c, i) => {
             const mine = c.authorUserId === currentUserId;
+            const research = c.authorUserId === RESEARCH_AUTHOR_ID;
             const author = members.find((m) => m.userId === c.authorUserId);
             const firstOfRun = i === 0 || visible[i - 1].authorUserId !== c.authorUserId;
             return (
               <li key={c.id} className={cn("flex items-end gap-2", mine ? "justify-end" : "justify-start", firstOfRun && i > 0 && "pt-2")}>
-                {!mine ? <span className="w-8 shrink-0">{firstOfRun && author ? <Avatar member={author} size="sm" /> : null}</span> : null}
+                {!mine ? <span className="w-8 shrink-0">{firstOfRun ? research ? <ResearchAvatar /> : author ? <Avatar member={author} size="sm" /> : null : null}</span> : null}
                 <div className={cn("max-w-[78%]", mine && "flex flex-col items-end")}>
-                  {!mine && firstOfRun ? <p className="mb-0.5 ml-3 text-[11px] font-medium text-tertiary">{author?.displayName ?? "Member"}</p> : null}
-                  <Bubble comment={c} mine={mine} slug={slug} selected={selected === c.id} onSelect={() => setSelected(selected === c.id ? null : c.id)} />
+                  {!mine && firstOfRun ? <p className="mb-0.5 ml-3 text-[11px] font-medium text-tertiary">{research ? "Research · AI" : (author?.displayName ?? "Member")}</p> : null}
+                  <Bubble comment={c} mine={mine} research={research} slug={slug} selected={selected === c.id} onSelect={() => setSelected(selected === c.id ? null : c.id)} />
                 </div>
               </li>
             );
@@ -103,7 +108,15 @@ export function MatchChat({ companyId, slug, companyName, comments, members, cur
   );
 }
 
-function Bubble({ comment, mine, slug, selected, onSelect }: { comment: Comment; mine: boolean; slug: string; selected: boolean; onSelect: () => void }) {
+function ResearchAvatar() {
+  return (
+    <span role="img" aria-label="Research (AI)" title="Research (AI)" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-pale text-violet">
+      <Sparkles size={15} aria-hidden />
+    </span>
+  );
+}
+
+function Bubble({ comment, mine, research, slug, selected, onSelect }: { comment: Comment; mine: boolean; research: boolean; slug: string; selected: boolean; onSelect: () => void }) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(comment.body);
   const [pending, start] = useTransition();
@@ -150,11 +163,18 @@ function Bubble({ comment, mine, slug, selected, onSelect }: { comment: Comment;
         onClick={onSelect}
         className={cn(
           "whitespace-pre-wrap break-words rounded-[20px] px-3.5 py-2 text-left text-[15px] leading-snug",
-          mine ? "rounded-br-[6px] bg-ink text-white" : "rounded-bl-[6px] bg-surface-muted text-ink",
+          mine ? "rounded-br-[6px] bg-ink text-white" : research ? "rounded-bl-[6px] border border-violet/20 bg-violet-pale text-ink" : "rounded-bl-[6px] bg-surface-muted text-ink",
           temp && "opacity-60",
         )}
       >
-        {comment.body}
+        {research && comment.body.includes("\n") && !comment.body.startsWith("I'm Research") ? (
+          <>
+            <span className="font-semibold">{comment.body.slice(0, comment.body.indexOf("\n"))}</span>
+            {comment.body.slice(comment.body.indexOf("\n"))}
+          </>
+        ) : (
+          comment.body
+        )}
       </button>
       {selected ? (
         <p className={cn("mt-0.5 flex gap-3 px-2 text-[11px] text-tertiary", mine ? "justify-end" : "justify-start")}>

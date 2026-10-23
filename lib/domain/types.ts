@@ -237,9 +237,13 @@ export interface Vote {
   updatedAt: string;
 }
 
+/** Stands in for authorUserId on messages written by the Research AI member. */
+export const RESEARCH_AUTHOR_ID = "research";
+
 export interface Comment {
   id: string;
   companyId: string;
+  /** A member's user id, or RESEARCH_AUTHOR_ID for the Research AI member. */
   authorUserId: string;
   body: string;
   createdAt: string;

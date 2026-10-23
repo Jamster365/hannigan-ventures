@@ -153,7 +153,7 @@ test("comments are shared and notify the other members", async ({ page }) => {
   await expect(page.getByText(text)).toBeVisible();
   await viewAs(page, "Jamie");
   await page.goto("/updates?tab=family");
-  await expect(page.getByText("Dad commented").first()).toBeVisible();
+  await expect(page.getByText("Dad · Northgate Surgical").first()).toBeVisible();
 });
 
 test("research instructions can be edited with a diff preview and versioned", async ({ page }) => {
@@ -206,4 +206,21 @@ test("'Why am I seeing this?' shows the discovery signal, rule and sources", asy
   await page.getByRole("menuitem", { name: "Why am I seeing this?" }).click();
   await expect(page.getByText("Research rule matched")).toBeVisible();
   await expect(page.getByText(/Priority 3/)).toBeVisible();
+});
+
+test("match chat: Research posts company updates alongside the family", async ({ page }) => {
+  await viewAs(page, "Jamie");
+  await go(page, "/matches");
+  await expect(page.getByRole("link", { name: /Tidewell Diagnostics/ })).toBeVisible();
+  await go(page, "/matches/tidewell-diagnostics");
+  const chat = page.getByLabel("Chat about Tidewell Diagnostics");
+  await expect(chat.getByText("Research · AI").first()).toBeVisible();
+  await expect(chat.getByText(/Tidewell reports £1.4m first close/)).toBeVisible();
+  await expect(chat.getByRole("img", { name: "Research (AI)" }).first()).toBeVisible();
+});
+
+test("Me shows phone notifications as live-app only in the demo", async ({ page }) => {
+  await go(page, "/me");
+  await expect(page.getByText("Phone notifications")).toBeVisible();
+  await expect(page.getByText("Available in the live app (not the demo).")).toBeVisible();
 });

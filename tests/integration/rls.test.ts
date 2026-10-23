@@ -212,3 +212,58 @@ describe("membership changes re-derive matches", () => {
     expect(await stageOf()).toBe("shortlisted");
   });
 });
+
+describe("the Research member in match chats", () => {
+  const active = async () => (await h.admin.query<{ user_id: string }>("select user_id from household_members where household_id = $1 and status = 'active'", [household])).map((r) => r.user_id).sort();
+  const research = (co: string) => h.admin.query<{ body: string; update_id: string | null }>("select body, update_id from comments where company_id = $1 and author_kind = 'research' order by created_at", [co]);
+
+  it("opens a new match's chat once, without a notification of its own", async () => {
+    const co = (await h.admin.query<{ id: string }>("insert into companies (household_id, name, slug) values ($1, 'Opener Co', 'opener-co') returning id", [household]))[0].id;
+    await h.admin.query("insert into company_assessments (company_id, ai_priority, confidence, summary) values ($1, 'medium', 'medium', 'Early revenue, credible team.')", [co]);
+    for (const u of [jamie, brother]) await h.as(u, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'interested')", [co, u]));
+    const first = await research(co);
+    expect(first).toHaveLength(1);
+    expect(first[0].body).toMatch(/^I'm Research[\s\S]*Opener Co[\s\S]*Where things stand: Early revenue, credible team\./);
+    const notes = await h.admin.query("select id from notifications where company_id = $1 and notification_type = 'comment'", [co]);
+    expect(notes).toHaveLength(0);
+    // Un-match and re-match: still one opener.
+    await h.as(brother, (q) => q.query("delete from member_votes where company_id = $1 and user_id = $2", [co, brother]));
+    await h.as(brother, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'interested')", [co, brother]));
+    expect(await research(co)).toHaveLength(1);
+  });
+
+  it("posts material updates on matches and notifies everyone once; ignores low ones and non-matches", async () => {
+    const matched = (await h.admin.query<{ id: string }>("select id from companies where slug = 'opener-co'"))[0].id;
+    const upd = (await h.admin.query<{ id: string }>("insert into company_updates (company_id, update_type, headline, summary, materiality, dedupe_key) values ($1, 'funding', 'Round opened', 'Seed round of £1m (sample).', 'high', 'k1') returning id", [matched]))[0].id;
+    await h.admin.query("insert into company_updates (company_id, update_type, headline, materiality, dedupe_key) values ($1, 'product', 'Minor website change', 'low', 'k2')", [matched]);
+    const posts = await research(matched);
+    expect(posts.map((p) => p.body)).toEqual([expect.stringMatching(/^I'm Research/), "Round opened\nSeed round of £1m (sample)."]);
+    expect(posts[1].update_id).toBe(upd);
+    const notes = await h.admin.query<{ recipient_user_id: string; dedupe_key: string; href: string }>("select recipient_user_id, dedupe_key, href from notifications where update_id = $1", [upd]);
+    expect(notes.map((n) => n.recipient_user_id).sort()).toEqual(await active());
+    expect(notes.every((n) => n.dedupe_key === `update:${upd}` && n.href === "/matches/opener-co")).toBe(true);
+
+    const unmatched = (await h.admin.query<{ id: string }>("insert into companies (household_id, name, slug) values ($1, 'Quiet Co', 'quiet-co') returning id", [household]))[0].id;
+    await h.admin.query("insert into company_updates (company_id, update_type, headline, materiality, dedupe_key) values ($1, 'funding', 'Round opened', 'high', 'k3')", [unmatched]);
+    expect(await research(unmatched)).toHaveLength(0);
+  });
+
+  it("members cannot post as Research, and member messages notify only the others", async () => {
+    const co = (await h.admin.query<{ id: string }>("select id from companies where slug = 'opener-co'"))[0].id;
+    await expect(h.as(jamie, (q) => q.query("insert into comments (company_id, author_kind, author_user_id, body) values ($1, 'research', null, 'Fake')", [co]))).rejects.toThrow(/row-level security/);
+    await expect(h.as(jamie, (q) => q.query("insert into comments (company_id, author_kind, author_user_id, body) values ($1, 'research', $2, 'Fake')", [co, jamie]))).rejects.toThrow(/comments_author_matches_kind/);
+    const id = (await h.as(dad, (q) => q.query<{ id: string }>("insert into comments (company_id, author_user_id, body) values ($1, $2, 'Shall we call them?') returning id", [co, dad])))[0].id;
+    const notes = await h.admin.query<{ recipient_user_id: string; title: string }>("select recipient_user_id, title from notifications where comment_id = $1", [id]);
+    expect(notes.map((n) => n.recipient_user_id).sort()).toEqual((await active()).filter((u) => u !== dad));
+    expect(notes[0].title).toBe("Dad · Opener Co");
+  });
+});
+
+describe("push subscriptions", () => {
+  it("are private to their owner", async () => {
+    await h.as(jamie, (q) => q.query("insert into push_subscriptions (user_id, endpoint, p256dh, auth) values ($1, 'https://push.example/1', 'k', 'a')", [jamie]));
+    await expect(h.as(brother, (q) => q.query("insert into push_subscriptions (user_id, endpoint, p256dh, auth) values ($1, 'https://push.example/2', 'k', 'a')", [jamie]))).rejects.toThrow(/row-level security/);
+    expect(await h.as(brother, (q) => q.query("select id from push_subscriptions"))).toEqual([]);
+    expect(await h.as(jamie, (q) => q.query("select id from push_subscriptions"))).toHaveLength(1);
+  });
+});

@@ -5,6 +5,7 @@ import { BackLink } from "@/components/navigation/page-header";
 import { MatchChat } from "@/components/swipe/match-chat";
 import { Pill, type Tone } from "@/components/ui/primitives";
 import { requireMember } from "@/lib/auth/current-member";
+import { dataMode } from "@/lib/config";
 import { getRepository } from "@/lib/data";
 import { computeFamilyStage } from "@/lib/domain/family-consensus";
 import { formatDate } from "@/lib/domain/format";
@@ -55,12 +56,13 @@ export default async function MatchChatPage({ params }: { params: Promise<{ slug
           members={members}
           currentUserId={member.userId}
           unreadIds={row?.unreadIds ?? []}
-          intro={`You all ticked ${company.name} · ${formatDate(matchedAt(bundle))}`}
+          intro={`It’s a match · ${formatDate(matchedAt(bundle))}`}
+          live={dataMode() === "supabase"}
         />
       ) : (
         <div className="mx-auto max-w-[36ch] px-6 pt-12 text-center">
           <p className="font-serif text-[20px] font-semibold text-ink">Not a match right now</p>
-          <p className="mt-1 text-[14px] text-secondary">Someone changed their mind about {company.name}, so its chat is closed.</p>
+          <p className="mt-1 text-[14px] text-secondary">Not enough of you want {company.name} right now, so its chat is closed.</p>
           <Link href="/matches" className="mt-4 inline-flex min-h-[44px] items-center font-medium text-blue">
             Back to matches
           </Link>

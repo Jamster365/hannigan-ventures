@@ -28,6 +28,7 @@ import type {
   TeamHighlight,
   Vote,
 } from "@/lib/domain/types";
+import { RESEARCH_AUTHOR_ID } from "@/lib/domain/types";
 import { BROTHER, DAD, JAMIE } from "./members";
 
 export const DEMO_LABEL = "Sample data — fictional companies for design review";
@@ -347,6 +348,8 @@ const tidewellBundle: CompanyBundle = {
     { companyId: tidewell.id, userId: DAD.userId, vote: "interested", score: 8, updatedAt: daysAgo(2) },
   ],
   comments: [
+    { id: "c-tidewell-r0", companyId: tidewell.id, authorUserId: RESEARCH_AUTHOR_ID, body: "I'm Research, the family's AI analyst. I'll post here whenever something changes for Tidewell Diagnostics: the round, the team, risks or how to invest. (Sample.)", createdAt: daysAgo(2), editedAt: null, deletedAt: null, likedBy: [] },
+    { id: "c-tidewell-r1", companyId: tidewell.id, authorUserId: RESEARCH_AUTHOR_ID, body: "Tidewell reports £1.4m first close\nStrong investor demand reported; final close expected within two weeks (sample).", createdAt: hoursAgo(2), editedAt: null, deletedAt: null, likedBy: [] },
     { id: "c-tidewell-1", companyId: tidewell.id, authorUserId: DAD.userId, body: "Ask about next round timeline and whether individual angels can still get an allocation.", createdAt: daysAgo(2), editedAt: null, deletedAt: null, likedBy: [] },
   ],
   updates: [

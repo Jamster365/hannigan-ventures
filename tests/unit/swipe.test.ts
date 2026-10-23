@@ -71,4 +71,14 @@ describe("cards and matches", () => {
     const rows = matchesFor([one, two], DEMO_MEMBERS, []);
     expect(rows.map((r) => r.company.id)).toEqual([one.company.id]);
   });
+
+  it("archives a match when its round closes", async () => {
+    const all = await bundles();
+    const closed = all.find((x) => x.accessChecks.some((k) => k.accessStatus === "closed"))!;
+    const open = all.find((x) => x !== closed && !x.accessChecks.some((k) => k.accessStatus === "closed") && !x.rounds.some((r) => r.isCurrent && r.claimedStatus === "closed"))!;
+    for (const x of [closed, open]) x.votes = [vote(a.userId, "interested"), vote(b.userId, "interested")];
+    const rows = matchesFor([closed, open], DEMO_MEMBERS, []);
+    expect(rows.find((r) => r.company.id === closed.company.id)?.archived).toBe(true);
+    expect(rows.find((r) => r.company.id === open.company.id)?.archived).toBe(false);
+  });
 });

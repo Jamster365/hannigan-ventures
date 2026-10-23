@@ -2,8 +2,10 @@ import { Building2, CalendarDays, ChevronRight, FlaskConical, Info, LayoutGrid, 
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/navigation/page-header";
+import { PushSettings } from "@/components/push/push-settings";
 import { Card } from "@/components/ui/primitives";
 import { requireMember } from "@/lib/auth/current-member";
+import { dataMode } from "@/lib/config";
 import { getRepository } from "@/lib/data";
 import { formatDateTime } from "@/lib/domain/format";
 
@@ -56,6 +58,12 @@ export default async function MePage() {
             A company becomes a match when two of you ({members.map((m) => m.displayName).join(", ")}) tick it. Your ticks and crosses stay private until then.
           </p>
         </Card>
+        <section className="mt-5">
+          <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">Notifications</h2>
+          <Card className="overflow-hidden p-0">
+            <PushSettings publicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null} available={dataMode() === "supabase"} />
+          </Card>
+        </section>
         {groups.map((g) => (
           <section key={g.title} className="mt-5">
             <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">{g.title}</h2>

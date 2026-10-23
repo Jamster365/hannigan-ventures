@@ -190,6 +190,8 @@ export interface MatchRow {
   /** Unread notification ids for this company (match + comments), cleared when the chat is opened. */
   unreadIds: string[];
   isNewMatch: boolean;
+  /** The round has closed: the match moves to Archived (its chat stays readable). */
+  archived: boolean;
 }
 
 /** The moment the last member ticked: the latest Interested vote. */
@@ -197,7 +199,7 @@ export function matchedAt(bundle: CompanyBundle): string {
   return bundle.votes.map((v) => v.updatedAt).sort().at(-1) ?? bundle.company.updatedAt;
 }
 
-export function matchesFor(bundles: CompanyBundle[], members: Member[], notifications: Notification[]): MatchRow[] {
+export function matchesFor(bundles: CompanyBundle[], members: Member[], notifications: Notification[], opts: { now?: Date } = {}): MatchRow[] {
   return bundles
     .filter((b) => computeFamilyStage(b.votes, members.length) === "shortlisted")
     .map((b) => {
@@ -214,6 +216,7 @@ export function matchesFor(bundles: CompanyBundle[], members: Member[], notifica
         unread: unreadNotes.filter((n) => n.notificationType === "comment" && n.href.startsWith("/matches")).length,
         unreadIds: unreadNotes.map((n) => n.id),
         isNewMatch: unreadNotes.some((n) => n.notificationType === "shortlist_promoted" && n.href.startsWith("/matches")),
+        archived: isClosedRound(b, opts),
       };
     })
     .sort((a, b) => (b.lastMessage?.createdAt ?? b.matchedAt).localeCompare(a.lastMessage?.createdAt ?? a.matchedAt));

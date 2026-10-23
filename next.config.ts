@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // The service worker must always be re-checked so updates reach phones.
+        source: "/sw.js",
+        headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }],
+      },
+      {
         source: "/:path*",
         headers: [
           // Private household app: never indexed.

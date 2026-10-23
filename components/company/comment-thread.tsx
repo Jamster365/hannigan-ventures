@@ -4,7 +4,7 @@ import { SendHorizontal } from "lucide-react";
 import { useOptimistic, useRef, useState, useTransition } from "react";
 import { addCommentAction, deleteCommentAction, editCommentAction } from "@/lib/actions/family";
 import { relativeTime } from "@/lib/domain/format";
-import type { Comment, Member } from "@/lib/domain/types";
+import { RESEARCH_AUTHOR_ID, type Comment, type Member } from "@/lib/domain/types";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
@@ -83,10 +83,10 @@ function CommentItem({ comment, author, mine, slug }: { comment: Comment; author
   const [pending, start] = useTransition();
   return (
     <li className="flex gap-3">
-      {author ? <Avatar member={author} size="sm" className="mt-0.5" /> : <span className="h-8 w-8 rounded-full bg-surface-muted" />}
+      {author ? <Avatar member={author} size="sm" className="mt-0.5" /> : <span className="h-8 w-8 shrink-0 rounded-full bg-violet-pale" />}
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-[14px] font-semibold text-ink">{author?.displayName ?? "Member"}</span>
+          <span className="text-[14px] font-semibold text-ink">{comment.authorUserId === RESEARCH_AUTHOR_ID ? "Research (AI)" : (author?.displayName ?? "Member")}</span>
           <span className="text-[11px] text-tertiary">{relativeTime(comment.createdAt)}</span>
           {comment.editedAt ? <span className="text-[11px] text-tertiary">(edited)</span> : null}
         </div>

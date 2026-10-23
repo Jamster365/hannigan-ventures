@@ -24,6 +24,7 @@ To move between the two apps:
 - **Votes are private until a match**, in both apps (`visibleVotes()` in `lib/domain/family-consensus.ts`).
 - **Closed rounds** leave the deck for a watch list in Decisions and come back when research records a new round. The deck shows the most investable companies first.
 - "Changed their view" notifications are not sent. Match and match-chat notifications link to `/matches/...`; when a match ends, its unread match and chat notifications are cleared.
+- The match chat is the company's one comment thread, so the classic Family tab shows the same messages, including the Research member's posts (`author_kind = 'research'`, migration 0014).
 
 The rule is defined twice, and the two must agree:
 1. TypeScript: `MATCH_RULE` in `lib/domain/family-consensus.ts` (`"two_of_three"` or `"unanimous"`).

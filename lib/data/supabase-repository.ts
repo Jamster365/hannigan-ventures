@@ -18,6 +18,7 @@ import type {
   Vote,
   VoteValue,
 } from "@/lib/domain/types";
+import { RESEARCH_AUTHOR_ID } from "@/lib/domain/types";
 import { DEFAULT_PREFERENCES } from "@/lib/research/default-prompt";
 import { applyPatch } from "@/lib/research/patch";
 import { requireSessionContext } from "@/lib/supabase/member";
@@ -169,7 +170,7 @@ class SupabaseRepository implements Repository {
         founders: (gfo.get(c.id) ?? []).map((f) => ({ id: f.id, companyId: c.id, name: f.name, role: f.role, bio: f.bio, profileUrl: f.profile_url, evidenceStatus: f.evidence_status, sourceId: f.source_id })),
         teamHighlights: (gh.get(c.id) ?? []).map((h) => ({ text: h.text, evidenceStatus: h.evidence_status, sourceId: h.source_id })),
         votes: (gv.get(c.id) ?? []).map((v) => ({ companyId: c.id, userId: v.user_id, vote: v.vote, score: v.score, note: v.note ?? undefined, updatedAt: v.updated_at })),
-        comments: (gc.get(c.id) ?? []).map((x) => ({ id: x.id, companyId: c.id, authorUserId: x.author_user_id, body: x.body, createdAt: x.created_at, editedAt: x.edited_at, deletedAt: x.deleted_at })),
+        comments: (gc.get(c.id) ?? []).map((x) => ({ id: x.id, companyId: c.id, authorUserId: x.author_user_id ?? RESEARCH_AUTHOR_ID, body: x.body, createdAt: x.created_at, editedAt: x.edited_at, deletedAt: x.deleted_at })),
         updates: (gu.get(c.id) ?? []).map((u) => ({ id: u.id, companyId: c.id, updateType: u.update_type, headline: u.headline, summary: u.summary, change: u.change_jsonb ?? undefined, materiality: u.materiality, sourceId: u.source_id, runId: u.run_id, effectiveAt: u.effective_at, detectedAt: u.detected_at })),
         sources: (gs.get(c.id) ?? []).map(mapSource),
         bookmarkedBy: (gb.get(c.id) ?? []).map((b) => b.user_id),
@@ -269,7 +270,7 @@ class SupabaseRepository implements Repository {
     const { data, error } = await supabase.from("comments").update({ body, edited_at: new Date().toISOString() }).eq("id", commentId).eq("author_user_id", userId).select("*").maybeSingle<CommentRow>();
     this.fail(error, "edit comment");
     if (!data) throw new Error("You can only edit your own comments");
-    return { id: data.id, companyId: data.company_id, authorUserId: data.author_user_id, body: data.body, createdAt: data.created_at, editedAt: data.edited_at, deletedAt: data.deleted_at };
+    return { id: data.id, companyId: data.company_id, authorUserId: data.author_user_id ?? RESEARCH_AUTHOR_ID, body: data.body, createdAt: data.created_at, editedAt: data.edited_at, deletedAt: data.deleted_at };
   }
 
   async deleteComment({ userId, commentId }: { userId: string; commentId: string }): Promise<void> {
