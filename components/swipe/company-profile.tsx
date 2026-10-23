@@ -1,10 +1,11 @@
 "use client";
 
 import { ExternalLink, MapPin, Sparkles } from "lucide-react";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Pill, type Tone } from "@/components/ui/primitives";
 import type { SwipeCard } from "@/lib/domain/swipe";
 import { cn } from "@/lib/utils";
+import { CompanyArtwork } from "@/components/company/company-artwork";
 import { RoundCheck } from "./round-check";
 
 /**
@@ -154,26 +155,18 @@ export function CompanyProfile({ card, className }: { card: SwipeCard; className
  */
 function ProfileHero({ card }: { card: SwipeCard }) {
   const { company, media, logo } = card;
-  const hue = company.artwork.hue;
-  const plain: CSSProperties = { background: `oklch(0.95 0.025 ${hue})` };
+  const box = "relative aspect-[16/10] max-h-[42dvh] w-full md:max-h-[30dvh] overflow-hidden";
   if (media?.url && media.rightsStatus !== "fallback") {
     return (
-      <div className="relative aspect-[16/10] max-h-[42dvh] w-full md:max-h-[30dvh] overflow-hidden bg-surface-muted">
+      <div className={cn(box, "bg-surface-muted")}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={media.url} alt={media.altText} className="h-full w-full object-cover" />
       </div>
     );
   }
   return (
-    <div className="relative flex aspect-[16/10] max-h-[42dvh] w-full md:max-h-[30dvh] items-center justify-center overflow-hidden" style={plain} role="img" aria-label={logo?.url ? logo.altText : `${company.name} name`}>
-      {logo?.url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={logo.url} alt="" className="max-h-[42%] max-w-[62%] object-contain" />
-      ) : (
-        <span className="px-8 text-center font-serif text-[clamp(30px,9vw,52px)] font-semibold leading-[1.05]" style={{ color: `oklch(0.34 0.07 ${hue})` }}>
-          {company.name}
-        </span>
-      )}
+    <div className={box}>
+      <CompanyArtwork company={company} media={null} logo={logo} variant="hero" />
     </div>
   );
 }
