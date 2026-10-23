@@ -1,6 +1,6 @@
 # Swipe app and classic app
 
-Since 22 October 2026 the app opens as a **swipe app**: everyone ticks or crosses each company, and when all three tick the same one it becomes a match with its own chat. The earlier **classic app** (Home feed, Discover filters, Shortlist, Updates, seven-tab company profiles) is still in the codebase and still works. Both use the same database, votes and comments.
+Since 22 October 2026 the app opens as a **swipe app**: everyone ticks, crosses or skips each company, and when two of the three tick the same one it becomes a match with its own chat. The earlier **classic app** (Home feed, Discover filters, Shortlist, Updates, seven-tab company profiles) is still in the codebase and still works. Both use the same database, votes and comments.
 
 ## Where things live
 
@@ -36,4 +36,4 @@ The rule is defined twice, and the two must agree:
 3. The current rule (two of three) already matches the classic app's original behaviour, so no rule change is needed.
 4. Run `npm run typecheck && npm run lint && npm test && npm run test:e2e`. The e2e suite covers both apps.
 
-To keep the unanimous rule with the classic screens, do step 1 (and step 2 if wanted) and skip step 3.
+To use the unanimous rule instead, set `MATCH_RULE = "unanimous"` and add a migration that restores `compute_family_stage()` from `0012_unanimous_matches.sql`.
