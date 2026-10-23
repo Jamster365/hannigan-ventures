@@ -244,6 +244,7 @@ test("members other than the owner cannot open the upload screen", async ({ page
 });
 
 test("three tabs: Decisions lives under Me", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("hv-deck-tip-seen", "1"));
   await go(page, "/");
   const nav = page.getByRole("navigation", { name: "Primary" });
   await expect(nav.getByRole("link")).toHaveCount(3);
