@@ -13,7 +13,7 @@ describe("research pool shipped with the app", () => {
       expect(planned.ok).toBe(true);
       if (planned.ok) {
         expect(planned.plan.rejected).toEqual([]);
-        for (const b of planned.plan.batches) for (const c of b.companies) expect(c.candidate.country).toMatch(/^(United Kingdom|UK)$/);
+        for (const b of planned.plan.batches) for (const c of b.companies) expect((c.candidate as { country: string }).country).toMatch(/^(United Kingdom|UK)$/);
       }
     }
   });

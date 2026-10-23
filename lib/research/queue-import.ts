@@ -49,7 +49,7 @@ export async function queueBundledPool(householdId: string): Promise<string[]> {
   for (const batch of RESEARCH_POOL) {
     if (done.has(batch.label)) continue;
     const res = await queueImport({ householdId, label: batch.label, raw: batch.data, triggeredBy: null });
-    if (res.ok) queued.push(batch.label);
+    queued.push(res.ok ? batch.label : `${batch.label}: ${res.error}`);
   }
   return queued;
 }

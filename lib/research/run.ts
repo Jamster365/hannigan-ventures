@@ -90,7 +90,7 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
 
   report.imagery = await backfillImagery(store, householdId, now).catch(() => 0);
   // Research batches shipped with the app are queued once, then processed like uploads.
-  report.poolQueued = await import("./queue-import").then((m) => m.queueBundledPool(householdId)).catch(() => []);
+  report.poolQueued = await import("./queue-import").then((m) => m.queueBundledPool(householdId)).catch((e: unknown) => [`error: ${e instanceof Error ? e.message : String(e)}`]);
 
   // Operator-triggered one-off first fill: a manual run with deep discovery and a larger cap.
   if (opts.firstFill) {
