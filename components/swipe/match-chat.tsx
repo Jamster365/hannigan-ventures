@@ -53,7 +53,7 @@ export function MatchChat({ companyId, slug, companyName, comments, members, cur
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4" aria-label={`Chat about ${companyName}`}>
         <p className="mx-auto mb-4 max-w-[34ch] rounded-full bg-green-pale px-4 py-1.5 text-center text-[12px] font-medium text-green">{intro}</p>
-        <ol className="space-y-1.5">
+        <ol className="mx-auto max-w-[760px] space-y-1.5">
           {visible.map((c, i) => {
             const mine = c.authorUserId === currentUserId;
             const research = c.authorUserId === RESEARCH_AUTHOR_ID;
@@ -83,7 +83,7 @@ export function MatchChat({ companyId, slug, companyName, comments, members, cur
           e.preventDefault();
           send();
         }}
-        className="flex shrink-0 items-end gap-2 border-t border-hairline bg-surface px-3 py-2"
+        className="flex shrink-0 items-end gap-2 border-t border-hairline bg-surface px-3 py-2 md:px-[max(12px,calc((100%-760px)/2))]"
       >
         <textarea
           value={draft}

@@ -49,7 +49,7 @@ export default async function MePage() {
 
   return (
     <>
-      <PageHeader title="Profile" />
+      <PageHeader width="max-w-[640px]" title="Profile" />
       <div className="mx-auto w-full max-w-[640px] px-4 pb-8 pt-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">

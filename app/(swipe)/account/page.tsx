@@ -22,7 +22,7 @@ export default async function AccountPage() {
   }
   return (
     <>
-      <PageHeader title="Account" backHref="/me" variant="back" />
+      <PageHeader width="max-w-[720px]" title="Account" backHref="/me" variant="back" />
       <div className="mx-auto max-w-[720px] px-4 pt-4">
         <Card className="flex items-center gap-3 p-4">
           <Avatar member={member} size="lg" />

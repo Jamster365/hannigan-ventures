@@ -273,7 +273,7 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
 
       {/* Thumb-reach corners, pinned to the bottom of the screen while the profile scrolls underneath. */}
       {top ? (
-        <div className="pointer-events-none sticky bottom-0 z-20 mx-auto flex w-full max-w-[640px] justify-between px-4 pb-4 pt-2">
+        <div className="pointer-events-none sticky bottom-0 z-20 mx-auto flex w-full max-w-[640px] justify-between px-4 pb-4 pt-2 md:max-w-[800px] md:px-3">
           <button
             type="button"
             onClick={() => commit("left")}

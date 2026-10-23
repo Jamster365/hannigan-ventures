@@ -158,14 +158,14 @@ function ProfileHero({ card }: { card: SwipeCard }) {
   const plain: CSSProperties = { background: `oklch(0.95 0.025 ${hue})` };
   if (media?.url && media.rightsStatus !== "fallback") {
     return (
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-muted">
+      <div className="relative aspect-[16/10] max-h-[42dvh] w-full overflow-hidden bg-surface-muted">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={media.url} alt={media.altText} className="h-full w-full object-cover" />
       </div>
     );
   }
   return (
-    <div className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden" style={plain} role="img" aria-label={logo?.url ? logo.altText : `${company.name} name`}>
+    <div className="relative flex aspect-[16/10] max-h-[42dvh] w-full items-center justify-center overflow-hidden" style={plain} role="img" aria-label={logo?.url ? logo.altText : `${company.name} name`}>
       {logo?.url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logo.url} alt="" className="max-h-[42%] max-w-[62%] object-contain" />

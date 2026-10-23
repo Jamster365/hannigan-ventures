@@ -25,7 +25,7 @@ export default async function MatchesPage() {
 
   return (
     <>
-      <PageHeader title="Matches" />
+      <PageHeader width="max-w-[640px]" title="Matches" />
       <LiveRefresh enabled={dataMode() === "supabase"} channel="matches" table="comments" />
       <div className="mx-auto w-full max-w-[640px] pb-6">
         {rows.length === 0 ? (

@@ -25,7 +25,7 @@ export default async function MatchChatPage({ params }: { params: Promise<{ slug
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <header className="flex shrink-0 items-center gap-2 border-b border-hairline bg-surface px-2 py-1.5">
+      <header className="flex shrink-0 items-center gap-2 border-b border-hairline bg-surface px-2 py-1.5 md:px-[max(8px,calc((100%-776px)/2))]">
         <BackLink href="/matches" />
         <Link href={`/matches/${slug}/profile`} className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl py-1 pr-2 hover:bg-surface-muted/60">
           <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-hairline">
@@ -38,7 +38,7 @@ export default async function MatchChatPage({ params }: { params: Promise<{ slug
         </Link>
       </header>
 
-      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-hairline bg-page px-4 py-2">
+      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-hairline bg-page px-4 py-2 md:px-[max(16px,calc((100%-760px)/2))]">
         <Pill tone={card.raising.tone as Tone}>{card.raising.label}</Pill>
         {card.facts.slice(0, 3).map((f) => (
           <Pill key={f.label}>

@@ -17,6 +17,7 @@ export function PageHeader({
   actions,
   unread = 0,
   className,
+  width = "max-w-[1200px]",
   children,
 }: {
   variant?: "brand" | "title" | "back";
@@ -25,11 +26,13 @@ export function PageHeader({
   actions?: ReactNode;
   unread?: number;
   className?: string;
+  /** Max width of the bar's content, matching the page column below it. */
+  width?: string;
   children?: ReactNode;
 }) {
   return (
     <header className={cn("sticky top-0 z-30 border-b border-hairline/70 bg-page/92 backdrop-blur supports-[backdrop-filter]:bg-page/80", className)}>
-      <div className="mx-auto flex min-h-[56px] max-w-[1200px] items-center gap-2 px-4">
+      <div className={cn("mx-auto flex min-h-[56px] items-center gap-2 px-4", width)}>
         {variant === "back" ? (
           <>
             <BackLink href={backHref ?? "/"} />
