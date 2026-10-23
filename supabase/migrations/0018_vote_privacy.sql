@@ -1,9 +1,13 @@
 -- Votes and reasons stay private until a match: enforced in the database,
 -- not only in the app (security review, 23 Oct 2026).
 
+-- Applied to the live database by hand on 23 Oct 2026, in pieces: DROP
+-- statements hung in the Supabase SQL tool that day, so policies are altered
+-- in place rather than dropped and recreated. (The live database also carries
+-- an identical extra policy, votes_select_private, from a first attempt.)
+
 -- 1. A member reads their own votes; everyone's once the company is a match.
-drop policy if exists votes_select on public.member_votes;
-create policy votes_select on public.member_votes for select to authenticated
+alter policy votes_select on public.member_votes
   using (
     user_id = auth.uid()
     or exists (
@@ -82,8 +86,7 @@ set before_jsonb = case when before_jsonb is null then null else jsonb_build_obj
     after_jsonb = case when after_jsonb is null then null else jsonb_build_object('vote', after_jsonb->'vote') end
 where action like 'vote.%';
 
-drop policy if exists audit_select on public.audit_events;
-create policy audit_select on public.audit_events for select to authenticated
+alter policy audit_select on public.audit_events
   using (public.is_household_member(household_id) and action not like 'vote.%');
 
 -- 3. Research-instruction activations are always in the caller's own name.
