@@ -54,20 +54,13 @@ export function effectiveAccess(
     if (!hasRoute) {
       return { status: "contactable", canInvestNow: false, reason: "Verified status recorded without an actionable route.", check: latest, isStale: false };
     }
-    const chequeOk = latest.minCheque === null || latest.minCheque <= maxCheque;
-    if (!chequeOk) {
-      return {
-        status: latest.accessStatus,
-        canInvestNow: false,
-        reason: `Minimum cheque exceeds the household maximum of £${maxCheque.toLocaleString("en-GB")}.`,
-        check: latest,
-        isStale: false,
-      };
-    }
+    // The family's cheque size is a preference, not a rule (owner, 23 Oct
+    // 2026): a high minimum is flagged, never hidden or blocked.
+    const aboveUsual = latest.minCheque !== null && latest.minCheque > maxCheque;
     return {
       status: latest.accessStatus,
       canInvestNow: true,
-      reason: "Live route verified within the freshness window. An application route does not guarantee allocation.",
+      reason: `Live route verified within the freshness window. An application route does not guarantee allocation.${aboveUsual ? ` Minimum cheque £${latest.minCheque!.toLocaleString("en-GB")} is above the usual £${maxCheque.toLocaleString("en-GB")} per member.` : ""}`,
       check: latest,
       isStale: false,
     };

@@ -31,7 +31,7 @@ OUTPUT
 /** Compose the final system prompt: policy first, editable instructions second. */
 export function composeSystemPrompt(editableInstructions: string, preferences: { maxChequeGbp: number; geographicFocus: string; eventGeography: string; sectorsInclude: string[]; sectorsExclude: string[] }): string {
   const prefs = [
-    `Maximum individual cheque: £${preferences.maxChequeGbp.toLocaleString("en-GB")} (an upper limit, not an assumed budget).`,
+    `Usual cheque per member: up to £${preferences.maxChequeGbp.toLocaleString("en-GB")}, typically £50k or more (a preference, not a hard limit).`,
     `Geographic focus: ${preferences.geographicFocus}.`,
     `Event geography: ${preferences.eventGeography}.`,
     preferences.sectorsInclude.length ? `Sectors to emphasise: ${preferences.sectorsInclude.join(", ")}.` : null,

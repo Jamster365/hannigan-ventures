@@ -34,8 +34,10 @@ describe("CAN INVEST NOW guard", () => {
   it("is refused when there is no actionable route", () => {
     expect(effectiveAccess([{ ...base, contactOrUrl: null, routeType: "none" }], { now }).canInvestNow).toBe(false);
   });
-  it("is refused when the minimum cheque exceeds the household maximum", () => {
-    expect(effectiveAccess([{ ...base, minCheque: 250_000 }], { now, maxChequeGbp: 100_000 }).canInvestNow).toBe(false);
+  it("flags, but does not block, a minimum cheque above the usual size", () => {
+    const access = effectiveAccess([{ ...base, minCheque: 250_000 }], { now, maxChequeGbp: 100_000 });
+    expect(access.canInvestNow).toBe(true);
+    expect(access.reason).toContain("above the usual £100,000");
   });
   it("closed always wins", () => {
     expect(effectiveAccess([{ ...base, accessStatus: "closed" }], { now })).toMatchObject({ status: "closed", canInvestNow: false });
