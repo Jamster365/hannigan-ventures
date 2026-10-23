@@ -1,5 +1,5 @@
 import { accessLabel, effectiveAccess, eisLabel } from "./company-status";
-import { computeFamilyStage } from "./family-consensus";
+import { familyStageOf } from "./family-consensus";
 import { formatMoney } from "./format";
 import { buildMatcher, type MemberPreferences } from "./learning";
 import type { Assessment, Company, CompanyBundle, CompanyMedia, EvidenceStatus, Member, Notification, VoteValue } from "./types";
@@ -56,8 +56,8 @@ const PLATFORMS: [RegExp, string][] = [
 export function crowdfundingPlatform(bundle: CompanyBundle): string | null {
   const latest = [...bundle.accessChecks].sort((a, b) => b.checkedAt.localeCompare(a.checkedAt))[0];
   if (!latest) return null;
-  const text = `${latest.contactOrUrl ?? ""} ${latest.notes}`;
-  for (const [re, name] of PLATFORMS) if (re.test(text)) return name;
+  // Judged from the campaign link only: notes can mention "Republic of Ireland".
+  for (const [re, name] of PLATFORMS) if (re.test(latest.contactOrUrl ?? "")) return name;
   return null;
 }
 
@@ -67,7 +67,7 @@ export function crowdfundingPlatform(bundle: CompanyBundle): string | null {
  * early-access pages don't count.
  */
 function probablyOpenListing(bundle: CompanyBundle, status: string): boolean {
-  if (!["fundraising_reported", "contactable", "unknown"].includes(status)) return false;
+  if (!["fundraising_reported", "contactable", "unknown", "stale"].includes(status)) return false;
   const latest = [...bundle.accessChecks].sort((a, b) => b.checkedAt.localeCompare(a.checkedAt))[0];
   return Boolean(crowdfundingPlatform(bundle)) && !/coming-soon|early-access/i.test(latest?.contactOrUrl ?? "");
 }
@@ -76,7 +76,7 @@ function probablyOpenListing(bundle: CompanyBundle, status: string): boolean {
 export function isClosedRound(bundle: CompanyBundle, opts: { now?: Date } = {}): boolean {
   const access = effectiveAccess(bundle.accessChecks, opts);
   const round = bundle.rounds.find((r) => r.isCurrent) ?? null;
-  return access.status === "closed" || (round?.claimedStatus === "closed" && !["verified_open", "closing_soon", "fundraising_reported", "expected"].includes(access.status));
+  return access.status === "closed" || (round?.claimedStatus === "closed" && !access.canInvestNow);
 }
 
 /** Higher = closer to a cheque actually being possible. With fitScore, orders the deck. */
@@ -145,7 +145,7 @@ export function buildSwipeCard(bundle: CompanyBundle, userId: string, opts: { no
   const platformName = crowdfundingPlatform(bundle);
   let raising: SwipeCard["raising"];
   if (access.canInvestNow) raising = { label: "Can invest now", tone: "green", detail: access.reason };
-  else if (access.status === "closed" || round?.claimedStatus === "closed") raising = { label: "Round closed", tone: "red", detail: access.reason };
+  else if (isClosedRound(bundle, opts)) raising = { label: "Round closed", tone: "red", detail: access.reason };
   else if (platformName && probablyOpenListing(bundle, access.status)) raising = { label: `On ${platformName} · probably open`, tone: "blue", detail: "Reported until a member checks the page" };
   else if (round?.claimedStatus === "open") raising = { label: "Raising (reported)", tone: "blue", detail: evidenceHint(round.evidenceStatus) ?? "Not verified" };
   else if (access.status !== "unknown") raising = { label: accessLabel(access.status), tone: access.status === "stale" || access.status === "expected" ? "amber" : "blue", detail: access.reason };
@@ -204,8 +204,10 @@ export interface DeckEntry {
   explore: boolean;
 }
 
-/** Every EXPLORE_EVERY-th card is an explore pick (once the member has given some answers). */
+/** Explore picks: every 5th card while a member is new (under 30 answers), every 8th after. */
 export const EXPLORE_EVERY = 8;
+export const EXPLORE_EVERY_EARLY = 5;
+export const EXPLORE_EARLY_UNTIL = 30;
 
 /**
  * A member's deck: companies they have not answered, that are not already a
@@ -223,25 +225,29 @@ export function rankDeck(bundles: CompanyBundle[], userId: string, opts: { now?:
     .filter((b) => {
       const mine = b.votes.find((v) => v.userId === userId);
       if (mine && mine.vote !== "unsure") return false;
-      const stage = computeFamilyStage(b.votes, opts.memberCount);
+      const stage = familyStageOf(b, opts.memberCount);
       if (stage === "shortlisted" || stage === "passed") return false;
       return isUk(b) && !isClosedRound(b, opts);
     })
     .map((b) => {
       const learned = matcher.score(b);
-      return { b, score: investability(b, opts) + fitScore(b) + learned.points, why: learned.why, novelty: learned.novelty };
+      // Investability at half weight and learning at 1.5x, so what the member
+      // has shown they want can outrank a merely "reported" round; a verified
+      // "can invest now" (50 here) still sits above everything unliked.
+      return { b, score: investability(b, opts) / 2 + fitScore(b) + 1.5 * learned.points, why: learned.why, novelty: learned.novelty };
     })
     .sort((x, y) => y.score - x.score || y.b.company.firstDiscoveredAt.localeCompare(x.b.company.firstDiscoveredAt));
 
   const out: DeckEntry[] = [];
   const rest = [...scored];
   const learning = matcher.mine.answers >= 5;
+  const every = matcher.mine.answers < EXPLORE_EARLY_UNTIL ? EXPLORE_EVERY_EARLY : EXPLORE_EVERY;
   while (rest.length) {
-    if (learning && (out.length + 1) % EXPLORE_EVERY === 0 && rest.length > 1) {
+    if (learning && (out.length + 1) % every === 0 && rest.length > 1) {
       // From the better half, the one this member's answers say least about.
       const pool = rest.slice(0, Math.max(2, Math.ceil(rest.length / 2)));
       const pick = pool.reduce((best, x) => (x.novelty > best.novelty ? x : best), pool[pool.length - 1]);
-      if (pick.novelty > 0 && pick !== rest[0]) {
+      if (pick !== rest[0]) {
         rest.splice(rest.indexOf(pick), 1);
         out.push({ bundle: pick.b, why: "Something a bit different, to learn what you think.", explore: true });
         continue;
@@ -286,7 +292,7 @@ export function decisionsFor(bundles: CompanyBundle[], userId: string, opts: { n
       logo: b.media.find((m) => m.kind === "logo" && m.url && m.rightsStatus !== "fallback") ?? null,
       closed: isClosedRound(b, opts),
     };
-    const stage = computeFamilyStage(b.votes, opts.memberCount);
+    const stage = familyStageOf(b, opts.memberCount);
     const status: DecisionStatus = stage === "shortlisted" ? "match" : stage === "passed" ? "ended" : "waiting";
     const mine = b.votes.find((v) => v.userId === userId);
     if (mine && mine.vote !== "unsure") decided.push({ ...base, vote: mine.vote, decidedAt: mine.updatedAt, status, note: mine.note ?? null });
@@ -318,7 +324,7 @@ export function matchedAt(bundle: CompanyBundle): string {
 
 export function matchesFor(bundles: CompanyBundle[], members: Member[], notifications: Notification[], opts: { now?: Date } = {}): MatchRow[] {
   return bundles
-    .filter((b) => computeFamilyStage(b.votes, members.length) === "shortlisted")
+    .filter((b) => familyStageOf(b, members.length) === "shortlisted")
     .map((b) => {
       const live = b.comments.filter((c) => !c.deletedAt).sort((x, y) => x.createdAt.localeCompare(y.createdAt));
       const last = live.at(-1) ?? null;

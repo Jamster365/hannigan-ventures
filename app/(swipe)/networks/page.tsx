@@ -1,3 +1,4 @@
+import { safeHref } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/navigation/page-header";
 import { Card, Pill } from "@/components/ui/primitives";
@@ -41,8 +42,8 @@ export default async function NetworksPage() {
                   <dd className="text-ink">{n.lastCheckedAt ? formatDate(n.lastCheckedAt) : "Never"}</dd>
                 </dl>
                 <p className="mt-3 text-[0.75rem] text-tertiary">{n.notes}</p>
-                {n.website || n.joiningUrl ? (
-                  <a href={n.joiningUrl ?? n.website ?? "#"} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-[36px] items-center gap-1 text-[0.8125rem] font-medium text-blue">
+                {safeHref(n.joiningUrl ?? n.website) ? (
+                  <a href={safeHref(n.joiningUrl ?? n.website)!} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-[36px] items-center gap-1 text-[0.8125rem] font-medium text-blue">
                     {n.joiningUrl ? "Joining information" : "Website"} <ExternalLink size={13} aria-hidden />
                   </a>
                 ) : null}

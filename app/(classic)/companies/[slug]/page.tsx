@@ -19,7 +19,7 @@ import { Chip } from "@/components/ui/primitives";
 import { requireMember } from "@/lib/auth/current-member";
 import { getRepository } from "@/lib/data";
 import { effectiveAccess } from "@/lib/domain/company-status";
-import { computeFamilyStage } from "@/lib/domain/family-consensus";
+import { familyStageOf } from "@/lib/domain/family-consensus";
 import { relativeTime } from "@/lib/domain/format";
 import { first, type Params, type SearchParams } from "@/lib/types/next";
 
@@ -42,7 +42,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pa
   const backHref = first(sp.from) === "match" ? `/matches/${slug}/profile` : "/home";
   const { company, media, votes, accessChecks, assessment, updates } = bundle;
   const primary = media.find((m) => m.isPrimary) ?? media[0] ?? null;
-  const stage = computeFamilyStage(votes);
+  const stage = familyStageOf(bundle);
   const access = effectiveAccess(accessChecks, { maxChequeGbp: prompt.config.maxChequeGbp });
   const bookmarked = bundle.bookmarkedBy.includes(member.userId);
   const latest = [...updates].sort((a, b) => b.effectiveAt.localeCompare(a.effectiveAt))[0];

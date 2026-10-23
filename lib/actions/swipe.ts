@@ -5,12 +5,11 @@ import { after } from "next/server";
 import { z } from "zod";
 import { requireMember } from "@/lib/auth/current-member";
 import { getRepository } from "@/lib/data";
-import { almostMatch } from "@/lib/domain/family-consensus";
 import type { ActionResult } from "./family";
 
 export type SwipeOutcome =
   | { kind: "match"; tickedBy: string[] }
-  | { kind: "almost"; likedBy: string[] }
+  | { kind: "almost" }
   | { kind: "none" };
 
 const swipeSchema = z.object({
@@ -37,16 +36,15 @@ export async function swipeAction(input: z.input<typeof swipeSchema>): Promise<A
   try {
     const member = await requireMember();
     const repo = await getRepository();
-    const [votes, members] = await Promise.all([repo.listVotes(parsed.data.companyId), repo.getMembers()]);
     const { transition } = await repo.setVote({ userId: member.userId, companyId: parsed.data.companyId, vote: parsed.data.vote });
     let outcome: SwipeOutcome = { kind: "none" };
     if (parsed.data.vote === "interested" && transition.promoted) {
+      // Others' votes become readable only once it is a match, so look them up now.
+      const [votes, members] = await Promise.all([repo.listVotes(parsed.data.companyId), repo.getMembers()]);
       const others = votes.filter((v) => v.userId !== member.userId && v.vote === "interested").map((v) => members.find((m) => m.userId === v.userId)?.displayName ?? "Someone");
       outcome = { kind: "match", tickedBy: others };
-    }
-    else if (parsed.data.vote === "pass") {
-      const liked = almostMatch(votes, members, member.userId);
-      if (liked) outcome = { kind: "almost", likedBy: liked.map((m) => m.displayName) };
+    } else if (parsed.data.vote === "pass" && (await repo.almostMatch({ userId: member.userId, companyId: parsed.data.companyId }))) {
+      outcome = { kind: "almost" };
     }
     revalidateSwipe(parsed.data.slug);
     // Every so many answers, draft research guidance from them (a proposal to approve).
@@ -107,6 +105,7 @@ export async function saveReasonAction(input: z.input<typeof reasonSchema>): Pro
     const repo = await getRepository();
     await repo.setVoteNote({ userId: member.userId, companyId: parsed.data.companyId, note: parsed.data.note || null });
     revalidatePath("/decisions");
+    revalidatePath("/taste");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not save the reason" };

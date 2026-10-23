@@ -289,6 +289,8 @@ export interface Company {
   tags: string[];
   eisStatus: EisStatus;
   eisNote?: string;
+  /** The family's stage for this company, as the database computed it from all votes (absent in demo data, where it is computed from the votes to hand). */
+  familyStage?: FamilyStage;
   /** Design accent used by the typographic artwork fallback. */
   artwork: { hue: number; motif: "orbit" | "grid" | "wave" | "facet" | "ring" | "field" };
   createdAt: string;

@@ -1,3 +1,4 @@
+import { safeHref } from "@/lib/utils";
 import { ExternalLink, MapPin } from "lucide-react";
 import { Card, Pill, type Tone } from "@/components/ui/primitives";
 import { formatDate, formatDateTime } from "@/lib/domain/format";
@@ -51,8 +52,8 @@ export function EventCard({ event, compact, currentUserId }: { event: EventRecor
               <span className="font-medium text-ink">Next:</span> {event.nextAction}
             </p>
             <p className="mt-1 text-[0.6875rem] text-tertiary">{event.registrationCheckedAt ? `Status checked ${formatDate(event.registrationCheckedAt)}` : "Registration status not verified"}</p>
-            {event.registrationUrl ? (
-              <a href={event.registrationUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-[36px] items-center gap-1 text-[0.8125rem] font-medium text-blue">
+            {safeHref(event.registrationUrl) ? (
+              <a href={safeHref(event.registrationUrl)!} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-[36px] items-center gap-1 text-[0.8125rem] font-medium text-blue">
                 Registration page <ExternalLink size={13} aria-hidden />
               </a>
             ) : null}

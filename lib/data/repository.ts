@@ -52,6 +52,8 @@ export interface Repository {
   // Family mutations (caller must already be authorised as userId)
   setVote(input: { userId: string; companyId: string; vote: VoteValue | null; score?: number | null }): Promise<{ transition: StageTransition }>;
   /** The member's optional reason for their current answer (private, like the vote). */
+  /** True when every other member has answered and exactly one is interested, so this member's yes would make a match. Never says who. */
+  almostMatch(input: { userId: string; companyId: string }): Promise<boolean>;
   setVoteNote(input: { userId: string; companyId: string; note: string | null }): Promise<void>;
   getPreferences(userId: string): Promise<MemberPreferences>;
   savePreferences(input: { userId: string; prefs: MemberPreferences }): Promise<void>;

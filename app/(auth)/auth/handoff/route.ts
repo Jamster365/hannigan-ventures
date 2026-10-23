@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false, autoRefreshToken: false } });
       const { data, error } = await anon.auth.getUser(accessToken);
       if (error || !data.user) return NextResponse.json({ status: "invalid" }, { status: 401 });
-      const ok = await confirmHandoff(id, accessToken, refreshToken);
+      const ok = await confirmHandoff(id, accessToken, refreshToken, data.user.email);
       return NextResponse.json({ status: ok ? "handed_off" : "gone" });
     }
     case "claim": {

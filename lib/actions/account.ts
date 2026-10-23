@@ -62,6 +62,7 @@ export async function createSignInLinkAction(userId: string): Promise<{ ok: true
   if (userError || !target.user?.email) return { ok: false, error: "Couldn't find that member's account." };
   const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email: target.user.email });
   if (error || !data.properties?.hashed_token) return { ok: false, error: "Couldn't create a link. Try again in a minute." };
+  await admin.from("audit_events").insert({ household_id: ctx.householdId, actor_type: "member", actor_id: member.userId, action: "auth.sign_in_link", object_type: "member", object_id: userId, after_jsonb: { email: target.user.email } });
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://hannigan-ventures.vercel.app";
   return { ok: true, url: `${site}/auth/link?t=${encodeURIComponent(data.properties.hashed_token)}` };
 }

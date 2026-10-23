@@ -175,8 +175,8 @@ function Facts({ facts }: { facts: SwipeCard["facts"] }) {
   if (!facts.length) return null;
   return (
     <dl className="mt-4 grid grid-cols-2 gap-2">
-      {facts.map((f) => (
-        <div key={f.label} className="rounded-[14px] bg-surface-muted px-3.5 py-2.5">
+      {facts.map((f, i) => (
+        <div key={`${f.label}-${i}`} className="rounded-[14px] bg-surface-muted px-3.5 py-2.5">
           <dt className="text-[0.75rem] text-secondary">{f.label}</dt>
           <dd className={cn("mt-0.5 text-[0.9375rem] font-semibold", /^(Unknown|Undisclosed)$/.test(f.value) ? "text-tertiary" : "text-ink")}>{f.value}</dd>
           {f.hint ? <dd className="mt-0.5 text-[0.6875rem] text-tertiary">{f.hint}</dd> : null}

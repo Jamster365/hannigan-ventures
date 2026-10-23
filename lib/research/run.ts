@@ -77,13 +77,13 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
     // Uploaded batches are processed one per heartbeat so each call stays inside the hosting time limit.
     const isImport = run.responseHandle?.startsWith(IMPORT_PREFIX) ?? false;
     if (isImport && importsProcessed > 0) continue;
-    if (isImport) importsProcessed++;
     const stale = staleReason(run, now);
     if (stale) {
       await store.finishRun({ runId: run.id, status: "failed", sourceCount: run.sourceCount, candidatesCount: run.candidatesCount, publishedCount: run.publishedCount, estimatedCostUsd: run.estimatedCostUsd, summary: "Research run did not complete; nothing new was published.", errorSummary: stale });
       report.failedStale.push(run.id);
       continue;
     }
+    if (isImport) importsProcessed++;
     const result = await advanceResearch(run.id);
     report.advanced.push({ runId: run.id, status: result.status });
   }

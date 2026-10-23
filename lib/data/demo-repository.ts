@@ -1,5 +1,5 @@
 import { DEFAULT_MEMBER_PREFERENCES, type MemberPreferences } from "@/lib/domain/learning";
-import { applyVote, computeFamilyStage } from "@/lib/domain/family-consensus";
+import { almostMatch, applyVote, computeFamilyStage } from "@/lib/domain/family-consensus";
 import type {
   AuditEvent,
   Comment,
@@ -134,6 +134,11 @@ class DemoRepository implements Repository {
     return { transition };
   }
 
+  async almostMatch({ userId, companyId }: { userId: string; companyId: string }) {
+    const bundle = this.companies.find((c) => c.company.id === companyId);
+    return bundle ? almostMatch(bundle.votes, DEMO_MEMBERS, userId) !== null : false;
+  }
+
   async setVoteNote({ userId, companyId, note }: { userId: string; companyId: string; note: string | null }) {
     const v = this.companies.find((c) => c.company.id === companyId)?.votes.find((x) => x.userId === userId);
     if (v) v.note = note ?? undefined;
@@ -159,7 +164,7 @@ class DemoRepository implements Repository {
       id: this.nextId("ac"),
       companyId,
       accessStatus: open ? "verified_open" : "closed",
-      routeType: last?.routeType ?? "platform",
+      routeType: last?.routeType && last.routeType !== "none" ? last.routeType : "platform",
       contactOrUrl: last?.contactOrUrl ?? null,
       minCheque: last?.minCheque ?? null,
       maxCheque: last?.maxCheque ?? null,
@@ -269,6 +274,7 @@ class DemoRepository implements Repository {
     const s = this.suggestions.find((x) => x.id === suggestionId);
     if (!s || s.status !== "proposed") return { ok: false as const, reason: "Suggestion is no longer open." };
     const active = await this.getActivePrompt();
+    if (s.suggestedText && s.basePromptVersionId !== active.id) return { ok: false as const, reason: "The instructions changed after this was drafted. Dismiss it and draft a fresh one." };
     const patched = s.suggestedText ?? applyPatch(active.promptText, s.suggestedPatch);
     if (patched === null) return { ok: false as const, reason: "The suggestion no longer matches the current instructions. Dismiss it and ask for a fresh proposal." };
     const res = await this.savePromptVersion({ userId, promptText: patched, config: active.config, changeNote: `Applied suggestion: ${s.rationale.slice(0, 80)}`, basedOnVersionId: active.id });

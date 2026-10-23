@@ -106,7 +106,7 @@ test("swipe: skip, almost a match, undo, two ticks make a match, and Decisions c
   await viewAs(page, "Brother");
   await deckWith(page, "quillon-verify", "Quillon Verify");
   await page.getByRole("button", { name: "Not interested", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Almost a match" })).toContainText("Jamie is interested in");
+  await expect(page.getByRole("dialog", { name: "Almost a match" })).toContainText("One of the others is interested in");
   await page.getByRole("button", { name: "Undo my answer" }).click();
   await expect(topCard(page)).toHaveText("Quillon Verify");
 

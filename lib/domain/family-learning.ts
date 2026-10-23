@@ -20,6 +20,8 @@ export interface FamilyInsights {
 export const LEARNING_SUGGESTED_BY = "learning";
 /** A new proposal is drafted after this many answers since the last one. */
 export const ANSWERS_PER_PROPOSAL = 25;
+/** A kind of company needs this many answers before it can appear in the guidance. */
+export const MIN_ANSWERS_PER_KIND = 8;
 const SECTION = "Learned from the family's answers";
 
 export function familyInsights(bundles: CompanyBundle[]): FamilyInsights {
@@ -47,12 +49,20 @@ export function familyInsights(bundles: CompanyBundle[]): FamilyInsights {
       }
     }
   }
-  const all = [...counts.entries()].map(([feature, c]) => ({ feature, ...c })).filter((x) => x.total >= 4);
+  // A kind of company stands out only against the family's usual yes rate
+  // (the deck itself skews what gets answered), and only with enough answers.
+  const totalYes = [...counts.values()].reduce((s, c) => s + c.yes, 0);
+  const totalAll = [...counts.values()].reduce((s, c) => s + c.total, 0);
+  const base = (totalYes + 1) / (totalAll + 2);
+  const logit = (p: number) => Math.log(p / (1 - p));
+  const all = [...counts.entries()]
+    .map(([feature, c]) => ({ feature, ...c, lean: logit((c.yes + 2 * base) / (c.total + 2)) - logit(base) }))
+    .filter((x) => x.total >= MIN_ANSWERS_PER_KIND);
   return {
     answers,
     reasons,
-    more: all.filter((x) => x.yes / x.total >= 0.7).sort((a, b) => b.yes / b.total - a.yes / a.total || b.total - a.total).slice(0, 4),
-    fewer: all.filter((x) => x.yes / x.total <= 0.2).sort((a, b) => a.yes / a.total - b.yes / b.total || b.total - a.total).slice(0, 4),
+    more: all.filter((x) => x.lean >= 0.7).sort((a, b) => b.lean - a.lean || b.total - a.total).slice(0, 4),
+    fewer: all.filter((x) => x.lean <= -0.7).sort((a, b) => a.lean - b.lean || b.total - a.total).slice(0, 4),
     topReasons: [...chips.entries()].map(([key, c]) => ({ chip: key.slice(key.indexOf(":") + 1), ...c })).sort((a, b) => b.count - a.count).slice(0, 5),
   };
 }
@@ -68,9 +78,11 @@ export function guidanceLines(i: FamilyInsights): string[] {
 
 /** The research instructions with the learned section added or replaced. */
 export function withLearnedSection(promptText: string, lines: string[], date: string): string {
-  const start = promptText.indexOf(`\n\n${SECTION}`);
-  const base = start >= 0 ? promptText.slice(0, start) : promptText.trimEnd();
-  return `${base}\n\n${SECTION} (${date}; a preference, not a rule):\n${lines.map((l) => `- ${l}`).join("\n")}`;
+  const section = `${SECTION} (${date}; a preference, not a rule):\n${lines.map((l) => `- ${l}`).join("\n")}`;
+  // Replace an earlier learned section (its heading and bullet lines only), keeping anything a member wrote after it.
+  const existing = new RegExp(`\\n*${SECTION.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}[^\\n]*\\n(?:- [^\\n]*\\n?)*`);
+  if (existing.test(promptText)) return promptText.replace(existing, `\n\n${section}\n`).trimEnd();
+  return `${promptText.trimEnd()}\n\n${section}`;
 }
 
 /** Whether enough has happened since the last learning proposal to draft a new one. */

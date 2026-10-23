@@ -3,13 +3,13 @@ import { CommentThread } from "@/components/company/comment-thread";
 import { VotePanel } from "@/components/company/vote-panel";
 import { Avatar } from "@/components/ui/avatar";
 import { Pill } from "@/components/ui/primitives";
-import { computeFamilyStage, familyAverage, stageLabel, tallyVotes, visibleVotes } from "@/lib/domain/family-consensus";
+import { familyAverage, familyStageOf, stageLabel, tallyVotes, visibleVotes } from "@/lib/domain/family-consensus";
 import type { CompanyBundle, Member } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
 
 export function FamilyTab({ bundle, members, currentUserId }: { bundle: CompanyBundle; members: Member[]; currentUserId: string }) {
   const { company, comments, assessment } = bundle;
-  const stage = computeFamilyStage(bundle.votes);
+  const stage = familyStageOf(bundle);
   // Votes stay private until a match: before that you see only your own.
   const votes = visibleVotes(bundle.votes, currentUserId);
   const hidden = votes.length !== bundle.votes.length || stage !== "shortlisted";

@@ -24,10 +24,15 @@ export async function queueImport(input: { householdId: string; label: string; r
 
   for (const [i, batch] of plan.batches.entries()) {
     const part = plan.batches.length > 1 ? `${label}, part ${i + 1} of ${plan.batches.length}` : label;
-    const { data: imp, error } = await admin.from("research_imports").insert({ household_id: input.householdId, label: part, payload: batch }).select("id").single<{ id: string }>();
-    if (error || !imp) return { ok: false, error: `Saving part ${i + 1} failed: ${error?.message ?? "unknown error"}. Earlier parts were queued.` };
+    // A label is queued once: a second heartbeat racing this one gets no row back and moves on.
+    const { data: imp, error } = await admin.from("research_imports").upsert({ household_id: input.householdId, label: part, payload: batch }, { onConflict: "household_id,label", ignoreDuplicates: true }).select("id").maybeSingle<{ id: string }>();
+    if (error) return { ok: false, error: `Saving part ${i + 1} failed: ${error.message}. Earlier parts were queued.` };
+    if (!imp) continue;
     const run = await store.startRun({ householdId: input.householdId, localDate: londonDate(new Date()), runKind: "manual", promptVersionId: config.promptVersionId, model: `Upload: ${label}`.slice(0, 120), triggeredBy: input.triggeredBy, newCompanyLimit: IMPORT_BATCH_SIZE });
-    if (!run) return { ok: false, error: `Could not queue part ${i + 1}.` };
+    if (!run) {
+      await admin.from("research_imports").delete().eq("id", imp.id);
+      return { ok: false, error: `Could not queue part ${i + 1}.` };
+    }
     await store.setDiscovery(run.id, `import:${imp.id}`);
     await store.progress(run.id, "searching", `Queued: ${batch.companies.length} uploaded compan${batch.companies.length === 1 ? "y" : "ies"} (${part})`);
   }

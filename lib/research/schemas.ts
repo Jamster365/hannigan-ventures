@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+/** Only web links: research JSON must never put javascript: or data: URLs into the app. */
+const httpUrl = z.string().url().refine((u) => /^https?:\/\//i.test(u), "must be an http(s) link");
+
 /** Zod schemas for every model output and network payload (SPEC §12). */
 
 export const evidenceStatusSchema = z.enum(["verified_independent", "official_company_claim", "third_party_report", "analyst_inference", "unknown"]);
@@ -9,7 +12,7 @@ export const sourceTypeSchema = z.enum(["news", "official", "filing", "research"
 
 export const citedSchema = z.object({
   /** URLs from the retrieved set that support this value. */
-  sourceUrls: z.array(z.string().url()).default([]),
+  sourceUrls: z.array(httpUrl).default([]),
   evidenceStatus: evidenceStatusSchema.default("unknown"),
 });
 
@@ -21,7 +24,7 @@ export const moneySchema = z.object({
 
 export const candidateSchema = z.object({
   name: z.string().min(1).max(120),
-  website: z.string().url().nullable(),
+  website: httpUrl.nullable(),
   legalName: z.string().max(160).nullable(),
   sector: z.string().min(1).max(60),
   subSector: z.string().max(80).nullable(),
@@ -33,7 +36,7 @@ export const candidateSchema = z.object({
   discoverySignal: z.string().max(300),
   researchRuleMatched: z.string().max(200),
   tags: z.array(z.string().max(40)).max(6).default([]),
-  founders: z.array(z.object({ name: z.string().max(120), role: z.string().max(80), bio: z.string().max(400), profileUrl: z.string().url().nullable() }).merge(citedSchema)).max(6).default([]),
+  founders: z.array(z.object({ name: z.string().max(120), role: z.string().max(80), bio: z.string().max(400), profileUrl: httpUrl.nullable() }).merge(citedSchema)).max(6).default([]),
   round: z
     .object({
       stage: z.string().max(40).nullable(),
@@ -78,7 +81,7 @@ export const extractionSchema = z.object({
         venue: z.string().max(160).nullable(),
         city: z.string().max(60),
         isOnline: z.boolean().default(false),
-        registrationUrl: z.string().url().nullable(),
+        registrationUrl: httpUrl.nullable(),
         accessStatus: z.enum(["open", "invitation_only", "waitlist", "closed", "unknown"]).default("unknown"),
         audienceFit: z.string().max(200),
         significance: z.string().max(300),
@@ -113,7 +116,7 @@ export const assessmentSchema = z.object({
         label: z.string().max(40),
         score: z.number().min(0).max(10).nullable(),
         note: z.string().max(200),
-        sourceUrls: z.array(z.string().url()).default([]),
+        sourceUrls: z.array(httpUrl).default([]),
       }),
     )
     .min(4)
@@ -131,7 +134,7 @@ export const homeStorySchema = z.object({
         headline: z.string().max(110),
         teaser: z.string().max(200),
         priority: z.number().int().min(0).max(100),
-        sourceUrl: z.string().url().nullable(),
+        sourceUrl: httpUrl.nullable(),
       }),
     )
     .max(4),

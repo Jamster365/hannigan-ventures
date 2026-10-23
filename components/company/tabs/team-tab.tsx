@@ -1,3 +1,4 @@
+import { safeHref } from "@/lib/utils";
 import { Award, ExternalLink, GraduationCap, Users } from "lucide-react";
 import { EvidencePill, SourceRef } from "@/components/company/source-link";
 import type { CompanyBundle } from "@/lib/domain/types";
@@ -24,8 +25,8 @@ export function TeamTab({ bundle }: { bundle: CompanyBundle }) {
                       <p className="text-[0.9375rem] font-semibold text-ink">{f.name}</p>
                       <p className="text-[0.75rem] text-secondary">{f.role}</p>
                     </div>
-                    {f.profileUrl ? (
-                      <a href={f.profileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-blue hover:bg-blue-pale" aria-label={`${f.name} public profile`}>
+                    {safeHref(f.profileUrl) ? (
+                      <a href={safeHref(f.profileUrl)!} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-blue hover:bg-blue-pale" aria-label={`${f.name} public profile`}>
                         <ExternalLink size={16} />
                       </a>
                     ) : null}

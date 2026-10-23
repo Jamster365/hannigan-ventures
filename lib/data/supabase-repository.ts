@@ -157,6 +157,7 @@ class SupabaseRepository implements Repository {
           tags: c.tags ?? [],
           eisStatus: c.eis_status,
           eisNote: c.eis_note ?? undefined,
+          familyStage: c.family_stage,
           artwork: { hue: c.artwork_hue, motif: (c.artwork_motif as CompanyBundle["company"]["artwork"]["motif"]) ?? "orbit" },
           createdAt: c.created_at,
           updatedAt: c.updated_at,
@@ -260,6 +261,13 @@ class SupabaseRepository implements Repository {
     return { transition: { from, to, promoted: to === "shortlisted" && from !== "shortlisted", demoted: from === "shortlisted" && to !== "shortlisted" } };
   }
 
+  async almostMatch({ userId, companyId }: { userId: string; companyId: string }): Promise<boolean> {
+    const { supabase, member } = await this.ctx();
+    if (member.userId !== userId) return false;
+    const { data } = await supabase.rpc("almost_match", { cid: companyId });
+    return data === true;
+  }
+
   async setVoteNote({ userId, companyId, note }: { userId: string; companyId: string; note: string | null }): Promise<void> {
     const { supabase, member } = await this.ctx();
     if (member.userId !== userId) throw new Error("You can only change your own answer");
@@ -289,7 +297,7 @@ class SupabaseRepository implements Repository {
     const { error } = await supabase.from("investment_access_checks").insert({
       company_id: companyId,
       access_status: open ? "verified_open" : "closed",
-      route_type: last?.route_type ?? "platform",
+      route_type: last?.route_type && last.route_type !== "none" ? last.route_type : "platform",
       contact_or_url: last?.contact_or_url ?? null,
       min_cheque: last?.min_cheque ?? null,
       max_cheque: last?.max_cheque ?? null,
@@ -379,6 +387,8 @@ class SupabaseRepository implements Repository {
 
   async createFeedback(input: Omit<ResearchFeedback, "id" | "createdAt">): Promise<ResearchFeedback> {
     const { supabase, householdId } = await this.ctx();
+    const { count } = await supabase.from("research_feedback").select("id", { count: "exact", head: true }).eq("author_user_id", input.authorUserId).gte("created_at", new Date(Date.now() - 3600_000).toISOString());
+    if ((count ?? 0) >= 10) throw new Error("That's plenty of suggestions for one hour; try again later.");
     const { data, error } = await supabase.from("research_feedback").insert({ household_id: householdId, company_id: input.companyId, author_user_id: input.authorUserId, feedback_type: input.feedbackType, body: input.body }).select("*").single();
     this.fail(error, "create feedback");
     return { id: data!.id, companyId: data!.company_id, authorUserId: data!.author_user_id, feedbackType: data!.feedback_type, body: data!.body, createdAt: data!.created_at };
@@ -401,6 +411,7 @@ class SupabaseRepository implements Repository {
     const { data: s } = await supabase.from("prompt_suggestions").select("*").eq("id", suggestionId).single<SuggestionRow>();
     if (!s || s.status !== "proposed") return { ok: false as const, reason: "Suggestion is no longer open." };
     const active = await this.getActivePrompt();
+    if (s.suggested_text && s.base_prompt_version_id !== active.id) return { ok: false as const, reason: "The instructions changed after this was drafted. Dismiss it and draft a fresh one." };
     const patched = s.suggested_text ?? applyPatch(active.promptText, s.suggested_patch ?? []);
     if (patched === null) return { ok: false as const, reason: "The suggestion no longer matches the current instructions. Dismiss it and ask for a fresh proposal." };
     const res = await this.savePromptVersion({ userId, promptText: patched, config: active.config, changeNote: `Applied suggestion: ${s.rationale.slice(0, 80)}`, basedOnVersionId: active.id });

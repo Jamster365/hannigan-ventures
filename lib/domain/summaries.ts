@@ -1,4 +1,4 @@
-import { computeFamilyStage, familyAverage, tallyVotes, visibleVotes, type VoteTally } from "./family-consensus";
+import { familyAverage, familyStageOf, tallyVotes, visibleVotes, type VoteTally } from "./family-consensus";
 import { effectiveAccess, type EffectiveAccess } from "./company-status";
 import type { Assessment, Company, CompanyBundle, CompanyMedia, CompanyUpdate, FamilyStage, FundingRound, Vote } from "./types";
 
@@ -31,7 +31,7 @@ const WEEK_MS = 7 * 24 * 3600 * 1000;
 export function summarise(bundle: CompanyBundle, opts: { now?: Date; maxChequeGbp?: number; viewerId?: string } = {}): CompanySummary {
   const now = opts.now ?? new Date();
   const { company, media, rounds, accessChecks, assessment, comments, updates, bookmarkedBy } = bundle;
-  const stage = computeFamilyStage(bundle.votes);
+  const stage = familyStageOf(bundle);
   // Votes stay private until a match; without a viewer (tests, server jobs) nothing is masked.
   const votes = opts.viewerId === undefined ? bundle.votes : visibleVotes(bundle.votes, opts.viewerId);
   const sortedUpdates = [...updates].sort((a, b) => b.effectiveAt.localeCompare(a.effectiveAt));

@@ -7,9 +7,10 @@ import type { CompanyBundle, Vote } from "./types";
  * hidden because of it, and it never touches the AI's own score.
  *
  * Privacy: votes stay private until a match. Family taste is built from
- * features (sector, stage, SEIS/EIS...) across everyone's answers, and the
- * company being ranked is always left out, so another member's vote on that
- * company can never move it.
+ * features (sector, stage, SEIS/EIS...) across everyone's answers, never
+ * shown per person, and the company being ranked is left out of it, so
+ * another member's vote on that company does not move it directly (their
+ * answers still shape the family's overall leanings, as intended).
  */
 
 export interface MemberPreferences {
@@ -86,11 +87,15 @@ export function companyFeatures(bundle: CompanyBundle): string[] {
   const round = bundle.rounds.find((r) => r.isCurrent) ?? null;
   const val = round?.preMoney ?? round?.postMoney ?? null;
   if (val !== null && (round?.currency ?? "GBP") === "GBP") out.push(`val:${val <= 5_000_000 ? "small" : val < 20_000_000 ? "mid" : "big"}`);
-  const latest = [...bundle.accessChecks].sort((a, b) => b.checkedAt.localeCompare(a.checkedAt))[0];
-  if (latest && latest.routeType !== "none") out.push(`route:${latest.routeType}`);
-  const reg = region(company.city ?? "");
-  if (reg) out.push(`region:${reg}`);
+  // Region and route were tried and dropped from scoring: with a handful of
+  // answers they produced confident nonsense ("you like companies in Wales").
+  if (bundle.assessment?.aiPriority && bundle.assessment.aiPriority !== "insufficient_evidence") out.push(`ai:${bundle.assessment.aiPriority}`);
   return out;
+}
+
+/** The UK region a company is in, for descriptions (not used for scoring). */
+export function companyRegion(bundle: CompanyBundle): string | null {
+  return region(bundle.company.city ?? "");
 }
 
 /** Which features a reason chip speaks to, so a reason counts extra for them. */
@@ -126,12 +131,16 @@ export interface Taste {
   /** Answers this model learned from. */
   answers: number;
   yes: number;
+  /** Weighted evidence per feature (reasons count double, preferences add a head start). */
   counts: Counts;
+  /** Plain answer tallies per feature, for anything shown to the member. */
+  seen: Counts;
 }
 
 /** Learns a taste from yes/no answers (and their reasons) plus stated preferences. */
 export function learnTaste(votes: Vote[], featuresOf: Map<string, string[]>, prefs?: MemberPreferences | null): Taste {
   const counts: Counts = new Map();
+  const seen: Counts = new Map();
   let answers = 0;
   let yes = 0;
   for (const v of votes) {
@@ -146,6 +155,7 @@ export function learnTaste(votes: Vote[], featuresOf: Map<string, string[]>, pre
       // A reason that names this kind of feature counts double.
       const w = stressed.has(f.slice(0, f.indexOf(":"))) ? 2 : 1;
       bump(counts, f, y * w, (1 - y) * w);
+      bump(seen, f, y, 1 - y);
     }
   }
   if (prefs) {
@@ -160,7 +170,7 @@ export function learnTaste(votes: Vote[], featuresOf: Map<string, string[]>, pre
       bump(counts, "eis:no", 0, 2);
     }
   }
-  return { answers, yes, counts };
+  return { answers, yes, counts, seen };
 }
 
 export interface Contribution {
@@ -185,16 +195,17 @@ export function scoreWithTaste(taste: Taste, features: string[]): { points: numb
     const p = (c.yes + 2 * base) / (n + 2);
     const lean = Math.log(p / (1 - p)) - Math.log(base / (1 - base));
     const trust = n / (n + 3);
-    parts.push({ feature: f, points: 12 * lean * trust, yes: c.yes, no: c.no });
+    const raw = taste.seen.get(f) ?? { yes: 0, no: 0 };
+    parts.push({ feature: f, points: 12 * lean * trust, yes: raw.yes, no: raw.no });
   }
-  const points = Math.max(-40, Math.min(40, parts.reduce((s, x) => s + x.points, 0)));
+  const points = parts.reduce((s, x) => s + x.points, 0);
   return { points, parts: parts.sort((a, b) => Math.abs(b.points) - Math.abs(a.points)) };
 }
 
 /** How little this taste knows about a company's features (0 = well known, 1 = new ground). */
 export function novelty(taste: Taste, features: string[]): number {
   if (features.length === 0) return 0;
-  return features.filter((f) => (taste.counts.get(f)?.yes ?? 0) + (taste.counts.get(f)?.no ?? 0) < 2).length / features.length;
+  return features.reduce((s, f) => s + 1 / (1 + (taste.seen.get(f)?.yes ?? 0) + (taste.seen.get(f)?.no ?? 0)), 0) / features.length;
 }
 
 export interface Matcher {
@@ -214,7 +225,9 @@ export function buildMatcher(bundles: CompanyBundle[], userId: string, prefs?: M
   const featuresOf = new Map(bundles.map((b) => [b.company.id, companyFeatures(b)]));
   const allVotes = bundles.flatMap((b) => b.votes);
   const mine = learnTaste(allVotes.filter((v) => v.userId === userId), featuresOf, prefs);
-  const family = learnTaste(allVotes, featuresOf);
+  // The family's leanings, from the other members' answers (this member's own are already in `mine`).
+  const othersVotes = allVotes.filter((v) => v.userId !== userId);
+  const family = learnTaste(othersVotes, featuresOf);
   return {
     mine,
     family,
@@ -223,23 +236,26 @@ export function buildMatcher(bundles: CompanyBundle[], userId: string, prefs?: M
       const features = featuresOf.get(bundle.company.id) ?? companyFeatures(bundle);
       const own = scoreWithTaste(mine, features);
       // Leave this company's own votes out of the family taste.
-      const others = bundle.votes.filter((v) => v.vote === "interested" || v.vote === "pass");
-      const fam = others.length ? learnTaste(allVotes.filter((v) => v.companyId !== bundle.company.id), featuresOf) : family;
+      const others = bundle.votes.filter((v) => v.userId !== userId && (v.vote === "interested" || v.vote === "pass"));
+      const fam = others.length ? learnTaste(othersVotes.filter((v) => v.companyId !== bundle.company.id), featuresOf) : family;
       const famScore = scoreWithTaste(fam, features);
-      const points = own.points + 0.5 * famScore.points;
-      return { points, why: explain(own.parts, prefs), novelty: novelty(mine, features) };
+      const points = Math.max(-40, Math.min(40, own.points + 0.25 * famScore.points));
+      return { points, why: own.points > 0 ? explain(own.parts, prefs) : null, novelty: novelty(mine, features) };
     },
   };
 }
 
 function explain(parts: Contribution[], prefs?: MemberPreferences | null): string | null {
-  const top = parts.find((p) => p.points >= 3);
+  const top = parts.find((p) => p.points >= 5);
   if (!top) return null;
-  const sector = top.feature.startsWith("sector:") ? top.feature.slice(7) : null;
-  if (sector && prefs?.sectorsLike.includes(sector)) return `You said you like ${sector}.`;
+  const [kind, value] = [top.feature.slice(0, top.feature.indexOf(":")), top.feature.slice(top.feature.indexOf(":") + 1)];
+  // Stated preferences are quoted as such; answers are quoted only once there are a few.
+  if (kind === "sector" && prefs?.sectorsLike.includes(value)) return `You said you like ${value}.`;
+  if (kind === "stage" && prefs?.stages.includes(value)) return `You said you prefer ${value} rounds.`;
+  if (kind === "eis" && value === "yes" && prefs && prefs.eis !== "neutral") return prefs.eis === "essential" ? "You said SEIS/EIS is essential." : "You said you prefer SEIS/EIS.";
   const answered = top.yes + top.no;
-  if (answered >= 2) return `You’ve said yes to ${top.yes} of ${answered} ${featureName(top.feature)}.`;
-  return `Fits what you’ve liked: ${featureName(top.feature)}.`;
+  if (answered >= 4) return `You’ve said yes to ${top.yes} of ${answered} ${featureName(top.feature)}.`;
+  return null;
 }
 
 /** A member's strongest learned likes and dislikes, for the taste page. */

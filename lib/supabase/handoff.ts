@@ -13,17 +13,17 @@ const TTL_MS = 60 * 60 * 1000; // matches the magic-link lifetime
 const CLAIM_WINDOW_MS = 10 * 60 * 1000;
 
 export type Handoff = { id: string; secret: string; code: string };
-type Row = { id: string; secret_hash: string; code: string; access_token: string | null; refresh_token: string | null; confirmed_at: string | null; created_at: string };
+type Row = { id: string; secret_hash: string; code: string; email: string | null; access_token: string | null; refresh_token: string | null; confirmed_at: string | null; created_at: string };
 
 const hash = (secret: string) => createHash("sha256").update(secret).digest("hex");
 const expired = (row: Row) => Date.now() - new Date(row.created_at).getTime() > TTL_MS || (row.confirmed_at !== null && Date.now() - new Date(row.confirmed_at).getTime() > CLAIM_WINDOW_MS);
 
-export async function createHandoff(): Promise<Handoff> {
+export async function createHandoff(email: string): Promise<Handoff> {
   const admin = createSupabaseAdminClient();
   await admin.from("auth_handoffs").delete().lt("created_at", new Date(Date.now() - 2 * TTL_MS).toISOString());
   const secret = randomBytes(32).toString("base64url");
   const code = String(randomInt(100, 1000));
-  const { data, error } = await admin.from("auth_handoffs").insert({ secret_hash: hash(secret), code }).select("id").single<{ id: string }>();
+  const { data, error } = await admin.from("auth_handoffs").insert({ secret_hash: hash(secret), code, email: email.trim().toLowerCase() }).select("id").single<{ id: string }>();
   if (error || !data) throw new Error(`could not create sign-in hand-off: ${error?.message ?? "no row"}`);
   return { id: data.id, secret, code };
 }
@@ -40,10 +40,11 @@ export async function pendingHandoffCode(id: string): Promise<string | null> {
   return row && !row.confirmed_at ? row.code : null;
 }
 
-/** Called from the link page once the member confirmed the code. Tokens must already be validated. */
-export async function confirmHandoff(id: string, accessToken: string, refreshToken: string): Promise<boolean> {
+/** Called from the link page once the member confirmed the code. Tokens must already be validated, and must belong to the email the hand-off was made for. */
+export async function confirmHandoff(id: string, accessToken: string, refreshToken: string, sessionEmail: string | undefined): Promise<boolean> {
   const row = await load(id);
   if (!row || row.confirmed_at) return false;
+  if (!row.email || !sessionEmail || row.email !== sessionEmail.trim().toLowerCase()) return false;
   const { error } = await createSupabaseAdminClient()
     .from("auth_handoffs")
     .update({ access_token: accessToken, refresh_token: refreshToken, confirmed_at: new Date().toISOString() })

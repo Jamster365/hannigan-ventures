@@ -17,7 +17,7 @@ interface Swiped {
   card: SwipeCard;
   previousVote: VoteValue | null;
 }
-type Overlay = { kind: "match"; card: SwipeCard; tickedBy: string[] } | { kind: "almost"; card: SwipeCard; likedBy: string[] } | null;
+type Overlay = { kind: "match"; card: SwipeCard; tickedBy: string[] } | { kind: "almost"; card: SwipeCard } | null;
 
 const TIP_KEY = "hv-deck-tip-seen";
 
@@ -72,7 +72,7 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
         }
         const outcome = res.data!.outcome;
         if (outcome.kind === "match") setOverlay({ kind: "match", card, tickedBy: outcome.tickedBy });
-        else if (outcome.kind === "almost") setOverlay({ kind: "almost", card, likedBy: outcome.likedBy });
+        else if (outcome.kind === "almost") setOverlay({ kind: "almost", card });
         else setReasonFor({ card, vote: dir === "right" ? "interested" : "pass" });
       });
     },
@@ -86,6 +86,7 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
     setError(null);
     setOverlay(null);
     setLeaving(null);
+    setReasonFor(null);
     setHistory((h) => h.filter((s) => s !== last));
     setDeck((d) => [last.card, ...d.filter((c) => c.company.id !== last.card.company.id)]);
     setEntering("back");
@@ -236,7 +237,7 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
 
       {tip && top ? <DeckTip onClose={closeTip} /> : null}
       {overlay?.kind === "match" ? <MatchOverlay card={overlay.card} members={members} tickedBy={overlay.tickedBy} onClose={() => setOverlay(null)} /> : null}
-      {overlay?.kind === "almost" ? <AlmostSheet card={overlay.card} likedBy={overlay.likedBy} onUndo={() => undo(overlay.card.company.id)} onClose={() => setOverlay(null)} /> : null}
+      {overlay?.kind === "almost" ? <AlmostSheet card={overlay.card} onUndo={() => undo(overlay.card.company.id)} onClose={() => setOverlay(null)} /> : null}
     </div>
   );
 }
@@ -314,7 +315,7 @@ function DeckTip({ onClose }: { onClose: () => void }) {
   );
 }
 
-function AlmostSheet({ card, likedBy, onUndo, onClose }: { card: SwipeCard; likedBy: string[]; onUndo: () => void; onClose: () => void }) {
+function AlmostSheet({ card, onUndo, onClose }: { card: SwipeCard; onUndo: () => void; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex animate-[fade-in_160ms_ease-out] items-end justify-center bg-ink/40" onClick={onClose}>
       <div
@@ -329,7 +330,7 @@ function AlmostSheet({ card, likedBy, onUndo, onClose }: { card: SwipeCard; like
           Almost a match
         </h2>
         <p className="mt-2 text-[0.9375rem] leading-relaxed text-secondary">
-          {joinNames(likedBy)} {likedBy.length === 1 ? "is" : "are"} interested in <span className="font-semibold text-ink">{card.company.name}</span>. If you were too, it would have been a match.
+          One of the others is interested in <span className="font-semibold text-ink">{card.company.name}</span>. If you were too, it would have been a match.
         </p>
         <div className="mt-5 flex flex-col gap-2">
           <Button onClick={onUndo} size="lg">

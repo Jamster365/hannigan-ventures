@@ -21,6 +21,7 @@ export function DecisionItem({ row }: { row: DecisionRow }) {
   const { company } = row;
 
   const change = (next: "interested" | "pass" | null) => {
+    if (next === vote) return;
     const before = vote;
     setVote(next ?? "unsure");
     setMessage(null);

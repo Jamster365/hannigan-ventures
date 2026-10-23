@@ -23,7 +23,7 @@ export async function requestMagicLinkAction(_prev: MagicLinkState, formData: Fo
   const { createHandoff } = await import("@/lib/supabase/handoff");
   // Lets the link sign in this screen even when the email opens in another
   // browser (on iPhone, the home-screen app never receives email links).
-  const handoff = await createHandoff().catch(() => null);
+  const handoff = await createHandoff(parsed.data.email).catch(() => null);
   const res = await sendMagicLink(parsed.data.email, handoff?.id);
   if (!res.ok) return { status: "error", message: res.error };
   return { status: "sent", email: parsed.data.email, handoff };

@@ -15,7 +15,7 @@ const prefsSchema = z.object({
   chequeMinGbp: z.number().int().min(0).max(10_000_000).nullable(),
   chequeMaxGbp: z.number().int().min(0).max(10_000_000).nullable(),
   notes: z.string().max(1000),
-});
+}).refine((p) => p.chequeMinGbp === null || p.chequeMaxGbp === null || p.chequeMinGbp <= p.chequeMaxGbp, "The usual cheque range is the wrong way round.");
 
 /** A member's own investing preferences: a head start for their deck's ordering. */
 export async function savePreferencesAction(input: z.input<typeof prefsSchema>): Promise<ActionResult> {

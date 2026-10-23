@@ -125,6 +125,16 @@ export function almostMatch<M extends { userId: string }>(votes: Pick<Vote, "use
 }
 
 /**
+ * The family stage of a company. The database keeps companies.family_stage up
+ * to date from everyone's votes (a member only ever receives their own votes
+ * until a match), so that is the truth in the live app; demo data has no such
+ * column and the stage is computed from the votes to hand.
+ */
+export function familyStageOf(bundle: { company: { familyStage?: FamilyStage }; votes: Pick<Vote, "vote">[] }, memberCount: number = HOUSEHOLD_SIZE): FamilyStage {
+  return bundle.company.familyStage ?? computeFamilyStage(bundle.votes, memberCount);
+}
+
+/**
  * Votes stay private until a company is a match: before that a viewer sees
  * only their own. Used by every screen that shows votes (both apps).
  */

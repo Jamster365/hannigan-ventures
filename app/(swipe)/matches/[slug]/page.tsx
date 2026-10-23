@@ -7,7 +7,7 @@ import { Pill, type Tone } from "@/components/ui/primitives";
 import { requireMember } from "@/lib/auth/current-member";
 import { dataMode } from "@/lib/config";
 import { getRepository } from "@/lib/data";
-import { computeFamilyStage } from "@/lib/domain/family-consensus";
+import { familyStageOf } from "@/lib/domain/family-consensus";
 import { formatDate } from "@/lib/domain/format";
 import { buildSwipeCard, matchedAt, matchesFor } from "@/lib/domain/swipe";
 
@@ -19,7 +19,7 @@ export default async function MatchChatPage({ params }: { params: Promise<{ slug
   if (!bundle) notFound();
   const [members, notifications, prompt] = await Promise.all([repo.getMembers(), repo.listNotifications(member.userId), repo.getActivePrompt()]);
   const card = buildSwipeCard(bundle, member.userId, { maxChequeGbp: prompt.config.maxChequeGbp });
-  const isMatch = computeFamilyStage(bundle.votes, members.length) === "shortlisted";
+  const isMatch = familyStageOf(bundle, members.length) === "shortlisted";
   const row = matchesFor([bundle], members, notifications)[0];
   const { company } = bundle;
 
