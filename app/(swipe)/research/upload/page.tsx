@@ -22,7 +22,8 @@ export default async function UploadResearchPage() {
   const member = await requireMember();
   if (member.role !== "owner") notFound();
   const repo = await getRepository();
-  const [bundles, prompt, runs] = await Promise.all([repo.listCompanies(), repo.getActivePrompt(), repo.listRuns()]);
+  const [bundles, prompt, runs, leads] = await Promise.all([repo.listCompanies(), repo.getActivePrompt(), repo.listRuns(), repo.listLeads()]);
+  const openLeads = leads.filter((l) => l.status === "new");
   const known = bundles.map((b) => b.company.name).sort();
   const uploads = runs.filter((r) => r.model.startsWith("Upload:") || r.model.startsWith("Claude chat research")).slice(0, 15);
 
@@ -36,7 +37,8 @@ export default async function UploadResearchPage() {
         <Card className="p-4">
           <h2 className="font-serif text-[1.125rem] font-semibold text-ink">1. Research in Claude</h2>
           <p className="mb-3 mt-1 text-[0.8125rem] text-secondary">Copy the prompt into a new Claude chat with web search on. It already lists the {known.length} companies you track, so Claude skips them.</p>
-          <CopyPrompt prompt={claudeBatchPrompt({ maxChequeGbp: prompt.config.maxChequeGbp, known })} />
+          <CopyPrompt prompt={claudeBatchPrompt({ maxChequeGbp: prompt.config.maxChequeGbp, known, leads: openLeads })} />
+          {openLeads.length ? <p className="mt-2 text-[0.8125rem] text-secondary">The prompt also asks for the {openLeads.length} compan{openLeads.length === 1 ? "y" : "ies"} the family suggested (Profile → Suggest a company) first.</p> : null}
         </Card>
         <Card className="p-4">
           <h2 className="font-serif text-[1.125rem] font-semibold text-ink">2. Upload Claude’s reply</h2>

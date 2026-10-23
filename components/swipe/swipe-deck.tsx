@@ -172,7 +172,7 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
             disabled={history.length === 0}
             aria-label="Undo last swipe"
             title="Undo last swipe"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-hairline-strong bg-surface text-amber transition-transform active:scale-90 disabled:text-tertiary disabled:opacity-50"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-hairline-strong bg-surface text-amber transition-transform active:scale-90 disabled:text-tertiary disabled:opacity-50"
           >
             <RotateCcw size={18} strokeWidth={2.3} />
           </button>
@@ -387,7 +387,7 @@ function ReasonPrompt({ card, vote, onDone }: { card: SwipeCard; vote: "interest
   if (!open) {
     return (
       <div className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--bottom-nav-height)+var(--safe-bottom)+84px)] z-30 flex justify-center px-4">
-        <button type="button" onClick={() => setOpen(true)} className="pointer-events-auto inline-flex min-h-[40px] items-center gap-2 rounded-full bg-ink px-4 text-[0.8125rem] font-medium text-white shadow-[var(--shadow-float)]">
+        <button type="button" onClick={() => setOpen(true)} className="pointer-events-auto inline-flex min-h-[44px] items-center gap-2 rounded-full bg-ink px-4 text-[0.8125rem] font-medium text-white shadow-[var(--shadow-float)]">
           <MessageSquarePlus size={16} aria-hidden />
           Say why you said {vote === "interested" ? "yes" : "no"} to {card.company.name}?
         </button>
@@ -409,7 +409,7 @@ function ReasonPrompt({ card, vote, onDone }: { card: SwipeCard; vote: "interest
               type="button"
               aria-pressed={picked.includes(r)}
               onClick={() => setPicked((p) => (p.includes(r) ? p.filter((x) => x !== r) : [...p, r]))}
-              className={cn("min-h-[36px] rounded-full border px-3 text-[0.8125rem] font-medium", picked.includes(r) ? "border-ink bg-ink text-white" : "border-hairline-strong bg-surface text-ink")}
+              className={cn("min-h-[44px] rounded-full border px-3 text-[0.8125rem] font-medium", picked.includes(r) ? "border-ink bg-ink text-white" : "border-hairline-strong bg-surface text-ink")}
             >
               {r}
             </button>

@@ -2,6 +2,7 @@ import { DEFAULT_MEMBER_PREFERENCES, type MemberPreferences } from "@/lib/domain
 import { safeDocumentName, type Deal, type DealCheck, type DealCheckStatus, type DealDecision, type DealDocument } from "@/lib/domain/deal";
 import { almostMatch, applyVote, computeFamilyStage } from "@/lib/domain/family-consensus";
 import type {
+  DealLead,
   AuditEvent,
   Comment,
   CompanyBundle,
@@ -147,6 +148,22 @@ class DemoRepository implements Repository {
 
   private prefs = new Map<string, MemberPreferences>();
   private deals = new Map<string, Deal>();
+  private leads: DealLead[] = [];
+
+  async listLeads(): Promise<DealLead[]> {
+    return structuredClone(this.leads);
+  }
+
+  async addLead(input: { userId: string; name: string; website: string | null; source: string; notes: string }): Promise<DealLead> {
+    const lead: DealLead = { id: this.nextId("lead"), name: input.name, website: input.website, source: input.source, notes: input.notes, status: "new", companyId: null, addedBy: input.userId, createdAt: new Date().toISOString() };
+    this.leads.unshift(lead);
+    return structuredClone(lead);
+  }
+
+  async setLeadStatus({ leadId, status }: { userId: string; leadId: string; status: DealLead["status"] }): Promise<void> {
+    const l = this.leads.find((x) => x.id === leadId);
+    if (l) l.status = status;
+  }
 
   private dealOf(companyId: string): Deal {
     let d = this.deals.get(companyId);
@@ -197,7 +214,7 @@ class DemoRepository implements Repository {
     this.prefs.set(userId, prefs);
   }
 
-  async recordMemberRoundCheck({ userId, companyId, open }: { userId: string; companyId: string; open: boolean }) {
+  async recordMemberRoundCheck({ userId, companyId, open, details }: { userId: string; companyId: string; open: boolean; details?: string }) {
     const bundle = this.companies.find((c) => c.company.id === companyId);
     if (!bundle) throw new Error("Company not found");
     const last = [...bundle.accessChecks].sort((a, b) => b.checkedAt.localeCompare(a.checkedAt))[0];
@@ -216,7 +233,7 @@ class DemoRepository implements Repository {
       expiresAt: open ? new Date(now.getTime() + 48 * 3600_000).toISOString() : null,
       verifier: `member:${userId}`,
       sourceId: null,
-      notes: `${name} checked the page: ${open ? "the round is live" : "the round has closed"}.`,
+      notes: `${name} checked the page: ${open ? "the round is live" : "the round has closed"}.${details ? ` ${details.trim()}` : ""}`,
     });
   }
 

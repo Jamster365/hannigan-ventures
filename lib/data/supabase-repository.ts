@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { StageTransition } from "@/lib/domain/family-consensus";
 import type {
+  DealLead,
   AngelNetwork,
   AuditEvent,
   Comment,
@@ -50,6 +51,7 @@ import {
   type StoryRow,
   type SuggestionRow,
   type DealCheckRow,
+  type DealLeadRow,
   type DealDecisionRow,
   type DealDocumentRow,
   type UpdateRow,
@@ -292,7 +294,7 @@ class SupabaseRepository implements Repository {
     this.fail(error, "save preferences");
   }
 
-  async recordMemberRoundCheck({ userId, companyId, open }: { userId: string; companyId: string; open: boolean }): Promise<void> {
+  async recordMemberRoundCheck({ userId, companyId, open, details }: { userId: string; companyId: string; open: boolean; details?: string }): Promise<void> {
     const { supabase, member } = await this.ctx();
     if (member.userId !== userId) throw new Error("You can only record your own check");
     const { data: last, error: readError } = await supabase.from("investment_access_checks").select("route_type, contact_or_url, min_cheque, max_cheque, currency").eq("company_id", companyId).order("checked_at", { ascending: false }).limit(1).maybeSingle<{ route_type: string; contact_or_url: string | null; min_cheque: number | null; max_cheque: number | null; currency: string | null }>();
@@ -309,7 +311,7 @@ class SupabaseRepository implements Repository {
       checked_at: now.toISOString(),
       expires_at: open ? new Date(now.getTime() + 48 * 3600_000).toISOString() : null,
       verifier: `member:${userId}`,
-      notes: `${member.displayName} checked the page on ${now.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Europe/London" })}: ${open ? "the round is live" : "the round has closed"}.`,
+      notes: `${member.displayName} checked the page on ${now.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Europe/London" })}: ${open ? "the round is live" : "the round has closed"}.${details ? ` ${details.trim().replace(/\.?$/, ".")}` : ""}`,
     });
     this.fail(error, "record check");
   }
@@ -524,6 +526,31 @@ class SupabaseRepository implements Repository {
       const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
       await createSupabaseAdminClient().storage.from("deal-documents").remove([data.storage_path]);
     }
+  }
+
+  // Leads
+
+  private leadFromRow(r: DealLeadRow): DealLead {
+    return { id: r.id, name: r.name, website: r.website, source: r.source, notes: r.notes, status: r.status, companyId: r.company_id, addedBy: r.added_by, createdAt: r.created_at };
+  }
+
+  async listLeads(): Promise<DealLead[]> {
+    const { supabase, householdId } = await this.ctx();
+    const { data } = await supabase.from("deal_leads").select("*").eq("household_id", householdId).order("created_at", { ascending: false }).limit(200).returns<DealLeadRow[]>();
+    return (data ?? []).map((r) => this.leadFromRow(r));
+  }
+
+  async addLead(input: { userId: string; name: string; website: string | null; source: string; notes: string }): Promise<DealLead> {
+    const { supabase, householdId } = await this.ctx();
+    const { data, error } = await supabase.from("deal_leads").insert({ household_id: householdId, name: input.name, website: input.website, source: input.source, notes: input.notes, added_by: input.userId }).select("*").single<DealLeadRow>();
+    this.fail(error, "add lead");
+    return this.leadFromRow(data!);
+  }
+
+  async setLeadStatus({ leadId, status }: { userId: string; leadId: string; status: DealLead["status"] }): Promise<void> {
+    const { supabase } = await this.ctx();
+    const { error } = await supabase.from("deal_leads").update({ status, updated_at: new Date().toISOString() }).eq("id", leadId);
+    this.fail(error, "update lead");
   }
 
   async listRuns(): Promise<ResearchRun[]> {

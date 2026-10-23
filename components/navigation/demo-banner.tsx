@@ -20,7 +20,7 @@ export function DemoBanner({ members, current }: { members: Member[]; current: M
       <label className="flex shrink-0 items-center gap-1.5">
         <span className="hidden sm:inline">Viewing as</span>
         <select
-          className={cn("rounded-full border border-amber/30 bg-white/70 px-2 py-0.5 text-[0.75rem] font-medium text-amber", pending && "opacity-60")}
+          className={cn("min-h-[36px] rounded-full border border-amber/30 bg-white/70 px-2.5 text-[0.8125rem] font-medium text-amber", pending && "opacity-60")}
           value={current.userId}
           disabled={pending}
           onChange={(e) => start(() => switchDemoMemberAction(e.target.value))}

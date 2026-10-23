@@ -1,4 +1,4 @@
-import { Briefcase, Building2, ListChecks, Sparkles, Upload, CalendarDays, ChevronRight, FlaskConical, Info, LayoutGrid, Network, Settings } from "lucide-react";
+import { Briefcase, Building2, Lightbulb, ListChecks, Sparkles, Upload, CalendarDays, ChevronRight, FlaskConical, Info, LayoutGrid, Network, Settings } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/navigation/page-header";
@@ -14,7 +14,8 @@ export const metadata = { title: "Profile" };
 export default async function MePage() {
   const member = await requireMember();
   const repo = await getRepository();
-  const [members, runs, suggestions, events] = await Promise.all([repo.getMembers(), repo.listRuns(), repo.listSuggestions(), repo.listEvents()]);
+  const [members, runs, suggestions, events, leads] = await Promise.all([repo.getMembers(), repo.listRuns(), repo.listSuggestions(), repo.listEvents(), repo.listLeads()]);
+  const openLeads = leads.filter((l) => l.status === "new").length;
   const openSuggestions = suggestions.filter((s) => s.status === "proposed").length;
   const upcoming = events.filter((e) => new Date(e.startAt).getTime() > new Date().getTime()).length;
   const lastRun = runs[0];
@@ -26,6 +27,7 @@ export default async function MePage() {
         { href: "/decisions", label: "Your picks", sub: "Everything you’ve said yes or no to. Change your mind any time.", Icon: ListChecks },
         { href: "/taste", label: "Your taste", sub: "What the app has learned, and your preferences", Icon: Sparkles },
         { href: "/portfolio", label: "Investments", sub: "What we invested in, what is in due diligence", Icon: Briefcase },
+        { href: "/leads", label: "Suggest a company", sub: openLeads ? `${openLeads} waiting for research` : "Heard of one from a network or a founder? Add it here", Icon: Lightbulb, badge: openLeads },
       ],
     },
     {

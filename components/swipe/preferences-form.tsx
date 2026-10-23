@@ -38,7 +38,7 @@ export function PreferencesForm({ initial, sectors }: { initial: MemberPreferenc
           {sectors.map((s) => {
             const st = sectorState(s);
             return (
-              <button key={s} type="button" onClick={() => cycleSector(s)} aria-label={`${s}: ${st === "like" ? "liked" : st === "avoid" ? "avoided" : "no preference"}`} className={cn("min-h-[36px] rounded-full border px-3 text-[0.8125rem] font-medium", st === "like" ? "border-green bg-green/15 text-ink" : st === "avoid" ? "border-red bg-red/10 text-ink line-through" : "border-hairline-strong text-ink")}>
+              <button key={s} type="button" onClick={() => cycleSector(s)} aria-label={`${s}: ${st === "like" ? "liked" : st === "avoid" ? "avoided" : "no preference"}`} className={cn("min-h-[44px] rounded-full border px-3 text-[0.8125rem] font-medium", st === "like" ? "border-green bg-green/15 text-ink" : st === "avoid" ? "border-red bg-red/10 text-ink line-through" : "border-hairline-strong text-ink")}>
                 {s}
               </button>
             );
@@ -48,7 +48,7 @@ export function PreferencesForm({ initial, sectors }: { initial: MemberPreferenc
       <Field label="SEIS/EIS">
         <div className="flex flex-wrap gap-1.5">
           {EIS.map((o) => (
-            <button key={o.value} type="button" aria-pressed={prefs.eis === o.value} onClick={() => set({ eis: o.value })} className={cn("min-h-[36px] rounded-full border px-3 text-[0.8125rem] font-medium", prefs.eis === o.value ? "border-ink bg-ink text-white" : "border-hairline-strong text-ink")}>
+            <button key={o.value} type="button" aria-pressed={prefs.eis === o.value} onClick={() => set({ eis: o.value })} className={cn("min-h-[44px] rounded-full border px-3 text-[0.8125rem] font-medium", prefs.eis === o.value ? "border-ink bg-ink text-white" : "border-hairline-strong text-ink")}>
               {o.label}
             </button>
           ))}
@@ -57,7 +57,7 @@ export function PreferencesForm({ initial, sectors }: { initial: MemberPreferenc
       <Field label="Stages you prefer">
         <div className="flex flex-wrap gap-1.5">
           {STAGES.map((s) => (
-            <button key={s} type="button" aria-pressed={prefs.stages.includes(s)} onClick={() => set({ stages: toggle(prefs.stages, s) })} className={cn("min-h-[36px] rounded-full border px-3 text-[0.8125rem] font-medium", prefs.stages.includes(s) ? "border-ink bg-ink text-white" : "border-hairline-strong text-ink")}>
+            <button key={s} type="button" aria-pressed={prefs.stages.includes(s)} onClick={() => set({ stages: toggle(prefs.stages, s) })} className={cn("min-h-[44px] rounded-full border px-3 text-[0.8125rem] font-medium", prefs.stages.includes(s) ? "border-ink bg-ink text-white" : "border-hairline-strong text-ink")}>
               {s}
             </button>
           ))}

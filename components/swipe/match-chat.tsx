@@ -100,7 +100,7 @@ export function MatchChat({ companyId, slug, companyName, comments, members, cur
           aria-label="Message"
           className="max-h-32 min-h-[42px] flex-1 resize-none rounded-[21px] border border-hairline-strong bg-page px-4 py-2.5 text-[0.9375rem] text-ink placeholder:text-tertiary focus:outline-none"
         />
-        <button type="submit" disabled={pending || !draft.trim()} aria-label="Send" className="inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-ink text-white disabled:opacity-40">
+        <button type="submit" disabled={pending || !draft.trim()} aria-label="Send" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink text-white disabled:opacity-40">
           <ArrowUp size={20} strokeWidth={2.4} />
         </button>
       </form>

@@ -38,7 +38,13 @@ export function SectorArt({ company, className, variant = "hero", showText = tru
           <p className="mt-0.5 text-[0.75rem] font-medium uppercase tracking-[0.12em] text-white/80">{company.subSector ?? company.sector}</p>
         </div>
       ) : null}
-      {variant !== "thumb" ? <span className="absolute right-2 top-2 rounded-full bg-black/40 px-2 py-0.5 text-[0.625rem] font-medium text-white/90">AI illustration</span> : null}
+      {variant === "thumb" ? (
+        <span className="absolute inset-0 flex items-center justify-center font-serif text-[1.125rem] font-semibold text-white drop-shadow-sm" aria-hidden>
+          {company.name.slice(0, 1).toUpperCase()}
+        </span>
+      ) : (
+        <span className="absolute right-2 top-2 rounded-full bg-black/40 px-2 py-0.5 text-[0.625rem] font-medium text-white/90">AI illustration</span>
+      )}
     </div>
   );
 }

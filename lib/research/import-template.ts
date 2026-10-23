@@ -3,7 +3,7 @@
  * companies and get back a file the upload screen accepts. The format mirrors
  * candidateSchema and assessmentSchema in ./schemas.ts.
  */
-export function claudeBatchPrompt(opts: { maxChequeGbp: number; known: string[] }): string {
+export function claudeBatchPrompt(opts: { maxChequeGbp: number; known: string[]; leads?: { name: string; website: string | null; source: string; notes: string }[] }): string {
   return `You are researching early-stage companies for a private family angel-investing app (three members, individual cheques up to £${opts.maxChequeGbp.toLocaleString("en-GB")}).
 
 Find as many genuinely investable companies as you can verify (aim for 20–50). What the family wants:
@@ -13,7 +13,9 @@ Find as many genuinely investable companies as you can verify (aim for 20–50).
 - Any sector, as long as an individual angel has a real route in: a live or upcoming round, an angel network or syndicate, an SPV, a founder intro, or an equity crowdfunding campaign (Crowdcube, Republic Europe and similar; include these, they are labelled in the app).
 - Prefer rounds open now or opening soon. Skip companies whose last round has closed with no sign of a new one.
 - The website field must be the company's own site: the app takes the company's picture from it.
-- Do not include these, which we already track: ${opts.known.length ? opts.known.join(", ") : "(none yet)"}.
+- Do not include these, which we already track: ${opts.known.length ? opts.known.join(", ") : "(none yet)"}.${opts.leads?.length ? `
+- Research these FIRST; the family heard of them and wants full profiles (then carry on finding others):
+${opts.leads.map((l) => `  - ${l.name}${l.website ? ` (${l.website})` : ""}${l.source ? ` — heard via ${l.source}` : ""}${l.notes ? `: ${l.notes.replace(/\s+/g, " ").slice(0, 400)}` : ""}`).join("\n")}` : ""}
 
 Use web search. Only state what a page you actually read says, and cite that page's full URL next to each claim (sourceUrls). Unknown values are null with evidenceStatus "unknown"; never guess figures. No made-up people, numbers or quotes.
 

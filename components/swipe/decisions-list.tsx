@@ -104,12 +104,12 @@ export function DecisionItem({ row }: { row: DecisionRow }) {
               </div>
             </form>
           ) : note ? (
-            <button type="button" onClick={() => setEditingNote(true)} className="mt-1.5 block text-left text-[0.8125rem] text-secondary">
+            <button type="button" onClick={() => setEditingNote(true)} className="mt-1 block min-h-[44px] text-left text-[0.8125rem] text-secondary">
               <span className="font-medium text-ink">Why: </span>
               {note}
             </button>
           ) : (
-            <button type="button" onClick={() => setEditingNote(true)} className="mt-1.5 inline-flex items-center gap-1 text-[0.75rem] font-medium text-secondary">
+            <button type="button" onClick={() => setEditingNote(true)} className="mt-1 inline-flex min-h-[44px] items-center gap-1 text-[0.75rem] font-medium text-secondary">
               <MessageSquarePlus size={13} aria-hidden /> Add why
             </button>
           )
@@ -133,7 +133,7 @@ function Choice({ active, tone, label, name, children, ...rest }: { active: bool
       title={label ?? name}
       aria-pressed={label ? undefined : active}
       className={cn(
-        "inline-flex min-h-[34px] items-center gap-1 rounded-full border px-3 text-[0.8125rem] font-medium transition-colors disabled:opacity-60",
+        "inline-flex min-h-[44px] items-center gap-1 rounded-full border px-3 text-[0.8125rem] font-medium transition-colors disabled:opacity-60",
         active && tone === "green" && "border-green bg-green text-white",
         active && tone === "red" && "border-red bg-red text-white",
         !active && "border-hairline-strong bg-surface text-ink",

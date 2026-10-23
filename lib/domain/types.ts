@@ -428,6 +428,19 @@ export interface ResearchFeedback {
   createdAt: string;
 }
 
+/** A company a member heard of outside the app, waiting for research. */
+export interface DealLead {
+  id: string;
+  name: string;
+  website: string | null;
+  source: string;
+  notes: string;
+  status: "new" | "researched" | "dismissed";
+  companyId: string | null;
+  addedBy: string | null;
+  createdAt: string;
+}
+
 export interface PromptSuggestion {
   id: string;
   feedbackId: string | null;

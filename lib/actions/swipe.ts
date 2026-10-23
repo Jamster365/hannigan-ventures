@@ -116,6 +116,8 @@ const roundCheckSchema = z.object({
   companyId: z.string().min(1),
   slug: z.string().min(1),
   open: z.boolean(),
+  /** What the member saw on the page: "£412k of £500k raised, closes 3 Nov, £3.2m pre-money, SEIS". */
+  details: z.string().trim().max(300).optional(),
 });
 
 /**
@@ -129,7 +131,7 @@ export async function recordRoundCheckAction(input: z.input<typeof roundCheckSch
   try {
     const member = await requireMember();
     const repo = await getRepository();
-    await repo.recordMemberRoundCheck({ userId: member.userId, companyId: parsed.data.companyId, open: parsed.data.open });
+    await repo.recordMemberRoundCheck({ userId: member.userId, companyId: parsed.data.companyId, open: parsed.data.open, details: parsed.data.details });
     revalidateSwipe(parsed.data.slug);
     revalidatePath(`/matches/${parsed.data.slug}/profile`);
     return { ok: true };

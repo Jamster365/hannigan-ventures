@@ -313,3 +313,16 @@ test("the deal room: checklist, decision and documents for a match", async ({ pa
   await page.getByRole("button", { name: "Remove term-sheet.txt" }).click();
   await expect(page.getByRole("link", { name: "term-sheet.txt" })).toHaveCount(0);
 });
+
+test("a member can suggest a company for research", async ({ page }) => {
+  await viewAs(page, "Brother");
+  await go(page, "/leads");
+  await page.getByLabel("Company name").fill("Example Robotics");
+  await page.getByLabel("Website (optional)").fill("example-robotics.co.uk");
+  await page.getByLabel("Where you heard of it").fill("Cambridge Angels email");
+  await page.getByRole("button", { name: "Add for research" }).click();
+  await expect(page.getByText("Added. It will be researched in the next research session.")).toBeVisible();
+  await expect(page.getByText("Example Robotics").first()).toBeVisible();
+  await go(page, "/me");
+  await expect(page.getByText(/waiting for research/)).toBeVisible();
+});

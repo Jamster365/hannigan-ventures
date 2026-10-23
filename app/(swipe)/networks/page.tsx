@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { safeHref } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/navigation/page-header";
@@ -25,22 +26,28 @@ export default async function NetworksPage() {
                   <h2 className="font-serif text-[1.0625rem] font-semibold leading-tight text-ink">{n.name}</h2>
                   <Pill tone={n.verificationStatus === "verified" ? "green" : n.verificationStatus === "partially_verified" ? "amber" : "neutral"}>{n.verificationStatus === "verified" ? "Verified" : n.verificationStatus === "partially_verified" ? "Partly verified" : "Unverified"}</Pill>
                 </div>
-                <dl className="mt-3 grid grid-cols-[96px_1fr] gap-x-3 gap-y-1.5 text-[0.8125rem]">
-                  <dt className="text-secondary">Region</dt>
-                  <dd className="text-ink">{n.region}</dd>
-                  <dt className="text-secondary">Focus</dt>
-                  <dd className="text-ink">{n.focus}</dd>
-                  <dt className="text-secondary">Eligibility</dt>
-                  <dd className="text-ink">{n.eligibility}</dd>
-                  <dt className="text-secondary">Fees</dt>
-                  <dd className="text-ink">{n.fees}</dd>
-                  <dt className="text-secondary">Cheques</dt>
-                  <dd className="text-ink">{n.chequeRequirements}</dd>
-                  <dt className="text-secondary">Co-invest</dt>
-                  <dd className="text-ink">{n.coInvestRoute}</dd>
-                  <dt className="text-secondary">Checked</dt>
-                  <dd className="text-ink">{n.lastCheckedAt ? formatDate(n.lastCheckedAt) : "Never"}</dd>
-                </dl>
+                {(() => {
+                  const rows: [string, string][] = [["Region", n.region], ["Focus", n.focus], ["Eligibility", n.eligibility], ["Fees", n.fees], ["Cheques", n.chequeRequirements], ["Co-invest", n.coInvestRoute]];
+                  const known = rows.filter(([, v]) => v && !/not yet checked|unknown/i.test(v));
+                  return (
+                    <dl className="mt-3 grid grid-cols-[96px_1fr] gap-x-3 gap-y-1.5 text-[0.8125rem]">
+                      {known.map(([k, v]) => (
+                        <Fragment key={k}>
+                          <dt className="text-secondary">{k}</dt>
+                          <dd className="text-ink">{v}</dd>
+                        </Fragment>
+                      ))}
+                      {known.length < rows.length ? (
+                        <>
+                          <dt className="text-secondary">Details</dt>
+                          <dd className="text-tertiary">{rows.length - known.length === rows.length ? "Not yet checked" : `${rows.length - known.length} not yet checked`}</dd>
+                        </>
+                      ) : null}
+                      <dt className="text-secondary">Checked</dt>
+                      <dd className="text-ink">{n.lastCheckedAt ? formatDate(n.lastCheckedAt) : "Never"}</dd>
+                    </dl>
+                  );
+                })()}
                 <p className="mt-3 text-[0.75rem] text-tertiary">{n.notes}</p>
                 {safeHref(n.joiningUrl ?? n.website) ? (
                   <a href={safeHref(n.joiningUrl ?? n.website)!} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-[36px] items-center gap-1 text-[0.8125rem] font-medium text-blue">

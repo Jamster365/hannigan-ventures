@@ -372,3 +372,6 @@ export const num = (v: number | string | null | undefined): number | null => (v 
 export type DealCheckRow = { company_id: string; household_id: string; key: string; label: string | null; status: "todo" | "done" | "na"; note: string; updated_by: string | null; updated_at: string };
 export type DealDocumentRow = { id: string; company_id: string; household_id: string; name: string; storage_path: string; mime: string; size_bytes: number | string; uploaded_by: string | null; created_at: string };
 export type DealDecisionRow = { company_id: string; household_id: string; status: "considering" | "invested" | "passed"; amounts: Record<string, number> | null; invested_at: string | null; scheme: "SEIS" | "EIS" | "none" | "unknown"; stake_pct: number | string | null; instrument: string; certificate_received: boolean; notes: string; updated_by: string | null; updated_at: string };
+
+// Leads (migration 0020)
+export type DealLeadRow = { id: string; household_id: string; name: string; website: string | null; source: string; notes: string; status: "new" | "researched" | "dismissed"; company_id: string | null; added_by: string | null; created_at: string; updated_at: string };

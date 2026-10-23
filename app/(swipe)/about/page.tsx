@@ -11,7 +11,14 @@ const sections = [
   },
   {
     title: "How matches work",
-    body: "Each member marks every company in their deck as interested or not interested (or skips it), and everyone's answers stay private until there is a match. When two of you are interested in the same company it is a match: it moves to Matches and opens a chat for the whole family. Two “not interested” answers end it. If your “not interested” was the deciding answer and “interested” would have made a match, you are told it was almost a match and can undo. Change any answer later in Profile → Your picks. Companies whose round has closed wait on the watch list until a new round appears. A match means \"worth a conversation\", never \"let's invest\". Nothing is overridden by hand or by the AI. The order of your deck is learned: the app puts first what you are most likely to want, from your answers, the reasons you add and your preferences (Profile → Your taste), with about one card in eight something a bit different. It only changes the order; nothing is hidden, and only UK companies and open rounds are hard rules.",
+    body: "Each of you answers interested or not interested to every company; answers stay private until there is a match.",
+    bullets: [
+      "Two of you interested = a match. It opens a chat and a deal room for the whole family. Two not interested ends it.",
+      "If your no was the deciding answer and a yes would have made a match, you are told it was almost a match and can undo.",
+      "Change any answer later in Profile → Your picks. Companies whose round has closed wait on the watch list.",
+      "A match means “worth a conversation”, never “let’s invest”. Nothing is overridden by hand or by the AI.",
+      "Your deck’s order is learned from your answers, your reasons and your preferences (Profile → Your taste), with one card in five or so something a bit different. Only the order changes; nothing is hidden. The only hard rules: UK companies, and no closed rounds.",
+    ],
   },
   {
     title: "How the AI rating works",
@@ -49,6 +56,16 @@ export default function AboutPage() {
             <Card key={s.title} className="p-4">
               <h2 className="font-serif text-[1.125rem] font-semibold text-ink">{s.title}</h2>
               <p className="mt-1.5 text-[0.875rem] leading-relaxed text-text">{s.body}</p>
+              {s.bullets ? (
+                <ul className="mt-2 space-y-1.5 text-[0.875rem] leading-relaxed text-text">
+                  {s.bullets.map((b) => (
+                    <li key={b} className="flex gap-2">
+                      <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-blue" aria-hidden />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </Card>
           ))}
         </div>

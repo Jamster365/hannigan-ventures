@@ -1,6 +1,7 @@
 import type { Deal, DealCheck, DealCheckStatus, DealDecision, DealDocument } from "@/lib/domain/deal";
 import type { MemberPreferences } from "@/lib/domain/learning";
 import type {
+  DealLead,
   AngelNetwork,
   AuditEvent,
   Comment,
@@ -59,7 +60,7 @@ export interface Repository {
   getPreferences(userId: string): Promise<MemberPreferences>;
   savePreferences(input: { userId: string; prefs: MemberPreferences }): Promise<void>;
   /** A member opened the round's page and says whether it is live (open: expires after 48h). */
-  recordMemberRoundCheck(input: { userId: string; companyId: string; open: boolean }): Promise<void>;
+  recordMemberRoundCheck(input: { userId: string; companyId: string; open: boolean; details?: string }): Promise<void>;
   addComment(input: { userId: string; companyId: string; body: string }): Promise<Comment>;
   editComment(input: { userId: string; commentId: string; body: string }): Promise<Comment>;
   deleteComment(input: { userId: string; commentId: string }): Promise<void>;
@@ -92,6 +93,11 @@ export interface Repository {
   saveDealDecision(input: { userId: string; companyId: string; decision: Omit<DealDecision, "companyId" | "updatedBy" | "updatedAt"> }): Promise<DealDecision>;
   addDealDocument(input: { userId: string; companyId: string; name: string; mime: string; bytes: Uint8Array }): Promise<DealDocument>;
   removeDealDocument(input: { userId: string; companyId: string; documentId: string }): Promise<void>;
+
+  // Leads: companies members heard of, waiting for research
+  listLeads(): Promise<DealLead[]>;
+  addLead(input: { userId: string; name: string; website: string | null; source: string; notes: string }): Promise<DealLead>;
+  setLeadStatus(input: { userId: string; leadId: string; status: DealLead["status"] }): Promise<void>;
 
   // Research runs
   listRuns(): Promise<ResearchRun[]>;
