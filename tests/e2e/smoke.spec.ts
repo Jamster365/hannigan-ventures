@@ -80,12 +80,9 @@ test("classic app hides other members' votes until a match", async ({ page }) =>
 
 const topCard = (page: Page) => page.getByRole("article").first().getByRole("heading", { level: 2 });
 
-/** Skip (no vote) until the named company is on top of the deck. */
-async function skipTo(page: Page, name: string) {
-  for (let i = 0; i < 12 && (await topCard(page).textContent()) !== name; i++) {
-    await page.getByRole("button", { name: "Skip: not now, show me later" }).click();
-    await page.waitForTimeout(250);
-  }
+/** Opens the deck with the named company on top (the deck's `?c=` link). */
+async function deckWith(page: Page, slug: string, name: string) {
+  await go(page, `/?c=${slug}`);
   await expect(topCard(page)).toHaveText(name);
 }
 
@@ -102,14 +99,12 @@ test("swipe: skip, almost a match, undo, two ticks make a match, and Decisions c
   await page.addInitScript(() => localStorage.setItem("hv-deck-tip-seen", "1"));
   // Quillon Verify: Jamie is interested. Dad says no, so Brother's vote decides it.
   await viewAs(page, "Dad");
-  await go(page, "/");
-  await skipTo(page, "Quillon Verify");
+  await deckWith(page, "quillon-verify", "Quillon Verify");
   await page.getByRole("button", { name: "Not interested", exact: true }).click();
   await page.waitForTimeout(600);
 
   await viewAs(page, "Brother");
-  await go(page, "/");
-  await skipTo(page, "Quillon Verify");
+  await deckWith(page, "quillon-verify", "Quillon Verify");
   await page.getByRole("button", { name: "Not interested", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Almost a match" })).toContainText("Jamie is interested in");
   await page.getByRole("button", { name: "Undo my answer" }).click();
@@ -246,4 +241,13 @@ test("members other than the owner cannot open the upload screen", async ({ page
   await page.goto("/research/upload");
   await expect(page.getByText("This page could not be found.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy the Claude prompt" })).toHaveCount(0);
+});
+
+test("three tabs: Decisions lives under Me", async ({ page }) => {
+  await go(page, "/");
+  const nav = page.getByRole("navigation", { name: "Primary" });
+  await expect(nav.getByRole("link")).toHaveCount(3);
+  await nav.getByRole("link", { name: "Me" }).click();
+  await page.getByRole("link", { name: /Decisions/ }).click();
+  await expect(page.getByRole("heading", { name: "Decisions" })).toBeVisible();
 });

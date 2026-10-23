@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Hourglass, PartyPopper, RotateCcw, SkipForward, X } from "lucide-react";
+import { Check, Hourglass, PartyPopper, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useTransition, type CSSProperties } from "react";
 import { Wordmark } from "@/components/navigation/logo";
@@ -34,8 +34,8 @@ export function joinNames(names: string[]): string {
 
 /**
  * The deck, Hinge-style: the whole screen is one company's profile, scrolled
- * like any page. A slim bar above the tabs holds cross, skip (to the back of
- * the deck, no vote), undo and tick; swiping sideways also ticks or crosses.
+ * like any page. Round Interested / Not interested buttons float in the
+ * bottom corners, Undo sits in the header; swiping right or left also decides.
  * Undo here covers this visit; the Decisions tab changes any earlier vote.
  * The deck is local state seeded from the server, so a refresh after each
  * swipe never reshuffles it.
@@ -103,15 +103,6 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
       }
     });
   }, [history]);
-
-  /** Not now: send the top company to the back of the deck without voting. */
-  const skip = useCallback(() => {
-    if (!top || leaving || deck.length < 2) return;
-    setError(null);
-    setDeck((d) => [...d.slice(1), d[0]]);
-    setEntering("next");
-    toTop();
-  }, [top, leaving, deck.length]);
 
   // One-time tip on the very first visit to a non-empty deck.
   useEffect(() => {
@@ -199,6 +190,16 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
           <p className="shrink-0 whitespace-nowrap text-[13px] font-medium text-secondary" aria-live="polite">
             {remaining === 0 ? "All done" : `${remaining} to go`}
           </p>
+          <button
+            type="button"
+            onClick={() => undo()}
+            disabled={history.length === 0}
+            aria-label="Undo last swipe"
+            title="Undo last swipe"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-hairline-strong bg-surface text-amber transition-transform active:scale-90 disabled:text-tertiary disabled:opacity-50"
+          >
+            <RotateCcw size={18} strokeWidth={2.3} />
+          </button>
         </div>
       </header>
 
@@ -270,49 +271,27 @@ export function SwipeDeck({ initialCards, members, banner }: { initialCards: Swi
         </div>
       ) : null}
 
-      {/* A slim action bar pinned above the tabs; it never covers the profile's text. */}
+      {/* Thumb-reach corners, pinned to the bottom of the screen while the profile scrolls underneath. */}
       {top ? (
-        <div className="sticky bottom-0 z-20 border-t border-hairline bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/85">
-          <div className="mx-auto flex w-full max-w-[640px] items-center gap-2 px-3 py-2">
-            <button
-              type="button"
-              onClick={() => commit("left")}
-              aria-label="Not interested"
-              title="Not interested"
-              className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-hairline-strong bg-surface text-red transition-transform active:scale-95"
-            >
-              <X size={26} strokeWidth={2.6} aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={skip}
-              disabled={deck.length < 2}
-              aria-label="Skip: not now, show me later"
-              title="Not now"
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-hairline-strong bg-surface text-secondary transition-transform active:scale-90 disabled:opacity-40"
-            >
-              <SkipForward size={19} strokeWidth={2.2} />
-            </button>
-            <button
-              type="button"
-              onClick={() => undo()}
-              disabled={history.length === 0}
-              aria-label="Undo last swipe"
-              title="Undo last swipe"
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-hairline-strong bg-surface text-amber transition-transform active:scale-90 disabled:text-tertiary disabled:opacity-40"
-            >
-              <RotateCcw size={19} strokeWidth={2.3} />
-            </button>
-            <button
-              type="button"
-              onClick={() => commit("right")}
-              aria-label="Interested"
-              title="Interested"
-              className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-green text-white transition-transform active:scale-95"
-            >
-              <Check size={26} strokeWidth={2.8} aria-hidden />
-            </button>
-          </div>
+        <div className="pointer-events-none sticky bottom-0 z-20 mx-auto flex w-full max-w-[640px] justify-between px-4 pb-4 pt-2">
+          <button
+            type="button"
+            onClick={() => commit("left")}
+            aria-label="Not interested"
+            title="Not interested"
+            className="pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full border border-hairline-strong bg-surface text-red shadow-[var(--shadow-float)] transition-transform active:scale-90"
+          >
+            <X size={26} strokeWidth={2.6} />
+          </button>
+          <button
+            type="button"
+            onClick={() => commit("right")}
+            aria-label="Interested"
+            title="Interested"
+            className="pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-green text-white shadow-[var(--shadow-float)] transition-transform active:scale-90"
+          >
+            <Check size={28} strokeWidth={2.8} />
+          </button>
         </div>
       ) : null}
 
@@ -376,8 +355,8 @@ function DeckTip({ onClose }: { onClose: () => void }) {
             <span><b>Interested</b> if it’s worth a conversation, <b>not interested</b> if not. Swiping right or left works too.</span>
           </li>
           <li className="flex gap-3">
-            <SkipForward size={20} className="mt-0.5 shrink-0 text-secondary" aria-hidden />
-            <span><b>Skip</b> sends it to the back for later. Change any decision in the Decisions tab.</span>
+            <RotateCcw size={20} className="mt-0.5 shrink-0 text-amber" aria-hidden />
+            <span><b>Undo</b> brings back the last one. Change any decision later in Me → Decisions.</span>
           </li>
           <li className="flex gap-3">
             <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[11px] font-bold text-white">2</span>

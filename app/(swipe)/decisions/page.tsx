@@ -18,7 +18,7 @@ export default async function DecisionsPage() {
 
   return (
     <>
-      <PageHeader title="Decisions" />
+      <PageHeader title="Decisions" backHref="/me" variant="back" />
       <div className="mx-auto w-full max-w-[640px] pb-8">
         <p className="px-4 pt-3 text-[13px] text-secondary">Every company you’ve said you’re interested or not interested in. Change your mind any time; only you can see your picks until there’s a match.</p>
         {decided.length === 0 && watching.length === 0 ? (

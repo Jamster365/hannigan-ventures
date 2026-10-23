@@ -1,4 +1,4 @@
-import { Building2, Upload, CalendarDays, ChevronRight, FlaskConical, Info, LayoutGrid, Network, Settings } from "lucide-react";
+import { Building2, ListChecks, Upload, CalendarDays, ChevronRight, FlaskConical, Info, LayoutGrid, Network, Settings } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/navigation/page-header";
@@ -19,7 +19,11 @@ export default async function MePage() {
   const upcoming = events.filter((e) => new Date(e.startAt).getTime() > new Date().getTime()).length;
   const lastRun = runs[0];
 
-  const groups = [
+  const groups: { title: string; items: Item[] }[] = [
+    {
+      title: "Your decisions",
+      items: [{ href: "/decisions", label: "Decisions", sub: "Everything you’ve said yes or no to. Change your mind any time.", Icon: ListChecks }],
+    },
     {
       title: "Research",
       items: [
@@ -59,37 +63,46 @@ export default async function MePage() {
             A company becomes a match when two of you ({members.map((m) => m.displayName).join(", ")}) are interested in it. Your answers stay private until then.
           </p>
         </Card>
+        <MenuGroup group={groups[0]} />
         <section className="mt-5">
           <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">Notifications</h2>
           <Card className="overflow-hidden p-0">
             <PushSettings publicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null} available={dataMode() === "supabase"} />
           </Card>
         </section>
-        {groups.map((g) => (
-          <section key={g.title} className="mt-5">
-            <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">{g.title}</h2>
-            <Card className="overflow-hidden p-0">
-              <ul className="divide-y divide-hairline">
-                {g.items.map((it) => (
-                  <li key={it.href}>
-                    <Link href={it.href} className="flex min-h-[60px] items-center gap-3 px-4 py-2.5 hover:bg-surface-muted/70">
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-muted text-ink">
-                        <it.Icon size={17} aria-hidden />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-[15px] font-medium text-ink">{it.label}</span>
-                        <span className="block truncate text-[12px] text-secondary">{it.sub}</span>
-                      </span>
-                      {"badge" in it && it.badge ? <span className="rounded-full bg-red px-2 py-0.5 text-[11px] font-semibold text-white">{it.badge}</span> : null}
-                      <ChevronRight size={18} className="text-tertiary" aria-hidden />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </section>
+        {groups.slice(1).map((g) => (
+          <MenuGroup key={g.title} group={g} />
         ))}
       </div>
     </>
+  );
+}
+
+type Item = { href: string; label: string; sub: string; Icon: React.ComponentType<{ size?: number; "aria-hidden"?: boolean }>; badge?: number };
+
+function MenuGroup({ group }: { group: { title: string; items: Item[] } }) {
+  return (
+    <section className="mt-5">
+      <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">{group.title}</h2>
+      <Card className="overflow-hidden p-0">
+        <ul className="divide-y divide-hairline">
+          {group.items.map((it) => (
+            <li key={it.href}>
+              <Link href={it.href} className="flex min-h-[60px] items-center gap-3 px-4 py-2.5 hover:bg-surface-muted/70">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-muted text-ink">
+                  <it.Icon size={17} aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-medium text-ink">{it.label}</span>
+                  <span className="block truncate text-[12px] text-secondary">{it.sub}</span>
+                </span>
+                {it.badge ? <span className="rounded-full bg-red px-2 py-0.5 text-[11px] font-semibold text-white">{it.badge}</span> : null}
+                <ChevronRight size={18} className="text-tertiary" aria-hidden />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Card>
+    </section>
   );
 }
