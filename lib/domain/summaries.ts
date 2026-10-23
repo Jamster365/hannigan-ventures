@@ -1,4 +1,4 @@
-import { computeFamilyStage, familyAverage, tallyVotes, type VoteTally } from "./family-consensus";
+import { computeFamilyStage, familyAverage, tallyVotes, visibleVotes, type VoteTally } from "./family-consensus";
 import { effectiveAccess, type EffectiveAccess } from "./company-status";
 import type { Assessment, Company, CompanyBundle, CompanyMedia, CompanyUpdate, FamilyStage, FundingRound, Vote } from "./types";
 
@@ -10,7 +10,10 @@ export interface CompanySummary {
   currentRound: FundingRound | null;
   access: EffectiveAccess;
   assessment: Pick<Assessment, "aiPriority" | "aiScore" | "confidence" | "summary" | "createdAt"> | null;
+  /** The votes this viewer may see: all of them on a match, otherwise only their own. */
   votes: Vote[];
+  /** True when other members' votes are withheld (no match yet). */
+  votesHidden: boolean;
   tally: VoteTally;
   familyStage: FamilyStage;
   familyAverage: number | null;
@@ -25,9 +28,12 @@ export interface CompanySummary {
 
 const WEEK_MS = 7 * 24 * 3600 * 1000;
 
-export function summarise(bundle: CompanyBundle, opts: { now?: Date; maxChequeGbp?: number } = {}): CompanySummary {
+export function summarise(bundle: CompanyBundle, opts: { now?: Date; maxChequeGbp?: number; viewerId?: string } = {}): CompanySummary {
   const now = opts.now ?? new Date();
-  const { company, media, rounds, accessChecks, assessment, votes, comments, updates, bookmarkedBy } = bundle;
+  const { company, media, rounds, accessChecks, assessment, comments, updates, bookmarkedBy } = bundle;
+  const stage = computeFamilyStage(bundle.votes);
+  // Votes stay private until a match; without a viewer (tests, server jobs) nothing is masked.
+  const votes = opts.viewerId === undefined ? bundle.votes : visibleVotes(bundle.votes, opts.viewerId);
   const sortedUpdates = [...updates].sort((a, b) => b.effectiveAt.localeCompare(a.effectiveAt));
   const latestUpdate = sortedUpdates[0] ?? null;
   const recentUpdateCount = sortedUpdates.filter((u) => now.getTime() - new Date(u.effectiveAt).getTime() < WEEK_MS).length;
@@ -40,7 +46,7 @@ export function summarise(bundle: CompanyBundle, opts: { now?: Date; maxChequeGb
   ].filter((x): x is string => Boolean(x));
   const lastActivityAt = activity.sort().at(-1) ?? company.createdAt;
   const avg = familyAverage(votes);
-  const isNew = now.getTime() - new Date(company.firstDiscoveredAt).getTime() < WEEK_MS && votes.length === 0;
+  const isNew = now.getTime() - new Date(company.firstDiscoveredAt).getTime() < WEEK_MS && bundle.votes.length === 0;
   return {
     company,
     primaryMedia: media.find((m) => m.isPrimary) ?? media[0] ?? null,
@@ -51,8 +57,9 @@ export function summarise(bundle: CompanyBundle, opts: { now?: Date; maxChequeGb
       ? { aiPriority: assessment.aiPriority, aiScore: assessment.aiScore, confidence: assessment.confidence, summary: assessment.summary, createdAt: assessment.createdAt }
       : null,
     votes,
+    votesHidden: votes.length !== bundle.votes.length,
     tally: tallyVotes(votes),
-    familyStage: computeFamilyStage(votes),
+    familyStage: stage,
     familyAverage: avg.average,
     raters: avg.raters,
     bookmarkedBy,

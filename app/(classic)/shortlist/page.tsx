@@ -15,7 +15,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Se
   const sort = first(sp.sort) ?? "priority";
   const member = await requireMember();
   const repo = await getRepository();
-  const [members, all] = await Promise.all([repo.getMembers(), loadCompanySummaries(repo)]);
+  const [members, all] = await Promise.all([repo.getMembers(), loadCompanySummaries(repo, { viewerId: member.userId })]);
   const list = all.filter((s) => s.familyStage === "shortlisted");
   if (sort === "alpha") list.sort((a, b) => a.company.name.localeCompare(b.company.name));
   else if (sort === "recent") list.sort((a, b) => b.lastActivityAt.localeCompare(a.lastActivityAt));

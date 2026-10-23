@@ -16,7 +16,7 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Sea
   const sp = await searchParams;
   const member = await requireMember();
   const repo = await getRepository();
-  const [members, all] = await Promise.all([repo.getMembers(), loadCompanySummaries(repo)]);
+  const [members, all] = await Promise.all([repo.getMembers(), loadCompanySummaries(repo, { viewerId: member.userId })]);
   const query = { q: first(sp.q), filter: first(sp.filter), sector: first(sp.sector), stage: first(sp.stage), access: first(sp.access), eis: first(sp.eis), ai: first(sp.ai), sort: first(sp.sort) };
   const results = applyDiscoverQuery(all, query);
   const sectors = [...new Set(all.map((s) => s.company.sector))].sort();

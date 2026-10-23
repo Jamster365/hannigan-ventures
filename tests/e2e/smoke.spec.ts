@@ -6,6 +6,8 @@ import { expect, test, type Page } from "@playwright/test";
  */
 
 async function viewAs(page: Page, name: string) {
+  // The deck's one-time tip has its own test; keep it out of the way elsewhere.
+  await page.addInitScript(() => localStorage.setItem("hv-deck-tip-seen", "1"));
   await page.goto("/");
   const select = page.getByLabel("Switch sample member");
   if ((await select.inputValue()) !== (await select.locator(`option:has-text("${name}")`).getAttribute("value"))) {
@@ -48,16 +50,9 @@ test("company page exposes all seven tabs and keeps unknowns visible", async ({ 
   await expect(page.getByText("CAN INVEST NOW")).toHaveCount(0);
 });
 
-test("classic app: the third Interested vote promotes (unanimous) and withdrawal demotes immediately", async ({ page }) => {
-  // Quillon Verify starts with one Interested vote (Jamie).
+test("classic app: the second Interested vote promotes and withdrawal demotes immediately", async ({ page }) => {
+  // Quillon Verify starts with one Interested vote (Jamie). Brother's vote makes two.
   await viewAs(page, "Brother");
-  await go(page, "/companies/quillon-verify?tab=family");
-  await clearVote(page);
-  await page.getByRole("radio", { name: "Interested" }).click();
-  await page.waitForTimeout(500);
-  await expect(page.getByRole("status").filter({ hasText: /Promoted to the family shortlist/ })).toHaveCount(0);
-
-  await viewAs(page, "Dad");
   await go(page, "/companies/quillon-verify?tab=family");
   await clearVote(page);
   await page.getByRole("radio", { name: "Interested" }).click();
@@ -71,45 +66,70 @@ test("classic app: the third Interested vote promotes (unanimous) and withdrawal
   await page.goto("/matches");
   await expect(page.getByRole("link", { name: /Quillon Verify/ })).toHaveCount(0);
 
-  // Clean up both votes.
-  await go(page, "/companies/quillon-verify?tab=family");
-  await clearVote(page);
-  await viewAs(page, "Brother");
   await go(page, "/companies/quillon-verify?tab=family");
   await clearVote(page);
 });
 
+test("classic app hides other members' votes until a match", async ({ page }) => {
+  // Quillon has Jamie's Interested vote but is not a match: Dad must not see it.
+  await viewAs(page, "Dad");
+  await go(page, "/companies/quillon-verify?tab=family");
+  await expect(page.getByText("Each member’s vote stays private until two of you are interested.")).toBeVisible();
+  await expect(page.getByText("Private", { exact: true }).first()).toBeVisible();
+});
+
 const topCard = (page: Page) => page.getByRole("article").first().getByRole("heading", { level: 2 });
 
-test("swipe: cross, almost a match, undo, tick makes a match, and undo puts everything back", async ({ page }) => {
-  // Tidewell Diagnostics has ticks from Jamie and Dad; Brother has not decided.
+/** Skip (no vote) until the named company is on top of the deck. */
+async function skipTo(page: Page, name: string) {
+  for (let i = 0; i < 12 && (await topCard(page).textContent()) !== name; i++) {
+    await page.getByRole("button", { name: "Skip: not now, show me later" }).click();
+    await page.waitForTimeout(250);
+  }
+  await expect(topCard(page)).toHaveText(name);
+}
+
+test("first visit shows a one-time tip", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("dialog", { name: "How it works" })).toBeVisible();
+  await page.getByRole("button", { name: "Got it" }).click();
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByRole("dialog", { name: "How it works" })).toHaveCount(0);
+});
+
+test("swipe: skip, almost a match, undo, two ticks make a match, and Decisions changes your mind", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("hv-deck-tip-seen", "1"));
+  // Quillon Verify: Jamie ticked. Dad crosses it, so Brother's vote decides it.
+  await viewAs(page, "Dad");
+  await go(page, "/");
+  await skipTo(page, "Quillon Verify");
+  await page.getByRole("button", { name: "Cross: not for us" }).click();
+  await page.waitForTimeout(600);
+
   await viewAs(page, "Brother");
   await go(page, "/");
-  let swipes = 0;
-  for (let i = 0; i < 10 && (await topCard(page).textContent()) !== "Tidewell Diagnostics"; i++) {
-    await page.getByRole("button", { name: "Cross: not for us" }).click();
-    swipes++;
-    await page.waitForTimeout(400);
-  }
-  await expect(topCard(page)).toHaveText("Tidewell Diagnostics");
-
+  await skipTo(page, "Quillon Verify");
   await page.getByRole("button", { name: "Cross: not for us" }).click();
-  await expect(page.getByRole("dialog", { name: "Almost a match" })).toContainText("Jamie and Dad both ticked");
+  await expect(page.getByRole("dialog", { name: "Almost a match" })).toContainText("Jamie ticked");
   await page.getByRole("button", { name: "Undo my cross" }).click();
-  await expect(topCard(page)).toHaveText("Tidewell Diagnostics");
+  await expect(topCard(page)).toHaveText("Quillon Verify");
 
   await page.getByRole("button", { name: "Tick: interested" }).click();
-  await expect(page.getByRole("dialog", { name: "It’s a match!" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "It’s a match!" })).toContainText("You and Jamie ticked");
   await page.getByRole("button", { name: "Keep swiping" }).click();
-
-  // Undo the tick, then every cross, newest first.
-  for (let i = 0; i <= swipes; i++) {
-    await page.getByRole("button", { name: "Undo last swipe" }).click();
-    await page.waitForTimeout(400);
-  }
-  await expect(page.getByRole("button", { name: "Undo last swipe" })).toBeDisabled();
+  await page.getByRole("button", { name: "Undo last swipe" }).click();
+  await page.waitForTimeout(600);
   await page.goto("/matches");
-  await expect(page.getByRole("link", { name: /Tidewell Diagnostics/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Quillon Verify/ })).toHaveCount(0);
+
+  // Dad changes his mind from Decisions: the company goes back in his deck.
+  await viewAs(page, "Dad");
+  await go(page, "/decisions");
+  const row = page.getByRole("listitem").filter({ hasText: "Quillon Verify" });
+  await row.getByRole("button", { name: "Back to my deck" }).click();
+  // No longer decided, so it leaves the list and returns to Dad's deck.
+  await expect(page.getByRole("listitem").filter({ hasText: "Quillon Verify" })).toHaveCount(0);
 });
 
 test("swipe: a match has one shared chat", async ({ page }) => {

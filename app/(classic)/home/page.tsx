@@ -18,7 +18,7 @@ export default async function HomePage() {
   const repo = await getRepository();
   const [members, summaries, stories, notifications, events, runs] = await Promise.all([
     repo.getMembers(),
-    loadCompanySummaries(repo),
+    loadCompanySummaries(repo, { viewerId: member.userId }),
     repo.listHomeStories(),
     repo.listNotifications(member.userId),
     repo.listEvents(),

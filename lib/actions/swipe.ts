@@ -8,7 +8,7 @@ import { almostMatch } from "@/lib/domain/family-consensus";
 import type { ActionResult } from "./family";
 
 export type SwipeOutcome =
-  | { kind: "match" }
+  | { kind: "match"; tickedBy: string[] }
   | { kind: "almost"; likedBy: string[] }
   | { kind: "none" };
 
@@ -20,14 +20,15 @@ const swipeSchema = z.object({
 
 function revalidateSwipe(slug: string) {
   revalidatePath("/");
+  revalidatePath("/decisions");
   revalidatePath("/matches");
   revalidatePath(`/matches/${slug}`);
 }
 
 /**
  * Tick (interested) or cross (pass). Reports a match when this tick made it
- * unanimous, and "almost a match" when this member was the last to decide,
- * crossed, and everyone else had ticked.
+ * one (with who else ticked), and "almost a match" when this member's cross
+ * was the deciding vote and a tick would have made it a match.
  */
 export async function swipeAction(input: z.input<typeof swipeSchema>): Promise<ActionResult<{ outcome: SwipeOutcome }>> {
   const parsed = swipeSchema.safeParse(input);
@@ -38,7 +39,10 @@ export async function swipeAction(input: z.input<typeof swipeSchema>): Promise<A
     const [votes, members] = await Promise.all([repo.listVotes(parsed.data.companyId), repo.getMembers()]);
     const { transition } = await repo.setVote({ userId: member.userId, companyId: parsed.data.companyId, vote: parsed.data.vote });
     let outcome: SwipeOutcome = { kind: "none" };
-    if (parsed.data.vote === "interested" && transition.promoted) outcome = { kind: "match" };
+    if (parsed.data.vote === "interested" && transition.promoted) {
+      const others = votes.filter((v) => v.userId !== member.userId && v.vote === "interested").map((v) => members.find((m) => m.userId === v.userId)?.displayName ?? "Someone");
+      outcome = { kind: "match", tickedBy: others };
+    }
     else if (parsed.data.vote === "pass") {
       const liked = almostMatch(votes, members, member.userId);
       if (liked) outcome = { kind: "almost", likedBy: liked.map((m) => m.displayName) };

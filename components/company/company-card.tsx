@@ -44,8 +44,8 @@ export function CompanyCard({ summary, members, currentUserId, className, imageC
         </div>
         {summary.familyStage !== "unreviewed" ? (
           <div className="mt-3 flex items-center gap-2 border-t border-hairline pt-3">
-            <ConsensusStrip members={members} votes={summary.votes} />
-            <span className="text-[12px] text-secondary">{consensusSummary(summary.votes, members.length)}</span>
+            <ConsensusStrip members={members} votes={summary.votes} hidden={summary.votesHidden} />
+            <span className="text-[12px] text-secondary">{summary.votesHidden ? "Votes private until a match" : consensusSummary(summary.votes, members.length)}</span>
           </div>
         ) : null}
       </div>
@@ -80,8 +80,8 @@ export function CompactCompanyCard({ summary, members, className }: { summary: C
           {company.sector} · {company.city}
         </p>
         <div className="mt-2 flex items-center gap-2">
-          <ConsensusStrip members={members} votes={summary.votes} />
-          <span className="truncate text-[12px] text-secondary">{consensusSummary(summary.votes, members.length)}</span>
+          <ConsensusStrip members={members} votes={summary.votes} hidden={summary.votesHidden} />
+          <span className="truncate text-[12px] text-secondary">{summary.votesHidden ? "Votes private until a match" : consensusSummary(summary.votes, members.length)}</span>
         </div>
       </div>
     </Card>
@@ -111,7 +111,7 @@ export function ShortlistCard({ summary, members, currentUserId }: { summary: Co
             </div>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <ConsensusStrip members={members} votes={summary.votes} />
+            <ConsensusStrip members={members} votes={summary.votes} hidden={summary.votesHidden} />
             <span className="text-[12px] text-secondary tnum">{summary.familyAverage !== null ? `Family ${summary.familyAverage}/10 · ${summary.raters} rated` : "No family ratings yet"}</span>
             <span className="text-[12px] text-secondary tnum">{summary.assessment?.aiScore != null ? `AI ${summary.assessment.aiScore.toFixed(1)}/10` : "AI not rated"}</span>
           </div>
@@ -166,7 +166,7 @@ export function CompanyRow({ summary, members }: { summary: CompanySummary; memb
         <AccessPill access={summary.access} />
       </td>
       <td className="px-2">
-        <ConsensusStrip members={members} votes={summary.votes} />
+        <ConsensusStrip members={members} votes={summary.votes} hidden={summary.votesHidden} />
       </td>
       <td className="pr-4 text-right">
         <AiInline priority={summary.assessment?.aiPriority ?? null} />

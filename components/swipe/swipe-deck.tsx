@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, RotateCcw, X } from "lucide-react";
+import { Check, Hourglass, PartyPopper, RotateCcw, SkipForward, X } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, useTransition, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition, type CSSProperties } from "react";
 import { Wordmark } from "@/components/navigation/logo";
 import { Avatar } from "@/components/ui/avatar";
 import { Button, LinkButton } from "@/components/ui/primitives";
@@ -17,7 +17,12 @@ interface Swiped {
   card: SwipeCard;
   previousVote: VoteValue | null;
 }
-type Overlay = { kind: "match"; card: SwipeCard } | { kind: "almost"; card: SwipeCard; likedBy: string[] } | null;
+type Overlay = { kind: "match"; card: SwipeCard; tickedBy: string[] } | { kind: "almost"; card: SwipeCard; likedBy: string[] } | null;
+
+const TIP_KEY = "hv-deck-tip-seen";
+
+/** A line above the deck: a new match to open, or a vague nudge that your view is awaited. */
+export type DeckBanner = { kind: "match"; href: string; title: string } | { kind: "waiting" } | null;
 
 /** Distance (px) a card must be dragged to count as a swipe. */
 const SWIPE_DISTANCE = 110;
@@ -29,12 +34,13 @@ export function joinNames(names: string[]): string {
 
 /**
  * The deck, Hinge-style: the whole screen is one company's profile, scrolled
- * like any page. ✕ (bottom left) crosses, ✓ (bottom right) ticks, swiping
- * sideways does the same, and ↺ (top right) undoes the last swipe
- * (repeatedly, newest first). The deck is local state seeded from the
- * server, so a refresh after each swipe never reshuffles it.
+ * like any page. A slim bar above the tabs holds cross, skip (to the back of
+ * the deck, no vote), undo and tick; swiping sideways also ticks or crosses.
+ * Undo here covers this visit; the Decisions tab changes any earlier vote.
+ * The deck is local state seeded from the server, so a refresh after each
+ * swipe never reshuffles it.
  */
-export function SwipeDeck({ initialCards, members, currentUserId, banner }: { initialCards: SwipeCard[]; members: Member[]; currentUserId: string; banner?: ReactNode }) {
+export function SwipeDeck({ initialCards, members, banner }: { initialCards: SwipeCard[]; members: Member[]; banner: DeckBanner }) {
   const [deck, setDeck] = useState(initialCards);
   const [history, setHistory] = useState<Swiped[]>([]);
   const [leaving, setLeaving] = useState<{ card: SwipeCard; dir: Dir; fromX: number } | null>(null);
@@ -42,6 +48,7 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [error, setError] = useState<string | null>(null);
   const [dx, setDx] = useState(0);
+  const [tip, setTip] = useState(false);
   const [, startTransition] = useTransition();
   const pointer = useRef<{ id: number; x: number; y: number; mode: "undecided" | "h" | "v" } | null>(null);
   const suppressClick = useRef(false);
@@ -69,7 +76,7 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
           return;
         }
         const outcome = res.data!.outcome;
-        if (outcome.kind === "match") setOverlay({ kind: "match", card });
+        if (outcome.kind === "match") setOverlay({ kind: "match", card, tickedBy: outcome.tickedBy });
         else if (outcome.kind === "almost") setOverlay({ kind: "almost", card, likedBy: outcome.likedBy });
       });
     },
@@ -97,6 +104,38 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
     });
   }, [history]);
 
+  /** Not now: send the top company to the back of the deck without voting. */
+  const skip = useCallback(() => {
+    if (!top || leaving || deck.length < 2) return;
+    setError(null);
+    setDeck((d) => [...d.slice(1), d[0]]);
+    setEntering("next");
+    toTop();
+  }, [top, leaving, deck.length]);
+
+  // One-time tip on the very first visit to a non-empty deck.
+  useEffect(() => {
+    if (!initialCards.length) return;
+    let seen = true;
+    try {
+      seen = Boolean(localStorage.getItem(TIP_KEY));
+    } catch {
+      // Storage blocked: skip the tip rather than show it every time.
+    }
+    if (seen) return;
+    const t = setTimeout(() => setTip(true), 0);
+    return () => clearTimeout(t);
+  }, [initialCards.length]);
+
+  const closeTip = () => {
+    setTip(false);
+    try {
+      localStorage.setItem(TIP_KEY, "1");
+    } catch {
+      // Ignore: the tip may show again next time.
+    }
+  };
+
   const finishLeaving = () => {
     if (!leaving) return;
     setLeaving(null);
@@ -112,14 +151,14 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (overlay || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+      if (overlay || tip || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
       if (e.key === "ArrowRight") commit("right");
       else if (e.key === "ArrowLeft") commit("left");
       else if ((e.key === "z" && (e.metaKey || e.ctrlKey)) || e.key === "Backspace") undo();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [commit, undo, overlay]);
+  }, [commit, undo, overlay, tip]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (leaving || (e.pointerType === "mouse" && e.button !== 0)) return;
@@ -160,20 +199,21 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
           <p className="shrink-0 whitespace-nowrap text-[13px] font-medium text-secondary" aria-live="polite">
             {remaining === 0 ? "All done" : `${remaining} to go`}
           </p>
-          <button
-            type="button"
-            onClick={() => undo()}
-            disabled={history.length === 0}
-            aria-label="Undo last swipe"
-            title="Undo last swipe"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-hairline-strong bg-surface text-amber transition-transform active:scale-90 disabled:text-tertiary disabled:opacity-50"
-          >
-            <RotateCcw size={18} strokeWidth={2.3} />
-          </button>
         </div>
       </header>
 
-      {banner}
+      {banner?.kind === "match" ? (
+        <Link href={banner.href} className="mx-auto mt-2 flex w-[calc(100%-32px)] max-w-[608px] items-center gap-2.5 rounded-[14px] bg-ink px-3.5 py-2.5 text-[13px] text-white">
+          <PartyPopper size={17} className="shrink-0" aria-hidden />
+          <span className="min-w-0 flex-1 truncate">{banner.title}</span>
+          <span className="shrink-0 font-semibold">Open chat</span>
+        </Link>
+      ) : banner?.kind === "waiting" ? (
+        <p className="mx-auto mt-2 flex w-[calc(100%-32px)] max-w-[608px] items-center gap-2 rounded-[14px] bg-amber-pale px-3.5 py-2.5 text-[13px] text-amber" role="status">
+          <Hourglass size={16} className="shrink-0" aria-hidden />
+          The family is waiting on your view of something here.
+        </p>
+      ) : null}
 
       {error ? (
         <p role="alert" className="px-4 py-2 text-center text-[13px] text-red">
@@ -213,7 +253,7 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
           }}
           inert={leaving ? true : undefined}
         >
-          <CompanyProfile card={shown} />
+          <CompanyProfile card={shown} essentialsFirst />
         </div>
       ) : (
         <CaughtUp />
@@ -230,29 +270,54 @@ export function SwipeDeck({ initialCards, members, currentUserId, banner }: { in
         </div>
       ) : null}
 
-      {/* Thumb-reach corners, pinned to the bottom of the screen while the profile scrolls underneath. */}
+      {/* A slim action bar pinned above the tabs; it never covers the profile's text. */}
       {top ? (
-        <div className="pointer-events-none sticky bottom-0 z-20 mx-auto flex w-full max-w-[640px] justify-between px-4 pb-4 pt-2">
-          <button
-            type="button"
-            onClick={() => commit("left")}
-            aria-label="Cross: not for us"
-            className="pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full border border-hairline-strong bg-surface text-red shadow-[var(--shadow-float)] transition-transform active:scale-90"
-          >
-            <X size={26} strokeWidth={2.6} />
-          </button>
-          <button
-            type="button"
-            onClick={() => commit("right")}
-            aria-label="Tick: interested"
-            className="pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-green text-white shadow-[var(--shadow-float)] transition-transform active:scale-90"
-          >
-            <Check size={28} strokeWidth={2.8} />
-          </button>
+        <div className="sticky bottom-0 z-20 border-t border-hairline bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/85">
+          <div className="mx-auto flex w-full max-w-[640px] items-center gap-2 px-3 py-2">
+            <button
+              type="button"
+              onClick={() => commit("left")}
+              aria-label="Cross: not for us"
+              className="inline-flex h-12 flex-1 items-center justify-center gap-1.5 rounded-full border border-hairline-strong bg-surface text-[15px] font-semibold text-red transition-transform active:scale-95"
+            >
+              <X size={22} strokeWidth={2.6} aria-hidden />
+              Cross
+            </button>
+            <button
+              type="button"
+              onClick={skip}
+              disabled={deck.length < 2}
+              aria-label="Skip: not now, show me later"
+              title="Not now"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-hairline-strong bg-surface text-secondary transition-transform active:scale-90 disabled:opacity-40"
+            >
+              <SkipForward size={19} strokeWidth={2.2} />
+            </button>
+            <button
+              type="button"
+              onClick={() => undo()}
+              disabled={history.length === 0}
+              aria-label="Undo last swipe"
+              title="Undo last swipe"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-hairline-strong bg-surface text-amber transition-transform active:scale-90 disabled:text-tertiary disabled:opacity-40"
+            >
+              <RotateCcw size={19} strokeWidth={2.3} />
+            </button>
+            <button
+              type="button"
+              onClick={() => commit("right")}
+              aria-label="Tick: interested"
+              className="inline-flex h-12 flex-1 items-center justify-center gap-1.5 rounded-full bg-green text-[15px] font-semibold text-white transition-transform active:scale-95"
+            >
+              <Check size={22} strokeWidth={2.8} aria-hidden />
+              Tick
+            </button>
+          </div>
         </div>
       ) : null}
 
-      {overlay?.kind === "match" ? <MatchOverlay card={overlay.card} members={members} currentUserId={currentUserId} onClose={() => setOverlay(null)} /> : null}
+      {tip && top ? <DeckTip onClose={closeTip} /> : null}
+      {overlay?.kind === "match" ? <MatchOverlay card={overlay.card} members={members} tickedBy={overlay.tickedBy} onClose={() => setOverlay(null)} /> : null}
       {overlay?.kind === "almost" ? <AlmostSheet card={overlay.card} likedBy={overlay.likedBy} onUndo={() => undo(overlay.card.company.id)} onClose={() => setOverlay(null)} /> : null}
     </div>
   );
@@ -265,7 +330,7 @@ function CaughtUp() {
         <Check size={28} strokeWidth={2.6} aria-hidden />
       </span>
       <p className="mt-4 font-serif text-[24px] font-semibold text-ink">You’re all caught up</p>
-      <p className="mt-1 max-w-[30ch] text-[14px] leading-relaxed text-secondary">New companies arrive after the morning research run. Matches are waiting in your chats.</p>
+      <p className="mt-1 max-w-[30ch] text-[14px] leading-relaxed text-secondary">New companies arrive as research adds them. Closed rounds wait on your watch list in Decisions.</p>
       <LinkButton href="/matches" variant="outline" className="mt-5">
         See matches
       </LinkButton>
@@ -273,11 +338,10 @@ function CaughtUp() {
   );
 }
 
-function MatchOverlay({ card, members, currentUserId, onClose }: { card: SwipeCard; members: Member[]; currentUserId: string; onClose: () => void }) {
-  const others = members.filter((m) => m.userId !== currentUserId).map((m) => m.displayName);
+function MatchOverlay({ card, members, tickedBy, onClose }: { card: SwipeCard; members: Member[]; tickedBy: string[]; onClose: () => void }) {
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="match-title" className="fixed inset-0 z-50 flex animate-[fade-in_200ms_ease-out] flex-col items-center justify-center bg-ink-deep px-8 text-center text-white">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/60">Everyone ticked</p>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/60">Two ticks</p>
       <h2 id="match-title" className="mt-2 animate-[match-pop_420ms_cubic-bezier(.2,1.4,.4,1)] font-serif text-[44px] font-semibold leading-none">
         It’s a match!
       </h2>
@@ -287,7 +351,7 @@ function MatchOverlay({ card, members, currentUserId, onClose }: { card: SwipeCa
         ))}
       </div>
       <p className="mt-6 max-w-[30ch] text-[16px] leading-relaxed text-white/85">
-        You, {joinNames(others)} all want to talk about <span className="font-semibold text-white">{card.company.name}</span>. The chat is open.
+        You{tickedBy.length ? ` and ${joinNames(tickedBy)}` : ""} ticked <span className="font-semibold text-white">{card.company.name}</span>. The chat is open to the whole family.
       </p>
       <Link href={`/matches/${card.company.slug}`} className="mt-8 inline-flex min-h-[50px] w-full max-w-[300px] items-center justify-center rounded-full bg-white px-6 text-[15px] font-semibold text-ink">
         Open the chat
@@ -295,6 +359,39 @@ function MatchOverlay({ card, members, currentUserId, onClose }: { card: SwipeCa
       <button type="button" onClick={onClose} className="mt-3 min-h-[44px] px-6 text-[15px] font-medium text-white/80 hover:text-white">
         Keep swiping
       </button>
+    </div>
+  );
+}
+
+function DeckTip({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex animate-[fade-in_160ms_ease-out] items-end justify-center bg-ink/40" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-labelledby="tip-title" className="w-full max-w-[480px] animate-[sheet-up_240ms_ease-out] rounded-t-[24px] bg-surface px-6 pb-[calc(24px+var(--safe-bottom))] pt-6" onClick={(e) => e.stopPropagation()}>
+        <h2 id="tip-title" className="font-serif text-[24px] font-semibold text-ink">
+          How it works
+        </h2>
+        <ul className="mt-3 space-y-2.5 text-[15px] leading-relaxed text-text">
+          <li className="flex gap-3">
+            <Check size={20} className="mt-0.5 shrink-0 text-green" aria-hidden />
+            <span><b>Tick</b> if it’s worth a conversation, <b>cross</b> if not. Swiping sideways works too.</span>
+          </li>
+          <li className="flex gap-3">
+            <SkipForward size={20} className="mt-0.5 shrink-0 text-secondary" aria-hidden />
+            <span><b>Skip</b> sends it to the back for later. Change any decision in the Decisions tab.</span>
+          </li>
+          <li className="flex gap-3">
+            <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[11px] font-bold text-white">2</span>
+            <span>When <b>two of you tick</b> the same company it’s a match, and a family chat opens.</span>
+          </li>
+          <li className="flex gap-3">
+            <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-muted text-[11px] font-bold text-secondary">?</span>
+            <span>Your picks stay private until there’s a match.</span>
+          </li>
+        </ul>
+        <Button size="lg" className="mt-5 w-full" onClick={onClose}>
+          Got it
+        </Button>
+      </div>
     </div>
   );
 }
@@ -314,7 +411,7 @@ function AlmostSheet({ card, likedBy, onUndo, onClose }: { card: SwipeCard; like
           Almost a match
         </h2>
         <p className="mt-2 text-[15px] leading-relaxed text-secondary">
-          {joinNames(likedBy)} {likedBy.length === 2 ? "both" : "all"} ticked <span className="font-semibold text-ink">{card.company.name}</span>. Your cross was the deciding vote.
+          {joinNames(likedBy)} ticked <span className="font-semibold text-ink">{card.company.name}</span>. Your tick would have made it a match.
         </p>
         <div className="mt-5 flex flex-col gap-2">
           <Button onClick={onUndo} size="lg">

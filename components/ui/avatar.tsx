@@ -23,15 +23,19 @@ export function Avatar({ member, size = "md", className, ring }: { member: Pick<
   );
 }
 
-/** Three-avatar consensus strip: muted for members who have not voted. */
-export function ConsensusStrip({ members, votes, size = "xs" }: { members: Member[]; votes: { userId: string; vote: "interested" | "unsure" | "pass" }[]; size?: "xs" | "sm" }) {
+/**
+ * Three-avatar consensus strip: muted for members who have not voted. With
+ * `hidden` (no match yet) only the viewer's own vote shows; the others are
+ * drawn neutrally, so withholding a vote never looks like "not reviewed".
+ */
+export function ConsensusStrip({ members, votes, size = "xs", hidden = false }: { members: Member[]; votes: { userId: string; vote: "interested" | "unsure" | "pass" }[]; size?: "xs" | "sm"; hidden?: boolean }) {
   return (
-    <span className="inline-flex -space-x-1.5" aria-label="Family votes">
+    <span className="inline-flex -space-x-1.5" aria-label={hidden ? "Votes are private until a match" : "Family votes"}>
       {members.map((m) => {
         const v = votes.find((x) => x.userId === m.userId);
         return (
-          <span key={m.userId} className="relative inline-flex" title={`${m.displayName}: ${v ? v.vote : "not reviewed"}`}>
-            <Avatar member={m} size={size} ring className={cn(!v && "opacity-40 grayscale")} />
+          <span key={m.userId} className="relative inline-flex" title={`${m.displayName}: ${v ? v.vote : hidden ? "private until a match" : "not reviewed"}`}>
+            <Avatar member={m} size={size} ring className={cn(!v && !hidden && "opacity-40 grayscale")} />
             {v ? (
               <span
                 className={cn(

@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, MessageCircle, UserRound } from "lucide-react";
+import { Heart, ListChecks, MessageCircle, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -8,10 +8,11 @@ import { cn } from "@/lib/utils";
 const items = [
   { href: "/", label: "Discover", icon: Heart, match: (p: string) => p === "/" },
   { href: "/matches", label: "Matches", icon: MessageCircle, match: (p: string) => p.startsWith("/matches") },
+  { href: "/decisions", label: "Decisions", icon: ListChecks, match: (p: string) => p.startsWith("/decisions") },
   { href: "/me", label: "Me", icon: UserRound, match: (p: string) => ["/me", "/events", "/networks", "/research", "/about", "/account"].some((x) => p.startsWith(x)) },
 ];
 
-/** Three-tab thumb navigation for the swipe app, at every screen width. */
+/** Four-tab thumb navigation for the swipe app, at every screen width. */
 export function SwipeNav({ unreadMatches }: { unreadMatches: number }) {
   const pathname = usePathname();
   return (

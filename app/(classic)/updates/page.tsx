@@ -48,7 +48,7 @@ export default async function UpdatesPage({ searchParams }: { searchParams: Sear
   const tab = first(sp.tab) ?? "all";
   const member = await requireMember();
   const repo = await getRepository();
-  const [notifications, summaries] = await Promise.all([repo.listNotifications(member.userId), loadCompanySummaries(repo)]);
+  const [notifications, summaries] = await Promise.all([repo.listNotifications(member.userId), loadCompanySummaries(repo, { viewerId: member.userId })]);
   const byId = new Map(summaries.map((s) => [s.company.id, s]));
   const filtered = notifications.filter((n) => (tab === "all" ? true : tab === "family" ? familyTypes.includes(n.notificationType) : !familyTypes.includes(n.notificationType)));
   const unread = notifications.filter((n) => !n.readAt).length;

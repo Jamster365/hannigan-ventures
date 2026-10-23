@@ -12,7 +12,7 @@ export const metadata = { title: "Family" };
 export default async function FamilyPage() {
   const member = await requireMember();
   const repo = await getRepository();
-  const [members, summaries, bundles] = await Promise.all([repo.getMembers(), loadCompanySummaries(repo), repo.listCompanies()]);
+  const [members, summaries, bundles] = await Promise.all([repo.getMembers(), loadCompanySummaries(repo, { viewerId: member.userId }), repo.listCompanies()]);
   const stats = members.map((m) => {
     const votes = summaries.flatMap((s) => s.votes.filter((v) => v.userId === m.userId));
     const comments = bundles.reduce((n, b) => n + b.comments.filter((c) => c.authorUserId === m.userId && !c.deletedAt).length, 0);
@@ -41,18 +41,18 @@ export default async function FamilyPage() {
                 <dl className="mt-3 grid w-full grid-cols-3 gap-1 text-center">
                   <div>
                     <dt className="text-[11px] text-tertiary">Reviewed</dt>
-                    <dd className="font-serif text-[18px] font-semibold text-ink tnum">{reviewed}</dd>
+                    <dd className="font-serif text-[18px] font-semibold text-ink tnum">{m.userId === member.userId ? reviewed : "–"}</dd>
                   </div>
                   <div>
                     <dt className="text-[11px] text-tertiary">Interested</dt>
-                    <dd className="font-serif text-[18px] font-semibold text-ink tnum">{interested}</dd>
+                    <dd className="font-serif text-[18px] font-semibold text-ink tnum">{m.userId === member.userId ? interested : "–"}</dd>
                   </div>
                   <div>
                     <dt className="text-[11px] text-tertiary">Comments</dt>
                     <dd className="font-serif text-[18px] font-semibold text-ink tnum">{comments}</dd>
                   </div>
                 </dl>
-                <p className="mt-2 text-[11px] text-tertiary">Joined {formatDate(m.joinedAt)}</p>
+                <p className="mt-2 text-[11px] text-tertiary">{m.userId === member.userId ? `Joined ${formatDate(m.joinedAt)}` : "Votes private until a match"}</p>
               </Card>
             </li>
           ))}
@@ -60,7 +60,7 @@ export default async function FamilyPage() {
         <section className="mt-6">
           <h2 className="mb-2 font-serif text-[18px] font-semibold text-ink">Shortlist rule</h2>
           <Card className="p-4 text-[14px] leading-relaxed text-text">
-            A company is <span className="font-semibold">Shortlisted</span> when at least 2 of {members.length} members mark it Interested. It is <span className="font-semibold">Passed</span> when 2 mark it Pass. Otherwise it is <span className="font-semibold">Awaiting views</span> once anyone has voted. Votes mean willingness to investigate, not a commitment to invest. The AI research rating is shown separately and is never averaged with family scores.
+            A company is <span className="font-semibold">Shortlisted</span> when at least 2 of {members.length} members mark it Interested. It is <span className="font-semibold">Passed</span> when 2 mark it Pass. Otherwise it is <span className="font-semibold">Awaiting views</span> once anyone has voted. Each member’s votes stay private until a company is shortlisted. Votes mean willingness to investigate, not a commitment to invest. The AI research rating is shown separately and is never averaged with family scores.
           </Card>
         </section>
         <section className="mt-6">

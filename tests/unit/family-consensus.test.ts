@@ -1,31 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { almostMatch, applyVote, computeFamilyStage, consensusSummary, familyAverage } from "@/lib/domain/family-consensus";
+import { almostMatch, applyVote, computeFamilyStage, consensusSummary, familyAverage, visibleVotes } from "@/lib/domain/family-consensus";
 import type { Vote } from "@/lib/domain/types";
 
 const v = (userId: string, vote: Vote["vote"], score: number | null = null): Vote => ({ companyId: "c", userId, vote, score, updatedAt: "2026-10-19T00:00:00Z" });
 
-describe("computeFamilyStage: unanimous (swipe app)", () => {
+describe("computeFamilyStage: two_of_three (current rule)", () => {
   it("0 votes = unreviewed", () => expect(computeFamilyStage([])).toBe("unreviewed"));
   it("1 tick = pending", () => expect(computeFamilyStage([v("a", "interested")])).toBe("pending"));
-  it("2 of 3 ticks is not yet a match", () => expect(computeFamilyStage([v("a", "interested"), v("b", "interested")])).toBe("pending"));
-  it("3 of 3 ticks = match", () => expect(computeFamilyStage([v("a", "interested"), v("b", "interested"), v("c", "interested")])).toBe("shortlisted"));
-  it("a single cross ends it, even after two ticks", () => expect(computeFamilyStage([v("a", "interested"), v("b", "interested"), v("c", "pass")])).toBe("passed"));
-  it("a cross never deletes anything; leftover unsure votes are pending", () => expect(computeFamilyStage([v("a", "unsure"), v("b", "unsure"), v("c", "unsure")])).toBe("pending"));
-  it("uses the actual household size", () => expect(computeFamilyStage([v("a", "interested"), v("b", "interested")], 2)).toBe("shortlisted"));
+  it("2 ticks = match, even with a cross", () => expect(computeFamilyStage([v("a", "interested"), v("b", "interested"), v("c", "pass")])).toBe("shortlisted"));
+  it("one cross does not end it", () => expect(computeFamilyStage([v("a", "pass"), v("b", "interested")])).toBe("pending"));
+  it("2 crosses = ended", () => expect(computeFamilyStage([v("a", "pass"), v("b", "pass"), v("c", "interested")])).toBe("passed"));
+  it("leftover unsure votes are pending", () => expect(computeFamilyStage([v("a", "unsure"), v("b", "unsure"), v("c", "unsure")])).toBe("pending"));
 });
 
-describe("computeFamilyStage: two_of_three (classic app)", () => {
-  const classic = (votes: Vote[]) => computeFamilyStage(votes, 3, "two_of_three");
-  it("2 interested = shortlisted", () => expect(classic([v("a", "interested"), v("b", "interested"), v("c", "pass")])).toBe("shortlisted"));
-  it("2 pass = passed", () => expect(classic([v("a", "pass"), v("b", "pass"), v("c", "interested")])).toBe("passed"));
-  it("1 pass alone is pending", () => expect(classic([v("a", "pass")])).toBe("pending"));
+describe("computeFamilyStage: unanimous (kept selectable)", () => {
+  const unanimous = (votes: Vote[], n = 3) => computeFamilyStage(votes, n, "unanimous");
+  it("2 of 3 ticks is not yet a match", () => expect(unanimous([v("a", "interested"), v("b", "interested")])).toBe("pending"));
+  it("3 of 3 ticks = match", () => expect(unanimous([v("a", "interested"), v("b", "interested"), v("c", "interested")])).toBe("shortlisted"));
+  it("a single cross ends it", () => expect(unanimous([v("a", "interested"), v("b", "interested"), v("c", "pass")])).toBe("passed"));
+  it("uses the actual household size", () => expect(unanimous([v("a", "interested"), v("b", "interested")], 2)).toBe("shortlisted"));
 });
 
-describe("almostMatch", () => {
+describe("almostMatch (two_of_three)", () => {
   const members = [{ userId: "a" }, { userId: "b" }, { userId: "c" }];
-  it("names the others when they both ticked", () => expect(almostMatch([v("a", "interested"), v("b", "interested")], members, "c")).toEqual([{ userId: "a" }, { userId: "b" }]));
-  it("is null when someone else has not decided", () => expect(almostMatch([v("a", "interested")], members, "c")).toBeNull());
-  it("is null when someone else crossed", () => expect(almostMatch([v("a", "interested"), v("b", "pass")], members, "c")).toBeNull());
+  it("your tick would have made it: one other ticked, the third crossed", () => expect(almostMatch([v("a", "interested"), v("b", "pass")], members, "c")).toEqual([{ userId: "a" }]));
+  it("not decisive while someone has not decided", () => expect(almostMatch([v("a", "interested")], members, "c")).toBeNull());
+  it("not decisive when nobody ticked", () => expect(almostMatch([v("a", "pass"), v("b", "pass")], members, "c")).toBeNull());
+});
+
+describe("visibleVotes", () => {
+  it("shows only your own vote before a match", () => expect(visibleVotes([v("a", "interested"), v("b", "pass")], "a").map((x) => x.userId)).toEqual(["a"]));
+  it("shows everyone's on a match", () => expect(visibleVotes([v("a", "interested"), v("b", "interested"), v("c", "pass")], "c")).toHaveLength(3));
 });
 
 describe("familyAverage", () => {
@@ -37,14 +42,14 @@ describe("familyAverage", () => {
 });
 
 describe("applyVote transitions", () => {
-  it("promotes on the third tick", () => {
-    const { transition } = applyVote([v("a", "interested"), v("b", "interested")], { userId: "c", vote: "interested" });
+  it("promotes on the second tick", () => {
+    const { transition } = applyVote([v("a", "interested")], { userId: "b", vote: "interested" });
     expect(transition).toMatchObject({ from: "pending", to: "shortlisted", promoted: true, demoted: false });
   });
-  it("undoing the last tick (clearing it) demotes immediately", () => {
-    const { transition, votes } = applyVote([v("a", "interested"), v("b", "interested"), v("c", "interested")], { userId: "c", vote: null });
+  it("undoing a tick (clearing it) demotes immediately", () => {
+    const { transition, votes } = applyVote([v("a", "interested"), v("b", "interested")], { userId: "b", vote: null });
     expect(transition).toMatchObject({ from: "shortlisted", to: "pending", demoted: true });
-    expect(votes.find((x) => x.userId === "c")).toBeUndefined();
+    expect(votes.find((x) => x.userId === "b")).toBeUndefined();
   });
   it("changing score alone does not change the stage", () => {
     const { transition } = applyVote([v("a", "interested", 5)], { userId: "a", vote: "interested", score: 9 });

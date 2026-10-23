@@ -3,13 +3,16 @@ import { CommentThread } from "@/components/company/comment-thread";
 import { VotePanel } from "@/components/company/vote-panel";
 import { Avatar } from "@/components/ui/avatar";
 import { Pill } from "@/components/ui/primitives";
-import { computeFamilyStage, familyAverage, stageLabel, tallyVotes } from "@/lib/domain/family-consensus";
+import { computeFamilyStage, familyAverage, stageLabel, tallyVotes, visibleVotes } from "@/lib/domain/family-consensus";
 import type { CompanyBundle, Member } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
 
 export function FamilyTab({ bundle, members, currentUserId }: { bundle: CompanyBundle; members: Member[]; currentUserId: string }) {
-  const { company, votes, comments, assessment } = bundle;
-  const stage = computeFamilyStage(votes);
+  const { company, comments, assessment } = bundle;
+  const stage = computeFamilyStage(bundle.votes);
+  // Votes stay private until a match: before that you see only your own.
+  const votes = visibleVotes(bundle.votes, currentUserId);
+  const hidden = votes.length !== bundle.votes.length || stage !== "shortlisted";
   const tally = tallyVotes(votes);
   const avg = familyAverage(votes);
   const mine = votes.find((v) => v.userId === currentUserId) ?? null;
@@ -26,7 +29,7 @@ export function FamilyTab({ bundle, members, currentUserId }: { bundle: CompanyB
           <Pill tone={stage === "shortlisted" ? "green" : stage === "passed" ? "red" : stage === "pending" ? "amber" : "neutral"}>{stageLabel(stage)}</Pill>
         </div>
         <p className="mt-1 text-[13px] text-secondary">
-          {tally.interested} of {members.length} members are interested{tally.total < members.length ? ` · ${members.length - tally.total} yet to vote` : ""}
+          {hidden ? "Each member’s vote stays private until two of you are interested." : `${tally.interested} of ${members.length} members are interested${tally.total < members.length ? ` · ${members.length - tally.total} yet to vote` : ""}`}
         </p>
         <ul className="mt-3 grid grid-cols-3 gap-2">
           {members.map((m) => {
@@ -47,7 +50,7 @@ export function FamilyTab({ bundle, members, currentUserId }: { bundle: CompanyB
                     <span className="mt-0.5 text-[12px] text-secondary tnum">{v.score !== null ? `${v.score}/10` : "No score"}</span>
                   </>
                 ) : (
-                  <span className="mt-1 text-[12px] text-tertiary">Not reviewed</span>
+                  <span className="mt-1 text-[12px] text-tertiary">{hidden && m.userId !== currentUserId ? "Private" : "Not reviewed"}</span>
                 )}
               </li>
             );

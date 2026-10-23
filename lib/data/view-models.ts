@@ -15,10 +15,11 @@ export interface ResearchFreshness {
   message: string | null;
 }
 
-export async function loadCompanySummaries(repo: Repository, maxChequeGbp?: number): Promise<CompanySummary[]> {
+/** `viewerId` hides other members' votes until a company is a match. */
+export async function loadCompanySummaries(repo: Repository, opts: { maxChequeGbp?: number; viewerId?: string } = {}): Promise<CompanySummary[]> {
   const bundles = await repo.listCompanies();
   const now = new Date();
-  return bundles.map((b) => summarise(b, { now, maxChequeGbp }));
+  return bundles.map((b) => summarise(b, { now, maxChequeGbp: opts.maxChequeGbp, viewerId: opts.viewerId }));
 }
 
 export function recentChanges(summaries: CompanySummary[], days = 7, limit = 8): ChangeItem[] {

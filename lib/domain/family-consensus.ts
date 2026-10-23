@@ -2,14 +2,15 @@ import type { FamilyStage, Vote, VoteValue } from "./types";
 
 /**
  * How a company reaches the family shortlist ("a match").
- *  - "unanimous" (swipe app): every member ticks it; a single cross ends it.
- *  - "two_of_three" (classic app): 2 Interested shortlists, 2 Pass passes.
+ *  - "two_of_three" (current, chosen 23 Oct 2026): 2 ticks make a match,
+ *    2 crosses end it; everyone still decides.
+ *  - "unanimous" (22–23 Oct 2026): every member ticks it; one cross ends it.
  * The database applies the same rule in compute_family_stage()
- * (supabase/migrations/0012_unanimous_matches.sql); change both together.
+ * (supabase/migrations/0013_two_of_three_matches.sql); change both together.
  * See docs/classic-app.md.
  */
 export type MatchRule = "unanimous" | "two_of_three";
-export const MATCH_RULE: MatchRule = "unanimous";
+export const MATCH_RULE: MatchRule = "two_of_three";
 
 /** Active household members at launch; used where the member list is not to hand. */
 export const HOUSEHOLD_SIZE = 3;
@@ -109,14 +110,27 @@ export function applyVote(
 }
 
 /**
- * "Almost a match": the member who just crossed a company was the last to
- * decide, and everyone else had ticked it. Returns the members who ticked.
+ * "Almost a match": this member just crossed a company, everyone else has
+ * already decided, and this member's tick would have made it a match.
+ * Returns the members who ticked it, or null.
  */
-export function almostMatch<M extends { userId: string }>(votes: Pick<Vote, "userId" | "vote">[], members: M[], userId: string): M[] | null {
+export function almostMatch<M extends { userId: string }>(votes: Pick<Vote, "userId" | "vote">[], members: M[], userId: string, rule: MatchRule = MATCH_RULE): M[] | null {
   const others = members.filter((m) => m.userId !== userId);
   if (others.length === 0) return null;
-  const ticked = others.every((m) => votes.some((v) => v.userId === m.userId && v.vote === "interested"));
-  return ticked ? others : null;
+  const voteOf = (id: string) => votes.find((v) => v.userId === id)?.vote;
+  if (others.some((m) => !voteOf(m.userId) || voteOf(m.userId) === "unsure")) return null;
+  const ticked = others.filter((m) => voteOf(m.userId) === "interested");
+  const needed = rule === "unanimous" ? members.length : SHORTLIST_THRESHOLD;
+  return ticked.length === needed - 1 ? ticked : null;
+}
+
+/**
+ * Votes stay private until a company is a match: before that a viewer sees
+ * only their own. Used by every screen that shows votes (both apps).
+ */
+export function visibleVotes<V extends Pick<Vote, "userId" | "vote">>(votes: V[], viewerId: string | null, memberCount: number = HOUSEHOLD_SIZE): V[] {
+  if (computeFamilyStage(votes, memberCount) === "shortlisted") return votes;
+  return votes.filter((v) => v.userId === viewerId);
 }
 
 export function stageLabel(stage: FamilyStage): string {

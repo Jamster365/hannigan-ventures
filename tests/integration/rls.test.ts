@@ -104,25 +104,21 @@ describe("row level security", () => {
   });
 });
 
-describe("family stage is computed server-side (unanimous matches)", () => {
+describe("family stage is computed server-side (two of three)", () => {
   const stage = async () => (await h.admin.query<{ family_stage: string }>("select family_stage from companies where id = $1", [company]))[0].family_stage;
 
   it("1 tick = pending", async () => {
     expect(await stage()).toBe("pending");
   });
 
-  it("2 of 3 ticks is not yet a match", async () => {
+  it("the second tick makes a match, naming who ticked, with one notification per other member pointing at the chat", async () => {
     await h.as(brother, (q) => q.query("insert into member_votes (company_id, user_id, vote, score) values ($1, $2, 'interested', 7)", [company, brother]));
-    expect(await stage()).toBe("pending");
-  });
-
-  it("the third tick makes a match, with one family update and one notification per other member pointing at the chat", async () => {
-    await h.as(dad, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'interested')", [company, dad]));
     expect(await stage()).toBe("shortlisted");
-    const updates = await h.admin.query("select headline from company_updates where company_id = $1 and update_type = 'family'", [company]);
+    const updates = await h.admin.query<{ headline: string; summary: string }>("select headline, summary from company_updates where company_id = $1 and update_type = 'family'", [company]);
     expect(updates.map((u) => u.headline)).toEqual(["It's a match"]);
+    expect(updates[0].summary).toBe("Jamie and Brother ticked Larkspur Photonics.");
     const notes = await h.admin.query<{ recipient_user_id: string; href: string }>("select recipient_user_id, href from notifications where notification_type = 'shortlist_promoted' and company_id = $1", [company]);
-    expect(notes.map((n) => n.recipient_user_id).sort()).toEqual([brother, jamie].sort());
+    expect(notes.map((n) => n.recipient_user_id).sort()).toEqual([dad, jamie].sort());
     expect(notes.every((n) => n.href === "/matches/larkspur-photonics")).toBe(true);
   });
 
@@ -132,24 +128,24 @@ describe("family stage is computed server-side (unanimous matches)", () => {
     expect(notes.map((n) => n.href)).toEqual(["/matches/larkspur-photonics", "/matches/larkspur-photonics"]);
   });
 
-  it("undoing a tick immediately ends the match and keeps history", async () => {
-    await h.as(dad, (q) => q.query("delete from member_votes where company_id = $1 and user_id = $2", [company, dad]));
+  it("undoing a tick ends the match, keeps history and clears the closed chat's unread notifications", async () => {
+    await h.as(brother, (q) => q.query("delete from member_votes where company_id = $1 and user_id = $2", [company, brother]));
     expect(await stage()).toBe("pending");
     const updates = await h.admin.query("select headline from company_updates where company_id = $1 and update_type = 'family' order by effective_at", [company]);
     expect(updates.map((u) => u.headline)).toEqual(["It's a match", "No longer a match"]);
-    // The closed match's unread notifications are cleared so no badge points at a closed chat.
     const unread = await h.admin.query("select id from notifications where company_id = $1 and notification_type in ('shortlist_promoted', 'comment') and read_at is null", [company]);
     expect(unread).toEqual([]);
     const audit = await h.admin.query("select action from audit_events where object_id = $1 and action like 'vote.%'", [company]);
-    expect(audit.length).toBeGreaterThanOrEqual(4);
+    expect(audit.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("a single cross = passed, deletes nothing and announces no vote", async () => {
+  it("one cross does not end it; two crosses do, deleting nothing and announcing no vote", async () => {
     await h.as(dad, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'pass')", [company, dad]));
+    expect(await stage()).toBe("pending");
+    await h.as(brother, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'pass')", [company, brother]));
     expect(await stage()).toBe("passed");
     const still = await h.admin.query("select id from companies where id = $1", [company]);
     expect(still).toHaveLength(1);
-    await h.as(brother, (q) => q.query("update member_votes set vote = 'pass' where company_id = $1 and user_id = $2", [company, brother]));
     const changed = await h.admin.query("select id from notifications where notification_type = 'vote_changed' and company_id = $1", [company]);
     expect(changed).toEqual([]);
   });
@@ -205,15 +201,14 @@ describe("deleting a company", () => {
 });
 
 describe("membership changes re-derive matches", () => {
-  it("a match needs every active member; leaving or rejoining recomputes quietly", async () => {
+  it("only active members' ticks count; leaving or rejoining recomputes quietly", async () => {
     const co = (await h.admin.query<{ id: string }>("insert into companies (household_id, name, slug) values ($1, 'Membership Co', 'membership-co') returning id", [household]))[0].id;
     const stageOf = async () => (await h.admin.query<{ family_stage: string }>("select family_stage from companies where id = $1", [co]))[0].family_stage;
-    const members = await h.admin.query<{ user_id: string }>("select user_id from household_members where household_id = $1 and status = 'active' and user_id <> $2", [household, dad]);
-    for (const m of members) await h.as(m.user_id, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'interested')", [co, m.user_id]));
-    expect(await stageOf()).toBe("pending");
-    await h.admin.query("update household_members set status = 'removed' where household_id = $1 and user_id = $2", [household, dad]);
+    for (const u of [jamie, dad]) await h.as(u, (q) => q.query("insert into member_votes (company_id, user_id, vote) values ($1, $2, 'interested')", [co, u]));
     expect(await stageOf()).toBe("shortlisted");
-    await h.admin.query("update household_members set status = 'active' where household_id = $1 and user_id = $2", [household, dad]);
+    await h.admin.query("update household_members set status = 'removed' where household_id = $1 and user_id = $2", [household, dad]);
     expect(await stageOf()).toBe("pending");
+    await h.admin.query("update household_members set status = 'active' where household_id = $1 and user_id = $2", [household, dad]);
+    expect(await stageOf()).toBe("shortlisted");
   });
 });

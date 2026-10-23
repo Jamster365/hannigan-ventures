@@ -11,7 +11,7 @@ const sections = [
   },
   {
     title: "How matches work",
-    body: "Each member ticks or crosses every company in their deck, and the others' choices stay hidden here (the classic app still shows votes). When all three tick the same company it is a match: it moves to Matches and opens a shared chat. A single cross ends it; if yours was the deciding cross after the other two ticked, you are told it was almost a match and can undo. A match means \"worth a conversation\", never \"let's invest\". Nothing is overridden by hand or by the AI.",
+    body: "Each member ticks, crosses or skips every company in their deck, and everyone's choices stay private until there is a match. When two of you tick the same company it is a match: it moves to Matches and opens a chat for the whole family. Two crosses end it. If your cross was the deciding vote and your tick would have made a match, you are told it was almost a match and can undo. Change any decision later in Decisions. Companies whose round has closed wait on the watch list until a new round appears. A match means \"worth a conversation\", never \"let's invest\". Nothing is overridden by hand or by the AI.",
   },
   {
     title: "How the AI rating works",

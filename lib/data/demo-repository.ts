@@ -111,9 +111,10 @@ class DemoRepository implements Repository {
     const others = DEMO_MEMBERS.filter((m) => m.userId !== userId).map((m) => m.userId);
     const actor = DEMO_MEMBERS.find((m) => m.userId === userId)?.displayName ?? "A member";
     const now = new Date().toISOString();
+    const tickers = bundle.votes.filter((v) => v.vote === "interested").map((v) => DEMO_MEMBERS.find((m) => m.userId === v.userId)?.displayName ?? "A member").join(" and ");
     if (transition.promoted) {
-      bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "It's a match", summary: `Everyone ticked ${bundle.company.name}.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
-      this.pushNotification(others, { notificationType: "shortlist_promoted", companyId, updateId: null, commentId: null, title: `It's a match: ${bundle.company.name}`, body: `Everyone ticked ${bundle.company.name}. The chat is open.`, importance: "high", href: `/matches/${bundle.company.slug}`, dedupe: `promote:${companyId}:${now}` });
+      bundle.updates.unshift({ id: this.nextId("u"), companyId, updateType: "family", headline: "It's a match", summary: `${tickers} ticked ${bundle.company.name}.`, materiality: "medium", sourceId: null, runId: null, effectiveAt: now, detectedAt: now });
+      this.pushNotification(others, { notificationType: "shortlist_promoted", companyId, updateId: null, commentId: null, title: `It's a match: ${bundle.company.name}`, body: `${tickers} ticked ${bundle.company.name}. The chat is open.`, importance: "high", href: `/matches/${bundle.company.slug}`, dedupe: `promote:${companyId}:${now}` });
     } else if (transition.demoted) {
       // The chat has closed: unread match and chat notifications would point at nothing.
       for (const n of this.notifications) {
