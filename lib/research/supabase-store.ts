@@ -317,8 +317,10 @@ export class SupabaseResearchStore implements ResearchStore {
       const when = input.allotment.allottedOn ?? input.allotment.date;
       await setFact("latest_sh01", "Latest share allotment (SH01)", `${when}${input.allotment.capital ? ` · capital ${input.allotment.capital}` : ""}`, when);
       if (input.newAllotment) {
+        // A recent allotment is news (a round just completed); an old one is history for the timeline only.
+        const recent = Date.now() - new Date(when).getTime() < 180 * 86_400_000;
         await this.admin.from("company_updates").upsert(
-          { company_id: input.companyId, update_type: "funding", headline: "Shares allotted (Companies House)", summary: `An SH01 statement of capital was filed for an allotment of shares on ${new Date(when).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}${input.allotment.capital ? ` (nominal capital now ${input.allotment.capital})` : ""}. A round, or a tranche of one, has completed.`, materiality: "high", source_id: sourceId, effective_at: `${when}T00:00:00Z`, detected_at: now, dedupe_key: `sh01:${when}` },
+          { company_id: input.companyId, update_type: "funding", headline: "Shares allotted (Companies House)", summary: `An SH01 statement of capital was filed for an allotment of shares on ${new Date(when).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}${input.allotment.capital ? ` (nominal capital now ${input.allotment.capital})` : ""}. A round, or a tranche of one, ${recent ? "has completed" : "completed then"}.`, materiality: recent ? "high" : "low", source_id: sourceId, effective_at: `${when}T00:00:00Z`, detected_at: now, dedupe_key: `sh01:${when}` },
           { onConflict: "company_id,dedupe_key", ignoreDuplicates: true },
         );
       }
