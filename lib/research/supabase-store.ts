@@ -265,6 +265,66 @@ export class SupabaseResearchStore implements ResearchStore {
     this.must(await this.admin.from("notifications").upsert(rows, { onConflict: "recipient_user_id,dedupe_key", ignoreDuplicates: true }), "notify");
   }
 
+  /** True when an audit row with this action was written in the last `hours`. */
+  async auditedWithin(householdId: string, action: string, hours: number): Promise<boolean> {
+    const { count } = await this.admin.from("audit_events").select("id", { count: "exact", head: true }).eq("household_id", householdId).eq("action", action).gte("created_at", new Date(Date.now() - hours * 3600_000).toISOString());
+    return (count ?? 0) > 0;
+  }
+
+  async importQueued(householdId: string, label: string): Promise<boolean> {
+    const { count } = await this.admin.from("research_imports").select("id", { count: "exact", head: true }).eq("household_id", householdId).eq("label", label);
+    return (count ?? 0) > 0;
+  }
+
+  /**
+   * Companies due a Companies House look (none in the last 7 days), with the
+   * company number if a fact already holds it and the newest allotment recorded.
+   */
+  async companiesForFilingCheck(householdId: string, limit: number) {
+    const companies = this.must(await this.admin.from("companies").select("id, name, legal_name").eq("household_id", householdId).eq("is_demo", false).returns<{ id: string; name: string; legal_name: string | null }[]>(), "companies") ?? [];
+    const ids = companies.map((c) => c.id);
+    if (!ids.length) return [];
+    const [recent, facts] = await Promise.all([
+      this.admin.from("audit_events").select("object_id").eq("household_id", householdId).eq("action", "companies_house.check").gte("created_at", new Date(Date.now() - 7 * 86_400_000).toISOString()).returns<{ object_id: string }[]>(),
+      this.admin.from("company_facts").select("company_id, field_key, value_jsonb").in("company_id", ids).in("field_key", ["company_number", "latest_sh01"]).is("effective_to", null).returns<{ company_id: string; field_key: string; value_jsonb: unknown }[]>(),
+    ]);
+    const skip = new Set((recent.data ?? []).map((r) => r.object_id));
+    const factOf = (id: string, key: string) => {
+      const v = (facts.data ?? []).find((f) => f.company_id === id && f.field_key === key)?.value_jsonb;
+      return typeof v === "string" ? v : v && typeof v === "object" && "value" in v ? String((v as { value: unknown }).value) : null;
+    };
+    return companies
+      .filter((c) => !skip.has(c.id))
+      .slice(0, limit)
+      .map((c) => ({ companyId: c.id, name: c.name, legalName: c.legal_name, companyNumber: factOf(c.id, "company_number")?.match(/[0-9A-Z]{8}/)?.[0] ?? null, lastSh01: factOf(c.id, "latest_sh01") }));
+  }
+
+  /** Records a company number and/or a newer share allotment as facts, with the filing-history page as the source and a timeline entry. */
+  async recordFiling(input: { householdId: string; companyId: string; companyName: string; companyNumber: string; url: string; allotment: { allottedOn: string | null; date: string; capital: string | null } | null; newAllotment: boolean }) {
+    const now = new Date().toISOString();
+    const existing = this.must(await this.admin.from("sources").select("id").eq("household_id", input.householdId).eq("canonical_url", input.url).maybeSingle<{ id: string }>(), "source");
+    let sourceId = existing?.id ?? null;
+    if (!sourceId) {
+      const ins = this.must(await this.admin.from("sources").insert({ household_id: input.householdId, company_id: input.companyId, canonical_url: input.url, title: `${input.companyName}: filing history (Companies House)`, publisher: "Companies House", source_type: "filing", retrieved_at: now, trust_tier: "primary", claim_type: "filing" }).select("id").single<{ id: string }>(), "source insert");
+      sourceId = ins.id;
+    }
+    const setFact = async (key: string, label: string, value: string, asOf: string | null) => {
+      await this.admin.from("company_facts").update({ effective_to: now }).eq("company_id", input.companyId).eq("field_key", key).is("effective_to", null);
+      this.must(await this.admin.from("company_facts").insert({ company_id: input.companyId, field_key: key, label, value_jsonb: value, as_of_date: asOf, evidence_status: "verified_independent", source_id: sourceId }), "fact");
+    };
+    await setFact("company_number", "Company number", input.companyNumber, null);
+    if (input.allotment) {
+      const when = input.allotment.allottedOn ?? input.allotment.date;
+      await setFact("latest_sh01", "Latest share allotment (SH01)", `${when}${input.allotment.capital ? ` · capital ${input.allotment.capital}` : ""}`, when);
+      if (input.newAllotment) {
+        await this.admin.from("company_updates").upsert(
+          { company_id: input.companyId, update_type: "funding", headline: "Shares allotted (Companies House)", summary: `An SH01 statement of capital was filed for an allotment of shares on ${new Date(when).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}${input.allotment.capital ? ` (nominal capital now ${input.allotment.capital})` : ""}. A round, or a tranche of one, has completed.`, materiality: "high", source_id: sourceId, effective_at: `${when}T00:00:00Z`, detected_at: now, dedupe_key: `sh01:${when}` },
+          { onConflict: "company_id,dedupe_key", ignoreDuplicates: true },
+        );
+      }
+    }
+  }
+
   async logReview(input: { householdId: string; runId: string; kind: string; detail: unknown }) {
     this.must(await this.admin.from("audit_events").insert({ household_id: input.householdId, actor_type: "research", actor_id: input.runId, action: `review.${input.kind}`, object_type: "research_run", object_id: input.runId, after_jsonb: input.detail }), "review log");
   }

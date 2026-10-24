@@ -70,7 +70,7 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
   const householdId = householdFromEnv();
   const { createSupabaseResearchStore } = await import("./supabase-store");
   const store = createSupabaseResearchStore();
-  const report: { advanced: { runId: string; status: string }[]; failedStale: string[]; started: PipelineResult | null; localDate: string; imagery: number; poolQueued: string[] } = { advanced: [], failedStale: [], started: null, localDate: londonDate(now), imagery: 0, poolQueued: [] };
+  const report: { advanced: { runId: string; status: string }[]; failedStale: string[]; started: PipelineResult | null; localDate: string; imagery: number; poolQueued: string[]; techround: string[]; filings: string[] } = { advanced: [], failedStale: [], started: null, localDate: londonDate(now), imagery: 0, poolQueued: [], techround: [], filings: [] };
 
   let importsProcessed = 0;
   for (const run of await store.listActiveRuns(householdId)) {
@@ -89,6 +89,8 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
   }
 
   report.imagery = await backfillImagery(store, householdId, now).catch(() => 0);
+  report.techround = await pollTechRoundFeed(store, householdId, now).catch((e: unknown) => [`error: ${e instanceof Error ? e.message : String(e)}`]);
+  report.filings = await checkCompaniesHouse(store, householdId, now).catch((e: unknown) => [`error: ${e instanceof Error ? e.message : String(e)}`]);
   // Research batches shipped with the app are queued once, then processed like uploads.
   report.poolQueued = await import("./queue-import").then((m) => m.queueBundledPool(householdId)).catch((e: unknown) => [`error: ${e instanceof Error ? e.message : String(e)}`]);
 
@@ -104,6 +106,51 @@ export async function tickResearch(opts: { now?: Date; forceStart?: boolean; fir
     report.started = await beginResearch({ runKind: "scheduled", triggeredBy: null, householdId, updateOnly: (config.preferences.dailyMode ?? "update_only") === "update_only" });
   }
   return report;
+}
+
+/**
+ * Once a day, TechRound's weekly crowdfunding lists (the readable source of
+ * live Crowdcube / Republic Europe campaigns) are queued as research batches.
+ */
+async function pollTechRoundFeed(store: import("./supabase-store").SupabaseResearchStore, householdId: string, now: Date): Promise<string[]> {
+  if (await store.auditedWithin(householdId, "techround.poll", 23)) return [];
+  const [{ pollTechRound }, { safeFetch }, { queueImport }] = await Promise.all([import("./techround"), import("./fetch"), import("./queue-import")]);
+  const queued = await pollTechRound({
+    householdId,
+    fetcher: safeFetch,
+    now,
+    alreadyQueued: (label) => store.importQueued(householdId, label),
+    queue: async (label, payload) => (await queueImport({ householdId, label, raw: payload, triggeredBy: null })).ok,
+  });
+  await store.audit({ householdId, runId: `techround:${now.toISOString().slice(0, 10)}`, action: "techround.poll", objectType: "feed", objectId: "techround", after: { queued } });
+  return queued;
+}
+
+/**
+ * A few companies per heartbeat get their Companies House filing history
+ * read (each at most weekly): the company number is recorded, and a new SH01
+ * share allotment becomes a timeline entry, since it is independent proof
+ * that a round completed.
+ */
+async function checkCompaniesHouse(store: import("./supabase-store").SupabaseResearchStore, householdId: string, now: Date, limit = 3): Promise<string[]> {
+  const [{ findCompanyNumber, latestAllotment, filingHistoryUrl }, { safeFetch }] = await Promise.all([import("./companies-house"), import("./fetch")]);
+  const done: string[] = [];
+  for (const c of await store.companiesForFilingCheck(householdId, limit)) {
+    const found = c.companyNumber ? { number: c.companyNumber, name: c.name } : await findCompanyNumber([c.legalName ?? "", c.name], safeFetch);
+    let note = "no match";
+    if (found) {
+      const hist = await latestAllotment(found.number, safeFetch);
+      if (hist) {
+        const when = hist.allotment?.allottedOn ?? hist.allotment?.date ?? null;
+        const newAllotment = Boolean(when && (!c.lastSh01 || !c.lastSh01.startsWith(when)));
+        await store.recordFiling({ householdId, companyId: c.companyId, companyName: c.name, companyNumber: found.number, url: filingHistoryUrl(found.number), allotment: hist.allotment, newAllotment });
+        note = `${found.number}${when ? ` sh01 ${when}${newAllotment ? " (new)" : ""}` : " no allotments"}`;
+      } else note = `${found.number} (history unreadable)`;
+    }
+    await store.audit({ householdId, runId: `companies_house:${now.toISOString().slice(0, 10)}`, action: "companies_house.check", objectType: "company", objectId: c.companyId, after: { note } });
+    done.push(`${c.name}: ${note}`);
+  }
+  return done;
 }
 
 /**

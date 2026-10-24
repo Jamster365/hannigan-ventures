@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+    
+    
+    <link rel="preconnect" href="https://use.typekit.net">
+    <!-- <script src="/wp-content/themes/techround-theme-child/assets/js/redirect.js"></script> -->
+            <script data-ad-client="ca-pub-4147988245985195" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="profile" href="https://gmpg.org/xfn/11">
+    <link rel="pingback" href="https://techround.co.uk/xmlrpc.php">
+    <link href="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/css/tailwind.min.css" rel="stylesheet">
+    <style type="text/css">@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:200;src:url(/cf-fonts/s/source-sans-pro/5.2.4/greek-ext/200/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:200;src:url(/cf-fonts/s/source-sans-pro/5.2.4/latin-ext/200/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:200;src:url(/cf-fonts/s/source-sans-pro/5.2.4/vietnamese/200/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:200;src:url(/cf-fonts/s/source-sans-pro/5.2.4/cyrillic/200/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:200;src:url(/cf-fonts/s/source-sans-pro/5.2.4/cyrillic-ext/200/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:200;src:url(/cf-fonts/s/source-sans-pro/5.2.4/latin/200/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:200;src:url(/cf-fonts/s/source-sans-pro/5.2.4/greek/200/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:400;src:url(/cf-fonts/s/source-sans-pro/5.2.4/cyrillic/400/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:400;src:url(/cf-fonts/s/source-sans-pro/5.2.4/vietnamese/400/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:400;src:url(/cf-fonts/s/source-sans-pro/5.2.4/latin-ext/400/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:400;src:url(/cf-fonts/s/source-sans-pro/5.2.4/greek/400/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:400;src:url(/cf-fonts/s/source-sans-pro/5.2.4/greek-ext/400/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:400;src:url(/cf-fonts/s/source-sans-pro/5.2.4/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:400;src:url(/cf-fonts/s/source-sans-pro/5.2.4/cyrillic-ext/400/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:700;src:url(/cf-fonts/s/source-sans-pro/5.2.4/vietnamese/700/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:700;src:url(/cf-fonts/s/source-sans-pro/5.2.4/latin-ext/700/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:700;src:url(/cf-fonts/s/source-sans-pro/5.2.4/cyrillic-ext/700/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:700;src:url(/cf-fonts/s/source-sans-pro/5.2.4/greek/700/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:700;src:url(/cf-fonts/s/source-sans-pro/5.2.4/cyrillic/700/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:700;src:url(/cf-fonts/s/source-sans-pro/5.2.4/latin/700/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Source Sans Pro';font-style:normal;font-weight:700;src:url(/cf-fonts/s/source-sans-pro/5.2.4/greek-ext/700/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}</style>
+    <link rel="stylesheet" href="https://use.typekit.net/zyc6mwr.css">
+    <meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+
+	<!-- This site is optimized with the Yoast SEO plugin v28.7 - https://yoast.com/product/yoast-seo-wordpress/ -->
+	<title>Meet The Startups Crowdfunding w/c 12.10.2026 - TechRound</title>
+	<link rel="canonical" href="https://techround.co.uk/startups/meet-the-startups-crowdfunding-w-c-12-10-2026/" />
+	<meta property="og:locale" content="en_GB" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="Meet The Startups Crowdfunding w/c 12.10.2026 - TechRound" />
+	<meta property="og:description" content="This article does not constitute financial advice and is designed for information purposes only. It&#8217;s a new week with a..." />
+	<meta property="og:url" content="https://techround.co.uk/startups/meet-the-startups-crowdfunding-w-c-12-10-2026/" />
+	<meta property="og:site_name" content="TechRound" />
+	<meta property="article:published_time" content="2026-10-14T11:00:20+00:00" />
+	<meta property="og:image" content="https://techround.co.uk/wp-content/uploads/2026/10/startups-crowdfunding-wc-12.10.2026-scaled-1.jpg" />
+	<meta property="og:image:width" content="1920" />
+	<meta property="og:image:height" content="1080" />
+	<meta property="og:image:type" content="image/jpeg" />
+	<meta name="author" content="Micayla de Fleuriot" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:creator" content="@TechRoundUK" />
+	<meta name="twitter:site" content="@TechRoundUK" />
+	<meta name="twitter:label1" content="Written by" />
+	<meta name="twitter:data1" content="Micayla de Fleuriot" />
+	<meta name="twitter:label2" content="Estimated reading time" />
+	<meta name="twitter:data2" content="5 minutes" />
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https:\/\/schema.org","@graph":[{"@type":"Article","@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/#article","isPartOf":{"@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/"},"author":{"name":"Micayla de Fleuriot","@id":"https:\/\/techround.co.uk\/#\/schema\/person\/9a13fd0dbb5486febf8882ea7cceb9d1"},"headline":"Meet The Startups Crowdfunding w\/c 12.10.2026","datePublished":"2026-10-14T11:00:20+00:00","mainEntityOfPage":{"@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/"},"wordCount":732,"publisher":{"@id":"https:\/\/techround.co.uk\/#organization"},"image":{"@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/#primaryimage"},"thumbnailUrl":"https:\/\/techround.co.uk\/wp-content\/uploads\/2026\/10\/startups-crowdfunding-wc-12.10.2026-scaled-1.jpg","articleSection":["Startups"],"inLanguage":"en-GB"},{"@type":"WebPage","@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/","url":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/","name":"Meet The Startups Crowdfunding w\/c 12.10.2026 - TechRound","isPartOf":{"@id":"https:\/\/techround.co.uk\/#website"},"primaryImageOfPage":{"@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/#primaryimage"},"image":{"@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/#primaryimage"},"thumbnailUrl":"https:\/\/techround.co.uk\/wp-content\/uploads\/2026\/10\/startups-crowdfunding-wc-12.10.2026-scaled-1.jpg","datePublished":"2026-10-14T11:00:20+00:00","breadcrumb":{"@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/#breadcrumb"},"inLanguage":"en-GB","potentialAction":[{"@type":"ReadAction","target":["https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/"]}]},{"@type":"ImageObject","inLanguage":"en-GB","@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/#primaryimage","url":"https:\/\/techround.co.uk\/wp-content\/uploads\/2026\/10\/startups-crowdfunding-wc-12.10.2026-scaled-1.jpg","contentUrl":"https:\/\/techround.co.uk\/wp-content\/uploads\/2026\/10\/startups-crowdfunding-wc-12.10.2026-scaled-1.jpg","width":1920,"height":1080},{"@type":"BreadcrumbList","@id":"https:\/\/techround.co.uk\/startups\/meet-the-startups-crowdfunding-w-c-12-10-2026\/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https:\/\/techround.co.uk\/"},{"@type":"ListItem","position":2,"name":"Meet The Startups Crowdfunding w\/c 12.10.2026"}]},{"@type":"WebSite","@id":"https:\/\/techround.co.uk\/#website","url":"https:\/\/techround.co.uk\/","name":"TechRound","description":"Startup News UK and Tech News UK","publisher":{"@id":"https:\/\/techround.co.uk\/#organization"},"potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/techround.co.uk\/?s={search_term_string}"},"query-input":{"@type":"PropertyValueSpecification","valueRequired":true,"valueName":"search_term_string"}}],"inLanguage":"en-GB"},{"@type":"Organization","@id":"https:\/\/techround.co.uk\/#organization","name":"TechRound","url":"https:\/\/techround.co.uk\/","logo":{"@type":"ImageObject","inLanguage":"en-GB","@id":"https:\/\/techround.co.uk\/#\/schema\/logo\/image\/","url":"https:\/\/techround.co.uk\/wp-content\/uploads\/2023\/04\/techround-logo-alt-1.png","contentUrl":"https:\/\/techround.co.uk\/wp-content\/uploads\/2023\/04\/techround-logo-alt-1.png","width":464,"height":108,"caption":"TechRound"},"image":{"@id":"https:\/\/techround.co.uk\/#\/schema\/logo\/image\/"},"sameAs":["https:\/\/x.com\/TechRoundUK","https:\/\/www.linkedin.com\/company\/techround\/"]},{"@type":"Person","@id":"https:\/\/techround.co.uk\/#\/schema\/person\/9a13fd0dbb5486febf8882ea7cceb9d1","name":"Micayla de Fleuriot","image":{"@type":"ImageObject","inLanguage":"en-GB","@id":"https:\/\/secure.gravatar.com\/avatar\/8c25ef13309a878c24b746efd72087d1a23a899f29fc439a233a328d2a3c7bf7?s=96&d=mm&r=g","url":"https:\/\/secure.gravatar.com\/avatar\/8c25ef13309a878c24b746efd72087d1a23a899f29fc439a233a328d2a3c7bf7?s=96&d=mm&r=g","contentUrl":"https:\/\/secure.gravatar.com\/avatar\/8c25ef13309a878c24b746efd72087d1a23a899f29fc439a233a328d2a3c7bf7?s=96&d=mm&r=g","caption":"Micayla de Fleuriot"},"url":"https:\/\/techround.co.uk\/author\/micayla\/"}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<link rel='dns-prefetch' href='//www.googletagmanager.com' />
+<link rel='dns-prefetch' href='//use.fontawesome.com' />
+<link rel='dns-prefetch' href='//fonts.bunny.net' />
+<link rel='dns-prefetch' href='//pagead2.googlesyndication.com' />
+<link rel="alternate" type="application/rss+xml" title="TechRound &raquo; Feed" href="https://techround.co.uk/feed/" />
+<link rel="alternate" type="application/rss+xml" title="TechRound &raquo; Comments Feed" href="https://techround.co.uk/comments/feed/" />
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="https://techround.co.uk/wp-json/oembed/1.0/embed?url=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026%2F" />
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="https://techround.co.uk/wp-json/oembed/1.0/embed?url=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026%2F&#038;format=xml" />
+<style id="wp-img-auto-sizes-contain-inline-css">
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<style id="wp-emoji-styles-inline-css">
+
+	img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}
+/*# sourceURL=wp-emoji-styles-inline-css */
+</style>
+
+
+<link rel='stylesheet' id='dashicons-css' href='https://techround.co.uk/wp-includes/css/dashicons.min.css?ver=7.1.3' media='all' />
+<link rel='stylesheet' id='theme-my-login-css' href='https://techround.co.uk/wp-content/plugins/theme-my-login/assets/styles/theme-my-login.min.css?ver=7.3.1' media='all' />
+<link rel='stylesheet' id='wp-pagenavi-css' href='https://techround.co.uk/wp-content/plugins/wp-pagenavi/css/wp-pagenavi.css?ver=3.0.1' media='all' />
+<link rel='stylesheet' id='mc4wp-form-themes-css' href='https://techround.co.uk/wp-content/plugins/mailchimp-for-wp/assets/css/form-themes.css?ver=4.14.1' media='all' />
+<link rel='stylesheet' id='wp-bootstrap-starter-bootstrap-css-css' href='https://techround.co.uk/wp-content/themes/techround-theme/inc/assets/css/bootstrap.css?ver=7.1.3' media='all' />
+<link rel='stylesheet' id='wp-bootstrap-pro-fontawesome-cdn-css' href='https://use.fontawesome.com/releases/v5.1.0/css/all.css?ver=7.1.3' media='all' />
+<link rel='stylesheet' id='wp-bootstrap-starter-style-css' href='https://techround.co.uk/wp-content/themes/techround-theme-child/style.css?ver=6.3.5' media='all' />
+<link rel='stylesheet' id='wp-bootstrap-starter-journal-css' href='https://techround.co.uk/wp-content/themes/techround-theme/inc/assets/css/presets/theme-option/journal.css?ver=7.1.3' media='all' />
+<link rel='stylesheet' id='latest-posts-style-css' href='https://techround.co.uk/wp-content/plugins/latest-posts/assets/css/style.css?ver=1.4.5' media='all' />
+<link rel='stylesheet' id='custom-css-0-css' href='https://techround.co.uk/wp-content/themes/techround-theme-child/assets/css/swiper.min.css?ver=1780576844' media='all' />
+<link rel='stylesheet' id='custom-css-1-css' href='https://techround.co.uk/wp-content/themes/techround-theme-child/assets/css/tinyslider.css?ver=1780576845' media='all' />
+<link rel='stylesheet' id='custom-css-2-css' href='https://techround.co.uk/wp-content/themes/techround-theme-child/assets/css/custom-new.css?ver=1783637356' media='all' />
+<link rel='stylesheet' id='custom-css-3-css' href='https://techround.co.uk/wp-content/themes/techround-theme-child/assets/css/custom-responsive-new.css?ver=1780576844' media='all' />
+<link rel='stylesheet' id='custom-css-4-css' href='https://techround.co.uk/wp-content/themes/techround-theme-child/assets/css/animate.css?ver=1780576845' media='all' />
+<link rel='stylesheet' id='custom-css-5-css' href='https://techround.co.uk/wp-content/themes/techround-theme-child/assets/css/techround.css?ver=1780576844' media='all' />
+<style id="hustle_inline_styles_front-inline-css">
+.hustle-ui.module_id_22 .hustle-popup-content {max-width: 800px;} .hustle-ui.module_id_22  {padding-right: 15px;padding-left: 15px;}.hustle-ui.module_id_22  .hustle-popup-content .hustle-info,.hustle-ui.module_id_22  .hustle-popup-content .hustle-optin {padding-top: 15px;padding-bottom: 15px;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22  {padding-right: 15px;padding-left: 15px;}.hustle-ui:not(.hustle-size--small).module_id_22  .hustle-popup-content .hustle-info,.hustle-ui:not(.hustle-size--small).module_id_22  .hustle-popup-content .hustle-optin {padding-top: 15px;padding-bottom: 15px;}} .hustle-ui.module_id_22 .hustle-layout {margin: 0px 0px 0px 0px;padding: 0px 0px 0px 0px;border-width: 0px 0px 0px 0px;border-style: solid;border-color: rgba(0,0,0,0);border-radius: 0px 0px 0px 0px;overflow: hidden;background-color: #ffffff;-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout {margin: 0px 0px 0px 0px;padding: 0px 0px 0px 0px;border-width: 0px 0px 0px 0px;border-style: solid;border-radius: 0px 0px 0px 0px;-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);}} .hustle-ui.module_id_22 .hustle-layout .hustle-layout-content {padding: 40px 40px 40px 40px;border-width: 0px 0px 0px 0px;border-style: solid;border-radius: 0px 0px 0px 0px;border-color: rgba(0,0,0,0);background-color: rgba(0,0,0,0);-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);}.hustle-ui.module_id_22 .hustle-main-wrapper {position: relative;padding:32px 0 0;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-layout-content {padding: 96px 50px 96px 50px;border-width: 0px 0px 0px 0px;border-style: solid;border-radius: 0px 0px 0px 0px;-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);}}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-main-wrapper {padding:32px 0 0;}}.hustle-ui.module_id_22 .hustle-layout .hustle-image {background-color: #ffffff;}.hustle-ui.module_id_22 .hustle-layout .hustle-image {height: 275px;overflow: hidden;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-image {max-width: 50%;height: auto;min-height: 0;-webkit-box-flex: 0;-ms-flex: 0 0 50%;flex: 0 0 50%;}}.hustle-ui.module_id_22 .hustle-layout .hustle-image img {width: 100%;max-width: unset;height: 100%;display: block;position: absolute;object-fit: cover;-ms-interpolation-mode: bicubic;}@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {.hustle-ui.module_id_22 .hustle-layout .hustle-image img {width: auto;max-width: unset;height: auto;max-height: unset;}}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-image img {width: 100%;max-width: unset;height: 100%;display: block;position: absolute;object-fit: cover;-ms-interpolation-mode: bicubic;}}@media all and (min-width: 783px) and (-ms-high-contrast: none), (-ms-high-contrast: active) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-image img {width: auto;max-width: unset;height: auto;max-height: unset;}}.hustle-ui.module_id_22 .hustle-layout .hustle-image img {object-position: center -75px;-o-object-position: center -75px;}@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {.hustle-ui.module_id_22 .hustle-layout .hustle-image img {left: 50%;}}@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {.hustle-ui.module_id_22 .hustle-layout .hustle-image img {transform: translateX(-50%);-ms-transform: translateX(-50%);-webkit-transform: translateX(-50%);}}@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {.hustle-ui.module_id_22 .hustle-layout .hustle-image img {top: -75px;}}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-image img {object-position: center center;-o-object-position: center center;}}@media all and (min-width: 783px) and (-ms-high-contrast: none), (-ms-high-contrast: active) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-image img {left: 50%;right: auto;}}@media all and (min-width: 783px) and (-ms-high-contrast: none), (-ms-high-contrast: active) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-image img {transform: translate(-50%,-50%);-ms-transform: translate(-50%,-50%);-webkit-transform: translate(-50%,-50%);}}@media all and (min-width: 783px) and (-ms-high-contrast: none), (-ms-high-contrast: active) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-image img {top: 50%;bottom: auto;}}@media all and (min-width: 783px) and (-ms-high-contrast: none), (-ms-high-contrast: active) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-image img {transform: translate(-50%,-50%);-ms-transform: translate(-50%,-50%);-webkit-transform: translate(-50%,-50%);}}  .hustle-ui.module_id_22 .hustle-layout .hustle-content {margin: 0px 0px 0px 0px;padding: 40px 40px 40px 40px;border-width: 0px 0px 0px 0px;border-style: solid;border-radius: 0px 0px 0px 0px;border-color: rgba(0,0,0,0);background-color: rgba(0,0,0,0);-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);}.hustle-ui.module_id_22 .hustle-layout .hustle-content .hustle-content-wrap {padding: 40px 0 40px 0;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-content {margin: 0px 0px 0px 0px;padding: 120px 50px 120px 50px;border-width: 0px 0px 0px 0px;border-style: solid;border-radius: 0px 0px 0px 0px;-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-content .hustle-content-wrap {padding: 120px 0 120px 0;}} .hustle-ui.module_id_22 .hustle-layout .hustle-title {display: block;margin: 0px 0px 10px 0px;padding: 0px 0px 0px 0px;border-width: 0px 0px 0px 0px;border-style: solid;border-color: rgba(0,0,0,0);border-radius: 0px 0px 0px 0px;background-color: rgba(0,0,0,0);box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);color: #330000;font: 500 14px/16px Roboto;font-style: normal;letter-spacing: 1.5px;text-transform: uppercase;text-decoration: none;text-align: left;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-title {margin: 0px 0px 10px 0px;padding: 0px 0px 0px 0px;border-width: 0px 0px 0px 0px;border-style: solid;border-radius: 0px 0px 0px 0px;box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);font: 500 14px/16px Roboto;font-style: normal;letter-spacing: 1.5px;text-transform: uppercase;text-decoration: none;text-align: left;}} .hustle-ui.module_id_22 .hustle-layout .hustle-subtitle {display: block;margin: 0px 0px 0px 0px;padding: 0px 0px 0px 0px;border-width: 0px 0px 0px 0px;border-style: solid;border-color: rgba(0,0,0,0);border-radius: 0px 0px 0px 0px;background-color: rgba(0,0,0,0);box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);color: #330000;font: 700 36px/46px Rubik;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;text-align: left;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-subtitle {margin: 0px 0px 0px 0px;padding: 0px 0px 0px 0px;border-width: 0px 0px 0px 0px;border-style: solid;border-radius: 0px 0px 0px 0px;box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);font: 700 36px/46px Rubik;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;text-align: left;}} .hustle-ui.module_id_22 .hustle-layout .hustle-group-content {margin: 20px 0px 0px 0px;padding: 0px 0px 0px 0px;border-color: rgba(0,0,0,0);border-width: 0px 0px 0px 0px;border-style: solid;color: #000000;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content b,.hustle-ui.module_id_22 .hustle-layout .hustle-group-content strong {font-weight: bold;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content a,.hustle-ui.module_id_22 .hustle-layout .hustle-group-content a:visited {color: #333333;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content a:hover {color: #2DA194;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content a:focus,.hustle-ui.module_id_22 .hustle-layout .hustle-group-content a:active {color: #2DA194;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content {margin: 20px 0px 0px 0px;padding: 0px 0px 0px 0px;border-width: 0px 0px 0px 0px;border-style: solid;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content {color: #000000;font-size: 16px;line-height: 26px;font-family: Roboto;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content {font-size: 16px;line-height: 26px;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content p:not([class*="forminator-"]) {margin: 0 0 10px;color: #000000;font: normal 16px/26px Roboto;font-style: normal;letter-spacing: -0.25px;text-transform: none;text-decoration: none;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content p:not([class*="forminator-"]):last-child {margin-bottom: 0;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content p:not([class*="forminator-"]) {margin: 0 0 10px;font: normal 16px/26px Roboto;font-style: normal;letter-spacing: -0.25px;text-transform: none;text-decoration: none;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content p:not([class*="forminator-"]):last-child {margin-bottom: 0;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h1:not([class*="forminator-"]) {margin: 0 0 10px;color: #000000;font: 700 28px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h1:not([class*="forminator-"]):last-child {margin-bottom: 0;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h1:not([class*="forminator-"]) {margin: 0 0 10px;font: 700 28px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h1:not([class*="forminator-"]):last-child {margin-bottom: 0;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h2:not([class*="forminator-"]) {margin: 0 0 10px;color: #000000;font: 700 22px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h2:not([class*="forminator-"]):last-child {margin-bottom: 0;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h2:not([class*="forminator-"]) {margin: 0 0 10px;font: 700 22px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h2:not([class*="forminator-"]):last-child {margin-bottom: 0;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h3:not([class*="forminator-"]) {margin: 0 0 10px;color: #000000;font: 700 18px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h3:not([class*="forminator-"]):last-child {margin-bottom: 0;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h3:not([class*="forminator-"]) {margin: 0 0 10px;font: 700 18px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h3:not([class*="forminator-"]):last-child {margin-bottom: 0;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h4:not([class*="forminator-"]) {margin: 0 0 10px;color: #000000;font: 700 16px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h4:not([class*="forminator-"]):last-child {margin-bottom: 0;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h4:not([class*="forminator-"]) {margin: 0 0 10px;font: 700 16px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h4:not([class*="forminator-"]):last-child {margin-bottom: 0;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h5:not([class*="forminator-"]) {margin: 0 0 10px;color: #000000;font: 700 14px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h5:not([class*="forminator-"]):last-child {margin-bottom: 0;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h5:not([class*="forminator-"]) {margin: 0 0 10px;font: 700 14px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h5:not([class*="forminator-"]):last-child {margin-bottom: 0;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h6:not([class*="forminator-"]) {margin: 0 0 10px;color: #000000;font: 700 12px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: uppercase;text-decoration: none;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content h6:not([class*="forminator-"]):last-child {margin-bottom: 0;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h6:not([class*="forminator-"]) {margin: 0 0 10px;font: 700 12px/1.4em Roboto;font-style: normal;letter-spacing: 0px;text-transform: uppercase;text-decoration: none;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content h6:not([class*="forminator-"]):last-child {margin-bottom: 0;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ol:not([class*="forminator-"]),.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ul:not([class*="forminator-"]) {margin: 0 0 10px;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ol:not([class*="forminator-"]):last-child,.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ul:not([class*="forminator-"]):last-child {margin-bottom: 0;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content li:not([class*="forminator-"]) {margin: 0 0 5px;display: flex;align-items: flex-start;color: #000000;font: 400 14px/1.45em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content li:not([class*="forminator-"]):last-child {margin-bottom: 0;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ol:not([class*="forminator-"]) li:before {color: #ADB5B7;flex-shrink: 0;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ul:not([class*="forminator-"]) li:before {color: #ADB5B7;content: "\2022";font-size: 16px;flex-shrink: 0;}@media screen and (min-width: 783px) {.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ol:not([class*="forminator-"]),.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ul:not([class*="forminator-"]) {margin: 0 0 20px;}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ol:not([class*="forminator-"]):last-child,.hustle-ui.module_id_22 .hustle-layout .hustle-group-content ul:not([class*="forminator-"]):last-child {margin: 0;}}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content li:not([class*="forminator-"]) {margin: 0 0 5px;font: 400 14px/1.45em Roboto;font-style: normal;letter-spacing: 0px;text-transform: none;text-decoration: none;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-group-content li:not([class*="forminator-"]):last-child {margin-bottom: 0;}}.hustle-ui.module_id_22 .hustle-layout .hustle-group-content blockquote {margin-right: 0;margin-left: 0;} .hustle-ui.module_id_22 .hustle-layout .hustle-cta-container {margin: 20px 0px 0px 0px;padding: 0px 0px 0px 0px;border-color: rgba(0,0,0,0);border-width: 0px 0px 0px 0px;border-style: solid;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-cta-container {margin: 20px 0px 0px 0px;padding: 0px 0px 0px 0px;border-width: 0px 0px 0px 0px;border-style: solid;}} .hustle-ui.module_id_22 .hustle-layout a.hustle-button-cta {margin: 0;padding: 9px 9px 9px 9px;border-width: 2px 2px 2px 2px;border-style: solid;border-color: #43f2d0;border-radius: 0px 0px 0px 0px;background-color: #43f2d0;-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);color: #FFFFFF;font: 700 14px/22px Roboto;font-style: normal;letter-spacing: 0.5px;text-transform: uppercase;text-decoration: none;text-align: center;}.hustle-ui.module_id_22 .hustle-layout a.hustle-button-cta:hover {border-color: #333333;background-color: #333333;color: #FFFFFF;}.hustle-ui.module_id_22 .hustle-layout a.hustle-button-cta:focus {border-color: #e63946;background-color: #e63946;color: #FFFFFF;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout a.hustle-button-cta {padding: 9px 45px 9px 45px;border-width: 2px 2px 2px 2px;border-style: solid;border-radius: 0px 0px 0px 0px;box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-moz-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);-webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);font: 700 14px/22px Roboto;font-style: normal;letter-spacing: 0.5px;text-transform: uppercase;text-decoration: none;text-align: center;}} .hustle-ui.module_id_22 .hustle-layout .hustle-cta-container {display: flex;flex-direction: column;}.hustle-ui.module_id_22 .hustle-layout .hustle-cta-container .hustle-button-cta {width: 100%;display: block;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-cta-container {justify-content: left;display: flex;flex-direction: unset;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-layout .hustle-cta-container .hustle-button-cta {width: auto;display: inline-block;}} .hustle-ui.module_id_22 .hustle-nsa-link {margin: 15px 0px 0px 0px;text-align: center;}.hustle-ui.module_id_22 .hustle-nsa-link {font-size: 14px;line-height: 22px;font-family: Roboto;letter-spacing: -0.22px;}.hustle-ui.module_id_22 .hustle-nsa-link a,.hustle-ui.module_id_22 .hustle-nsa-link a:visited {color: #e1e1e1;font-weight: normal;font-style: normal;text-transform: none;text-decoration: none;}.hustle-ui.module_id_22 .hustle-nsa-link a:hover {color: #e1e1e1;}.hustle-ui.module_id_22 .hustle-nsa-link a:focus,.hustle-ui.module_id_22 .hustle-nsa-link a:active {color: #e1e1e1;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-nsa-link {margin: 15px 0px 0px 0px;text-align: center;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-nsa-link {font-size: 14px;line-height: 22px;letter-spacing: -0.22px;}.hustle-ui:not(.hustle-size--small).module_id_22 .hustle-nsa-link a {font-weight: normal;font-style: normal;text-transform: none;text-decoration: none;}}button.hustle-button-close .hustle-icon-close:before {font-size: inherit;}.hustle-ui.module_id_22 button.hustle-button-close {color: #ffffff;background: transparent;border-radius: 0;position: absolute;z-index: 1;display: block;width: 32px;height: 32px;right: 0;left: auto;top: 0;bottom: auto;transform: unset;}.hustle-ui.module_id_22 button.hustle-button-close .hustle-icon-close {font-size: 12px;}.hustle-ui.module_id_22 button.hustle-button-close:hover {color: #ffffff;}.hustle-ui.module_id_22 button.hustle-button-close:focus {color: #ffffff;}@media screen and (min-width: 783px) {.hustle-ui:not(.hustle-size--small).module_id_22 button.hustle-button-close .hustle-icon-close {font-size: 12px;}.hustle-ui:not(.hustle-size--small).module_id_22 button.hustle-button-close {background: transparent;border-radius: 0;display: block;width: 32px;height: 32px;right: 0;left: auto;top: 0;bottom: auto;transform: unset;}}.hustle-ui.module_id_22 .hustle-popup-mask {background-color: rgba(0,0,0,0.75);} .hustle-ui.module_id_22 .hustle-layout .hustle-group-content blockquote {border-left-color: #333333;}@media screen and (min-width: 783px) {.hustle-ui[data-id="4"].hustle-float.hustle-displaying-in-large[data-desktop="true"][data-desktop-positionx="right"] { right: 0px !important }.hustle-ui[data-id="4"].hustle-float.hustle-displaying-in-large[data-desktop="true"][data-desktop-positiony="bottom"] { bottom: 0px !important }}@media screen and (max-width: 782px) {.hustle-ui[data-id="4"].hustle-float.hustle-displaying-in-small[data-mobiles="true"][data-mobiles-positionx="left"] { left: 0px !important }.hustle-ui[data-id="4"].hustle-float.hustle-displaying-in-small[data-mobiles="true"][data-mobiles-positiony="bottom"] { bottom: 0px !important }}.hustle-ui[data-id="4"].hustle-float .hustle-social { background-color: #404040; }.hustle-ui[data-id="4"].hustle-inline .hustle-social { background-color: rgba(146, 158, 170, 1); }
+/*# sourceURL=hustle_inline_styles_front-inline-css */
+</style>
+<link rel='stylesheet' id='hustle_icons-css' href='https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/hustle-ui/css/hustle-icons.min.css?ver=7.8.14' media='all' />
+<link rel='stylesheet' id='hustle_global-css' href='https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/hustle-ui/css/hustle-global.min.css?ver=7.8.14' media='all' />
+<link rel='stylesheet' id='hustle_info-css' href='https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/hustle-ui/css/hustle-info.min.css?ver=7.8.14' media='all' />
+<link rel='stylesheet' id='hustle_popup-css' href='https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/hustle-ui/css/hustle-popup.min.css?ver=7.8.14' media='all' />
+<link rel='stylesheet' id='hustle_social-css' href='https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/hustle-ui/css/hustle-social.min.css?ver=7.8.14' media='all' />
+<link rel='stylesheet' id='hustle_inline-css' href='https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/hustle-ui/css/hustle-inline.min.css?ver=7.8.14' media='all' />
+<link rel='stylesheet' id='hustle_float-css' href='https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/hustle-ui/css/hustle-float.min.css?ver=7.8.14' media='all' />
+<link rel='stylesheet' id='hustle-fonts-css' href='https://fonts.bunny.net/css?family=Roboto:500,regular,700|Rubik:700&#038;display=swap&#038;ver=1.0' media='all' />
+<link rel='stylesheet' id='sib-front-css-css' href='https://techround.co.uk/wp-content/plugins/mailin/css/mailin-front.css?ver=7.1.3' media='all' />
+<link rel='stylesheet' id='wp-add-custom-css-css' href='https://techround.co.uk?display_custom_css=css&#038;ver=7.1.3' media='all' />
+<link rel='stylesheet' id='yarppRelatedCss-css' href='https://techround.co.uk/wp-content/plugins/yet-another-related-posts-plugin/style/related.css?ver=5.30.11' media='all' />
+<script id="jquery-core-js" src="https://techround.co.uk/wp-includes/js/jquery/jquery.min.js?ver=3.7.1"></script>
+<script id="jquery-migrate-js" src="https://techround.co.uk/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1"></script>
+<script id="facebook-signal-js-extra">
+var facebookSignalConfig = {"cookieName":"wc_facebook_signals_state","ajaxUrl":"https://techround.co.uk/wp-admin/admin-ajax.php","signalsAction":"fbpix_set_pixel_signals","signalsNonce":"97632e6aa2"};
+//# sourceURL=facebook-signal-js-extra
+</script>
+<script id="facebook-signal-js" src="https://techround.co.uk/wp-content/plugins/official-facebook-pixel/core/../js/facebook_signal.js?ver=5.2.2"></script>
+
+<!-- Google tag (gtag.js) snippet added by Site Kit -->
+<!-- Google Analytics snippet added by Site Kit -->
+<script id="google_gtagjs-js" src="https://www.googletagmanager.com/gtag/js?id=GT-PJRZQ2C" async></script>
+<script id="google_gtagjs-js-after">
+window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}
+gtag("set","linker",{"domains":["techround.co.uk"]});
+gtag("js", new Date());
+gtag("set", "developer_id.dZTNiMT", true);
+gtag("config", "GT-PJRZQ2C");
+//# sourceURL=google_gtagjs-js-after
+</script>
+<script id="custom-js-0-js" src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/js/jquery.matchHeight.js?ver=1780576844"></script>
+<script id="custom-js-1-js" src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/js/jquery.ajaxq.js?ver=1780576844"></script>
+<script id="custom-js-2-js" src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/js/swiper.min.js?ver=1780576844"></script>
+<script id="custom-js-3-js" src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/js/tinyslider.min.js?ver=1780576844"></script>
+<script id="custom-js-4-js" src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/js/utils.js?ver=1780576845"></script>
+<script id="custom-js-5-js" src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/js/postlist.js?ver=1780576844"></script>
+<script id="custom-js-6-js" src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/js/scrollbar.js?ver=1780576844"></script>
+<script id="custom-js-7-js" src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/js/browser.js?ver=1780576844"></script>
+<script id="custom-js-8-js" src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/js/script.js?ver=1780576844"></script>
+<script id="sib-front-js-js-extra">
+var sibErrMsg = {"invalidMail":"Please fill out valid email address","requiredField":"Please fill out required fields","invalidDateFormat":"Please fill out valid date format","invalidSMSFormat":"Please fill out valid phone number"};
+var ajax_sib_front_object = {"ajax_url":"https://techround.co.uk/wp-admin/admin-ajax.php","ajax_nonce":"cef32087a3","flag_url":"https://techround.co.uk/wp-content/plugins/mailin/img/flags/"};
+//# sourceURL=sib-front-js-js-extra
+</script>
+<script id="sib-front-js-js" src="https://techround.co.uk/wp-content/plugins/mailin/js/mailin-front.js?ver=1783940757"></script>
+<link rel="https://api.w.org/" href="https://techround.co.uk/wp-json/" /><link rel="alternate" title="JSON" type="application/json" href="https://techround.co.uk/wp-json/wp/v2/posts/161365" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://techround.co.uk/xmlrpc.php?rsd" />
+<meta name="generator" content="WordPress 7.1.3" />
+<link rel='shortlink' href='https://techround.co.uk/?p=161365' />
+<meta name="generator" content="Site Kit by Google 1.190.0" /><meta name="og:url" content="https://techround.co.uk/startups/meet-the-startups-crowdfunding-w-c-12-10-2026/" />    <style type="text/css">
+        #page-sub-header { background: #fff; }
+    </style>
+    			<link rel="preload" href="https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/hustle-ui/fonts/hustle-icons-font.woff2" as="font" type="font/woff2" crossorigin>
+		
+<!-- Google AdSense meta tags added by Site Kit -->
+<meta name="google-adsense-platform-account" content="ca-host-pub-2644536267352236">
+<meta name="google-adsense-platform-domain" content="sitekit.withgoogle.com">
+<!-- End Google AdSense meta tags added by Site Kit -->
+
+<!-- Meta Pixel Code -->
+<script type='text/javascript'>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+</script>
+<!-- End Meta Pixel Code -->
+<script type='text/javascript'>FacebookSignal.init({"held":false,"ajaxUrl":"https:\/\/techround.co.uk\/wp-admin\/admin-ajax.php","releaseAction":"fbpix_release_signals","pixelId":"119340973469530","attribution":{},"capig":"1"});FacebookSignal.initPixel("119340973469530",{},{"agent":"wordpress_0-7.1.3-5.2.2","includeCapiIntegration":true});</script><script type='text/javascript'>
+    fbq('track', 'PageView', []);
+  </script>	<style type="text/css">
+			.site-title,
+		.site-description {
+			position: absolute;
+			clip: rect(1px, 1px, 1px, 1px);
+		}
+		</style>
+	
+<!-- Google AdSense snippet added by Site Kit -->
+<script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4147988245985195&#038;host=ca-host-pub-2644536267352236"></script>
+
+<!-- End Google AdSense snippet added by Site Kit -->
+<link rel="icon" href="https://techround.co.uk/wp-content/uploads/2023/04/cropped-techround-logo-alt-1-32x32.png" sizes="32x32" />
+<link rel="icon" href="https://techround.co.uk/wp-content/uploads/2023/04/cropped-techround-logo-alt-1-192x192.png" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://techround.co.uk/wp-content/uploads/2023/04/cropped-techround-logo-alt-1-180x180.png" />
+<meta name="msapplication-TileImage" content="https://techround.co.uk/wp-content/uploads/2023/04/cropped-techround-logo-alt-1-270x270.png" />
+<style id="wp-custom-css">
+input#gform_submit_button_83 {
+    color: black;
+}
+input#input_83_1 {
+    color: black;
+}
+</style>
+<style id="kirki-inline-styles"></style>                <!-- Hotjar Tracking Code for https://techround.co.uk/ -->
+        <script>
+            (function(h, o, t, j, a, r) {
+                h.hj = h.hj || function() {
+                    (h.hj.q = h.hj.q || []).push(arguments)
+                };
+                h._hjSettings = {
+                    hjid: 1731451,
+                    hjsv: 6
+                };
+                a = o.getElementsByTagName('head')[0];
+                r = o.createElement('script');
+                r.async = 1;
+                r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+                a.appendChild(r);
+            })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+        </script>
+        <script data-ad-client="ca-pub-4147988245985195" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <script type="text/javascript">
+            var ajax_url = "https://techround.co.uk/wp-admin/admin-ajax.php";
+        </script>
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TVSVBK7X');</script>
+<!-- End Google Tag Manager -->
+</head>
+
+<body class="wp-singular post-template-default single single-post postid-161365 single-format-standard wp-theme-techround-theme wp-child-theme-techround-theme-child group-blog theme-preset-active">
+    <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVSVBK7X"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+    <div id="page" class="site">
+       <!-- <a class="skip-link screen-reader-text" href="#content">Skip to content</a>-->
+                    <header class="header">
+                <div class="c">
+                    <div class="p_relative">
+                        <div class="logo">
+                            <a href="https://techround.co.uk/">
+                                <img src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/img/techround-logo-2026.png" alt="TechRound" class="primary-logo">
+                                <img src="https://techround.co.uk/wp-content/themes/techround-theme-child/assets/img/techround-logo-2026.png?v=123" alt="TechRound" class="hidden alt-logo">
+                            </a>
+                        </div>
+                        <div class="menu_search">
+                            <div class="p_relative">
+                                <div class="h_menu">
+                                        <div id="main-nav" class="menu-main-menu-container">
+        <ul id="menu-main-menu" class="menu">
+            <li class="menu-item-has-children">
+                    <a class="nav_item" href="https://techround.co.uk/news/">News</a>
+                                            <a class="m_arr"><span class="arr"></span></a>
+                        <div class="sub_wrap">
+                            <div class="c_row flex">
+                                <div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Latest News</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/features/business/">Business</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/features/finance/">Finance</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/category/artificial-intelligence/">Artificial Intelligence</a>
+                                                                                                </div>
+                                    </div><div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Latest News</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/features/guides/">Guides</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/features/startups/">Startups</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/features/tech/">Tech</a>
+                                                                                                </div>
+                                    </div><div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Latest News</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/cryptocurrency/">Cryptocurrency</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/cybersecurity/">Cybersecurity</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/category/interviews/">Interviews</a>
+                                                                                                </div>
+                                    </div>                            </div>
+                        </div>
+                                        </li>
+            <li class="">
+                    <a class="nav_item" href="https://techround.co.uk/competitions/techrounds-competition-schedule-2026/">Competitions 2026</a>
+                                    </li>
+            <li class="menu-item-has-children">
+                    <a class="nav_item" href="https://techround.co.uk/#">Startups</a>
+                                            <a class="m_arr"><span class="arr"></span></a>
+                        <div class="sub_wrap">
+                            <div class="c_row flex">
+                                <div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Startups</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/a-z-startup-profiles/">A-Z Startup Profiles</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/business-grants-and-funding/">Business Grants and Funding</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/self-employed-and-sole-traders/">Self Employed and Sole Traders</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/startups/how-to-launch-a-startup-in-dubai/">Setting Up In Dubai</a>
+                                                                                                </div>
+                                    </div><div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Startups</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/starting-a-business/">Starting a Business</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/tax-and-accounting/">Tax and Accounting</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/legal-hub/">Legals</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/business-bank-accounts/top-10-business-bank-accounts/">Business Banking</a>
+                                                                                                </div>
+                                    </div>                            </div>
+                        </div>
+                                        </li>
+            <li class="menu-item-has-children">
+                    <a class="nav_item" href="https://techround.co.uk/vpns/">VPNs</a>
+                                            <a class="m_arr"><span class="arr"></span></a>
+                        <div class="sub_wrap">
+                            <div class="c_row flex">
+                                <div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">VPNs</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/tech/compare-the-best-vpns-for-work/">VPNs for Work</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/tech/vpns-for-windows-pc/">VPNs for Windows</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/tech/vpns-for-fire-stick/">VPNs for Firestick</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/tech/vpns-for-android/">VPNs for Android</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/tech/best-vpns-for-netflix/">VPNs for Netflix</a>
+                                                                                                </div>
+                                    </div><div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Hosting</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/guides/top-10-web-hosting-services/">Web Hosting</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/guides/top-10-managed-hosting-service-providers/">Managed Hosting</a>
+                                                                                                </div>
+                                    </div><div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Security</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/tech/top-10-antivirus-software/">Top 10 Antivirus Software</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/guides/top-10-anti-malware/">Top 10 Malware Protection</a>
+                                                                                                </div>
+                                    </div>                            </div>
+                        </div>
+                                        </li>
+            <li class="menu-item-has-children">
+                    <a class="nav_item" href="https://techround.co.uk/#">Startup Products and Services</a>
+                                            <a class="m_arr"><span class="arr"></span></a>
+                        <div class="sub_wrap">
+                            <div class="c_row flex">
+                                <div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Startup HR</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/guides/accounting-software-uk/">Top 10 Accounting Software UK</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/business/top-10-business-voip-providers-for-2023/">Top 10 VoIP Phone Systems</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/guides/top-10-human-resources-software-services-uk/">Top 10 Human Resources Software</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/guides/top-10-employee-benefits-schemes-uk/">Top 10 Employee Benefits</a>
+                                                                                                </div>
+                                    </div><div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Startup Efficiency</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/guides/the-top-10-crm-software-solutions/">Top 10 CRM Software Solutions</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/guides/best-payroll-software-uk/">Top 10 Payroll Software</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/business/top-10-it-support-services-london/">Top 10 IT Support Services</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/tech/top-5-electric-point-of-sale-epos-systems/">EPOS Systems</a>
+                                                                                                </div>
+                                    </div><div class="col_3 header_col_sec">
+                                        <div class="inner_wrap">
+                                            <h4 class="inner_wrap_title">Startup Finances</h4>
+                                            <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/business-bank-accounts/top-10-business-bank-accounts/">Business Bank Accounts</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/business/top-10-business-credit-cards-in-the-uk/">Top 10 Business Credit Cards</a>
+                                                        <a class="inner_item header_sub_menu_sec" href="https://techround.co.uk/tech/top-10-credit-card-terminals-and-machines/">Top 10 Credit Card Terminals and Machines</a>
+                                                                                                </div>
+                                    </div>                            </div>
+                        </div>
+                                        </li>
+            <li class="">
+                    <a class="nav_item" href="https://techround.co.uk/about/">About</a>
+                                    </li>
+            <li class="">
+                    <a class="nav_item" href="https://techround.co.uk/contact/">Contact</a>
+                                    </li>
+                    </ul>
+    </div>
+    
+                                   
+                                </div>
+                            
+
+                              
+
+                                <a class="burger_menu_wrap">
+                                    <div class="burger_menu"><span class="lines"></span></div>
+                                </a>
+                            </div>
+                        </div>
+
+                    
+                        <a class="search_button"> 
+                            <div id="openSearch" class="fas fa-search"></div>
+                        </a>
+
+                    
+                    </div>
+
+                </div>
+            </header>
+
+
+         
+            <div id="content" class="site-content">
+            
+
+
+            <!-- Fullscreen Search Overlay -->
+				
+<!-- 				<script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/17389bca463c335f03c5de1c3/0b9e29de9353aada5b458f437.js");</script> -->
+   
+<div id="searchBox">
+  <div class="search-container">
+    <form method="get" action="https://techround.co.uk/" class="search-form">
+      <input type="text" name="s" class="form-control" placeholder="Type to search...">
+      <button type="submit" class="btn btn-primary">Search</button>
+      <button id="closeSearch" type="button" class="close">
+        <i class="fas fa-times"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="w-full pt-16 mb-12 bg-gray-100">
+    <div class="mx-auto c">
+        <div id="header-widget-area" class="chw-widget-area widget-area" role="complementary">
+            <span class="inline-block mt-4 text-gray-300 text-uppercase">Advertisement</span>
+            <div class="widget_text chw-widget"><div class="textwidget custom-html-widget"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script> <!-- Above Content --> <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4147988245985195" data-ad-slot="6095980734" data-ad-format="auto" data-full-width-responsive="true"></ins> <script> (adsbygoogle = window.adsbygoogle || []).push({}); </script> <br></div></div>        </div>
+    </div>
+</div>
+<div class="c">
+    <div class="row">
+        <div class="flex flex-wrap max-w-full">
+            <div class="w-full lg:w-3/4 lg:pr-6">
+                <section id="primary" class="content-area">
+                    <main id="main" class="site-main" role="main">
+
+                        
+<article id="post-161365" class="post-161365 post type-post status-publish format-standard has-post-thumbnail hentry category-startups">
+
+    
+            <div class="mb-8 post-thumbnail-single" style="max-height: none !important; position: relative">
+            
+             
+             <div style="padding-top:28.125%"></div>
+             
+            <div class="relative mx-8" style="z-index: 2;">
+                
+                                        <a href="https://techround.co.uk/category/startups/" class="story-category-transparent">
+                    <span class="inline-block pl-1 pr-2 mb-1 text-base text-white">Startups</span>
+                </a>
+                                <h1 class="mt-2 text-white">Meet The Startups Crowdfunding w/c 12.10.2026</h1>
+                                <div class="pt-2 pb-8 article-author">
+                    <div class="flex items-center">
+                        <div class="single-author-avatar">
+                            <img alt='' src='https://secure.gravatar.com/avatar/8c25ef13309a878c24b746efd72087d1a23a899f29fc439a233a328d2a3c7bf7?s=68&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/8c25ef13309a878c24b746efd72087d1a23a899f29fc439a233a328d2a3c7bf7?s=136&#038;d=mm&#038;r=g 2x' class='avatar avatar-68 photo' height='68' width='68' decoding='async'/>                        </div>
+                        <p class="mt-3 ml-3 text-xs leading-none text-white">
+                            <span class="font-semibold uppercase the-author">Micayla de Fleuriot</span>
+                            <span class="block">October 14, 2026</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="bsz">
+    <div class="bgimage" style="background-image: url(https://techround.co.uk/wp-content/uploads/fly-images/161371/startups-crowdfunding-wc-12.10.2026-scaled-1-1600x900.jpg)"></div>
+    <img src="https://techround.co.uk/wp-content/uploads/fly-images/161371/startups-crowdfunding-wc-12.10.2026-scaled-1-1600x900.jpg" alt="" />
+</div>        </div>
+    
+    
+        <div class="entry-content">
+            
+
+
+
+        <p style="text-align: center;"><em><strong>This article does not constitute financial advice and is designed for information purposes only.</strong></em></p>
+<p>It&#8217;s a new week with a new round of startups pitching themselves to the public. You&#8217;ve got an award-winning CBD soda brand, a marketplace designed for sellers to keep more with 0% seller fees and a platform helping people to <a href="https://techround.co.uk/tech/five-apps-for-mental-health-and-wellbeing/" target="_blank" rel="noopener">understand their wellbeing</a> patterns over time while maintaining privacy.</p>
+<p>There&#8217;s plenty of variety this week and for these startups in particular, crowdfunding is a way to fund their next steps. Aside from the financial aspect, it&#8217;s also a great way for founders to gauge interest and build a following early on.</p>
+<p>So, who are the ambitious startups crowdfunding this week? Here they are.</p>
+<p>&nbsp;</p>
+<h3 style="text-align: center;">1. INTUNE Drinks</h3>
+<p>&nbsp;</p>
+<p><img decoding="async" class="wp-image-161366 aligncenter" src="https://techround.co.uk/wp-content/uploads/2026/10/INTUNE-Drinks-Logo-300x101.png" alt="INTUNE-drinks-logo" width="172" height="58" srcset="https://techround.co.uk/wp-content/uploads/2026/10/INTUNE-Drinks-Logo-300x101.png 300w, https://techround.co.uk/wp-content/uploads/2026/10/INTUNE-Drinks-Logo-730x249.png 730w, https://techround.co.uk/wp-content/uploads/2026/10/INTUNE-Drinks-Logo-180x61.png 180w, https://techround.co.uk/wp-content/uploads/2026/10/INTUNE-Drinks-Logo-660x220.png 660w, https://techround.co.uk/wp-content/uploads/2026/10/INTUNE-Drinks-Logo.png 738w" sizes="(max-width: 172px) 100vw, 172px" /></p>
+<p>&nbsp;</p>
+<p><strong>How much are they raising: </strong>£219,909</p>
+<p><strong>Website: </strong>www.intunedrinks.com</p>
+<p><strong>SEIS/EIS? </strong>Yes, EIS</p>
+<p><strong>About:</strong> INTUNE makes sparkling fruit and botanical sodas infused with CBD, offering something a little different for anyone choosing to skip the alcohol.</p>
+<p>The brand is co-owned by singer Ella Eyre and founded by Hannah Glasson, whose drinks industry experience includes Diageo and Sipsmith. Flavour is a big part of the appeal, with a range that includes sodas to drink on their own and mixers like tonic and orange zest. INTUNE has built its presence through restaurants, pubs and live music events, giving people a chance to try the drinks while they&#8217;re already out.</p>
+<p><strong>Where to invest: </strong>Europe Republic</p>
+<p>&nbsp;</p>
+<h3 style="text-align: center;">2. Café del Mar Spirits</h3>
+<p>&nbsp;</p>
+<p><img decoding="async" class="wp-image-161367 aligncenter" src="https://techround.co.uk/wp-content/uploads/2026/10/Cafe-del-Mar-Spirits-Logo-300x157.webp" alt="Cafe-del-mar-spirits-logo" width="193" height="101" srcset="https://techround.co.uk/wp-content/uploads/2026/10/Cafe-del-Mar-Spirits-Logo-300x157.webp 300w, https://techround.co.uk/wp-content/uploads/2026/10/Cafe-del-Mar-Spirits-Logo-768x402.webp 768w, https://techround.co.uk/wp-content/uploads/2026/10/Cafe-del-Mar-Spirits-Logo-1024x536.webp 1024w, https://techround.co.uk/wp-content/uploads/2026/10/Cafe-del-Mar-Spirits-Logo-153x80.webp 153w, https://techround.co.uk/wp-content/uploads/2026/10/Cafe-del-Mar-Spirits-Logo.webp 1200w" sizes="(max-width: 193px) 100vw, 193px" /></p>
+<p>&nbsp;</p>
+<p><strong>How much are they raising: </strong>N/A</p>
+<p><strong>Website: </strong>www.spirits.cafedelmar.com</p>
+<p><strong>SEIS/EIS? </strong>Yes, EIS</p>
+<p><strong>About:</strong> Café del Mar is a family name familiar to anyone who associates Ibiza with sunset sessions and laidback music. Café del Mar Spirits takes that connection into drinks, with a premium range including signature gin and vodka.</p>
+<p>The ambition is to build an international spirits business around that familiarity. There&#8217;s already a natural introduction for customers who know Café del Mar through its venues or compilation albums, while the drinks gives bars and retailers another way to bring the brand to their customers.</p>
+<p><strong>Where to invest: </strong>Crowdcube</p>
+<p>&nbsp;</p>
+    <div class="centered-articles">
+        <h4>More from Startups</h4>
+        <ul>                <li><a href="https://techround.co.uk/startups/180m-gets-uk-ai-startups-started-who-pays-to-keep-them-here/">£180m Gets UK AI Startups Started, Who Pays to Keep Them Here?</a></li>
+                                <li><a href="https://techround.co.uk/startups/how-is-austria-attracting-entrepreneurs/">How Is Austria Attracting Entrepreneurs?</a></li>
+                                <li><a href="https://techround.co.uk/startups/how-fuel-card-became-go-to-cost-control-tool-uk-startups/">How a Fuel Card Became The Go-To Cost-Control Tool For UK Startups</a></li>
+                                <li><a href="https://techround.co.uk/startups/5-startups-crowdfunding-w-c-19-10-2026/">5 Startups Crowdfunding w/c 19.10.2026</a></li>
+                                <li><a href="https://techround.co.uk/startups/quite-contrary-the-fastest-way-to-scale-a-business-is-to-slow-down-says-john-messer/">Quite Contrary: The Fastest Way To Scale A Business Is To Slow Down, Says John Messer </a></li>
+                                <li><a href="https://techround.co.uk/startups/founder-of-the-week-matt-mcluckie/">Founder Of The Week: Matt McLuckie</a></li>
+                                <li><a href="https://techround.co.uk/startups/top-climate-tech-startups-in-the-uae-to-watch-in-2027/">Top Climate Tech Startups In The UAE To Watch In 2027</a></li>
+                                <li><a href="https://techround.co.uk/startups/startup-of-the-week-snorelab/">Startup of the Week: SnoreLab</a></li>
+                </ul>    </div>
+    
+<p>&nbsp;</p>
+<h3 style="text-align: center;">3. EverRhythm</h3>
+<p>&nbsp;</p>
+<p><img loading="lazy" decoding="async" class="wp-image-161368 aligncenter" src="https://techround.co.uk/wp-content/uploads/2026/10/EverRhythm-Logo.png" alt="EverRhythm-logo" width="130" height="97" srcset="https://techround.co.uk/wp-content/uploads/2026/10/EverRhythm-Logo.png 259w, https://techround.co.uk/wp-content/uploads/2026/10/EverRhythm-Logo-107x80.png 107w" sizes="auto, (max-width: 130px) 100vw, 130px" /></p>
+<p>&nbsp;</p>
+<p><strong>How much are they raising: </strong>£25,000</p>
+<p><strong>Website: </strong>www.everrhythm.health</p>
+<p><strong>SEIS/EIS? </strong>N/A</p>
+<p><strong>About:</strong> EverRhythm is a platform being built to help people keep a record of how they feel to be able to look back at how their wellbeing changes over time.</p>
+<p>The platform puts privacy at the centre of the process while giving people space to record what they&#8217;re experiencing, notice patterns and decide what they want to share. Having something to refer back to can also make it easier to explain those experiences in a conversation with healthcare professionals. While it&#8217;s not intended to offer a diagnosis or replace professional care, the focus is on helping people understand their own experiences.</p>
+<p><strong>Where to invest: </strong>Crowdfunder</p>
+<p>&nbsp;</p>
+<h3 style="text-align: center;">4. Gemsza</h3>
+<p>&nbsp;</p>
+<p><img loading="lazy" decoding="async" class="wp-image-161369 aligncenter" src="https://techround.co.uk/wp-content/uploads/2026/10/Screenshot-2026-10-14-at-09.15.11.jpg" alt="Gemsza Logo" width="175" height="66" srcset="https://techround.co.uk/wp-content/uploads/2026/10/Screenshot-2026-10-14-at-09.15.11.jpg 282w, https://techround.co.uk/wp-content/uploads/2026/10/Screenshot-2026-10-14-at-09.15.11-180x68.jpg 180w" sizes="auto, (max-width: 175px) 100vw, 175px" /></p>
+<p>&nbsp;</p>
+<p><strong>How much are they raising: </strong>£30,000</p>
+<p><strong>Website: </strong>www.gemsza.com</p>
+<p><strong>SEIS/EIS? </strong>N/A</p>
+<p><strong>About:</strong> Gemsza is a marketplace where sellers can choose an auction or buy now price with no seller fees so buyers pay a premium at checkout while sellers keep their asking price.</p>
+<p>The platform also offers AI tools that turn uploaded photos into titles and descriptions for sellers to check before publishing, which comes in handy if there is a lot to list &#8211; that often ends up putting people off entirely. It&#8217;s intended to offer an alternative to familiar names like Vinted and eBay but ensuring that sellers receive the full amount they&#8217;re asking for with no surprise charges.</p>
+<p><strong>Where to invest: </strong>Crowdfunder</p>
+<p>&nbsp;</p>
+<h3 style="text-align: center;">5. Curcle</h3>
+<p>&nbsp;</p>
+<p><img loading="lazy" decoding="async" class="wp-image-161370 aligncenter" src="https://techround.co.uk/wp-content/uploads/2026/10/Screenshot-2026-10-14-at-09.20.46.jpg" alt="Curcle-logo" width="186" height="60" /></p>
+<p>&nbsp;</p>
+<p><strong>How much are they raising: </strong>£30,000</p>
+<p><strong>Website: </strong>N/A</p>
+<p><strong>SEIS/EIS? </strong>N/A</p>
+<p><strong>About:</strong> Curcle is a platform being developed for communities to bring residents together around specific issues that they want their MP to address.</p>
+<p>The app combines a local community feed with a way to raise shared concerns, allowing residents to post an issue and gather support from verified constituents. Once there&#8217;s enough backing, the concern goes to their MP as a single submission showing how many residents are being affected, with space for a public response. Given that there&#8217;s often so many conversations that happen without ever reaching someone who can help, the aim is to make local priorities easier to see and follow up.</p>
+<p><strong>Where to invest: </strong>Crowdfunder</p>
+<div class='yarpp yarpp-related yarpp-related-website yarpp-template-yarpp-template-custom'>
+
+<h2 class="mt-8 mb-4 text-black">Related Articles</h2>
+<div class="flex related-articles-wrap">
+			<div class="related-article-item flex flex-col w-full lg:w-1/3 mr-4" style="min-height: 220px">
+					<a href="https://techround.co.uk/startups/top-fashion-startups-in-japan/" rel="bookmark norewrite" title="Top Fashion Startups In Japan">
+				<div style="background-image: url(https://techround.co.uk/wp-content/uploads/2026/07/top-fashion-startups-japan-660x220.jpg);" class="w-full h-32 mb-0 bg-center bg-no-repeat bg-cover"></div>
+			</a>
+						<a href="https://techround.co.uk/category/startups/" class="mb-2 story-category">
+				<span class="inline-block pl-1 pr-2 mt-3 mb-0 text-base text-black">Startups</span>
+			</a>
+						<a href="https://techround.co.uk/startups/top-fashion-startups-in-japan/" rel="bookmark norewrite" title="Top Fashion Startups In Japan" class="article-title-link">
+				<h2 class="mt-0 mb-2 text-black hover:text-primary">Top Fashion Startups In Japan</h2>
+			</a>
+			<div class="flex items-center mt-3">
+				<p class="text-xs leading-none text-black">
+					<span class="font-extrabold tracking-widest uppercase the-author">TechRound Team</span>
+					<span class="block">July 22, 2026</span>
+				</p>
+			</div>
+					</div>
+			<div class="related-article-item flex flex-col w-full lg:w-1/3 mr-4" style="min-height: 220px">
+					<a href="https://techround.co.uk/startups/could-trumps-paid-early-access-truth-social-plan-create-a-new-generation-of-political-intelligence-startups/" rel="bookmark norewrite" title="Could Trump&#8217;s Paid Early-Access Truth Social Plan Create A New Generation Of Political Intelligence Startups?">
+				<div style="background-image: url(https://techround.co.uk/wp-content/uploads/2026/08/truth-social-660x220.jpg);" class="w-full h-32 mb-0 bg-center bg-no-repeat bg-cover"></div>
+			</a>
+						<a href="https://techround.co.uk/category/startups/" class="mb-2 story-category">
+				<span class="inline-block pl-1 pr-2 mt-3 mb-0 text-base text-black">Startups</span>
+			</a>
+						<a href="https://techround.co.uk/startups/could-trumps-paid-early-access-truth-social-plan-create-a-new-generation-of-political-intelligence-startups/" rel="bookmark norewrite" title="Could Trump&#8217;s Paid Early-Access Truth Social Plan Create A New Generation Of Political Intelligence Startups?" class="article-title-link">
+				<h2 class="mt-0 mb-2 text-black hover:text-primary">Could Trump&#8217;s Paid Early-Access Truth Social Plan Create A New Generation Of Political Intelligence Startups?</h2>
+			</a>
+			<div class="flex items-center mt-3">
+				<p class="text-xs leading-none text-black">
+					<span class="font-extrabold tracking-widest uppercase the-author">Gina Marrs</span>
+					<span class="block">August 6, 2026</span>
+				</p>
+			</div>
+					</div>
+			<div class="related-article-item flex flex-col w-full lg:w-1/3 " style="min-height: 220px">
+					<a href="https://techround.co.uk/startups/startup-of-the-week-carea/" rel="bookmark norewrite" title="Startup of the Week: Carea">
+				<div style="background-image: url(https://techround.co.uk/wp-content/uploads/2026/08/startup-of-the-week-carea-scaled-1-660x220.jpg);" class="w-full h-32 mb-0 bg-center bg-no-repeat bg-cover"></div>
+			</a>
+						<a href="https://techround.co.uk/category/startups/" class="mb-2 story-category">
+				<span class="inline-block pl-1 pr-2 mt-3 mb-0 text-base text-black">Startups</span>
+			</a>
+						<a href="https://techround.co.uk/startups/startup-of-the-week-carea/" rel="bookmark norewrite" title="Startup of the Week: Carea" class="article-title-link">
+				<h2 class="mt-0 mb-2 text-black hover:text-primary">Startup of the Week: Carea</h2>
+			</a>
+			<div class="flex items-center mt-3">
+				<p class="text-xs leading-none text-black">
+					<span class="font-extrabold tracking-widest uppercase the-author">Micayla de Fleuriot</span>
+					<span class="block">August 10, 2026</span>
+				</p>
+			</div>
+					</div>
+	</div>
+</div>
+    </div>
+
+        
+    <!-- .entry-content -->
+
+</article><!-- #post-## -->
+                    </main><!-- #main -->
+                </section><!-- #primary -->
+            </div>
+
+        <div class="w-full lg:w-1/4 lg:pl-6 lg:border-l lg:border-black lg:border-opacity-10">
+            
+<aside id="secondary" class="widget-area" role="complementary">
+	<section id="custom_html-2" class="widget_text widget widget_custom_html"><div class="textwidget custom-html-widget"><br> <br> <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script> <!-- Square Sidebar Ads --> <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4147988245985195" data-ad-slot="3465947961" data-ad-format="auto" data-full-width-responsive="true"></ins> <script> (adsbygoogle = window.adsbygoogle || []).push({}); </script> <br> <br></div></section><section id="text-11" class="widget widget_text">			<div class="textwidget"></div>
+		</section><section id="media_image-7" class="widget widget_media_image"><h3 class="widget-title">Startup of the Week: SnoreLab</h3><a href="https://techround.co.uk/startups/startup-of-the-week-snorelab/"><img width="1920" height="1080" src="https://techround.co.uk/wp-content/uploads/2026/10/SnoreLab-scaled-1.jpg" class="image wp-image-161953  attachment-full size-full" alt="" style="max-width: 100%; height: auto;" title="Startup of the Week: Neon Link" decoding="async" loading="lazy" srcset="https://techround.co.uk/wp-content/uploads/2026/10/SnoreLab-scaled-1.jpg 1920w, https://techround.co.uk/wp-content/uploads/2026/10/SnoreLab-scaled-1-300x169.jpg 300w, https://techround.co.uk/wp-content/uploads/2026/10/SnoreLab-scaled-1-768x432.jpg 768w, https://techround.co.uk/wp-content/uploads/2026/10/SnoreLab-scaled-1-1536x864.jpg 1536w, https://techround.co.uk/wp-content/uploads/2026/10/SnoreLab-scaled-1-1024x576.jpg 1024w, https://techround.co.uk/wp-content/uploads/2026/10/SnoreLab-scaled-1-730x410.jpg 730w, https://techround.co.uk/wp-content/uploads/2026/10/SnoreLab-scaled-1-142x80.jpg 142w" sizes="auto, (max-width: 1920px) 100vw, 1920px" /></a></section><section id="text-14" class="widget widget_text">			<div class="textwidget"></div>
+		</section><section id="mc4wp_form_widget-4" class="widget widget_mc4wp_form_widget"><h3 class="widget-title">Sign up to our newsletter&#8230;</h3><script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.14.1 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-153806 mc4wp-form-theme mc4wp-form-theme-light" method="post" data-id="153806" data-name="Newsletter" ><div class="mc4wp-form-fields"><input type="email" id="email" name="EMAIL" placeholder="Your e-mail address" autocomplete="email" style="width: 100% !important;" required>
+
+<p>
+	<input type="submit" value="Sign up" style="margin-top: 10px; width: 100%; background-color: #36F1CD !important; border:0px !important;">
+</p></div><label style="display: none !important;">Leave this field empty if you&#039;re human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off" /></label><input type="hidden" name="_mc4wp_timestamp" value="1792801826" /><input type="hidden" name="_mc4wp_form_id" value="153806" /><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1" /><div class="mc4wp-response"></div></form><!-- / Mailchimp for WordPress Plugin --></section><section id="text-10" class="widget widget_text">			<div class="textwidget"><p>&nbsp;</p>
+</div>
+		</section><section id="media_image-9" class="widget widget_media_image"><h3 class="widget-title">Find The Best Human Resources (HR) Management Software</h3><a href="https://techround.co.uk/guides/top-10-human-resources-software-services-uk/"><img width="5184" height="3888" src="https://techround.co.uk/wp-content/uploads/2019/03/human-resources-work-team.jpg" class="image wp-image-5932  attachment-full size-full" alt="HR software" style="max-width: 100%; height: auto;" title="Enter The BAME Top 50 Entrepreneurs - Deadline 10th Nov 2021" decoding="async" loading="lazy" srcset="https://techround.co.uk/wp-content/uploads/2019/03/human-resources-work-team.jpg 5184w, https://techround.co.uk/wp-content/uploads/2019/03/human-resources-work-team-300x225.jpg 300w, https://techround.co.uk/wp-content/uploads/2019/03/human-resources-work-team-768x576.jpg 768w, https://techround.co.uk/wp-content/uploads/2019/03/human-resources-work-team-1440x1080.jpg 1440w, https://techround.co.uk/wp-content/uploads/2019/03/human-resources-work-team-1024x768.jpg 1024w, https://techround.co.uk/wp-content/uploads/2019/03/human-resources-work-team-107x80.jpg 107w" sizes="auto, (max-width: 5184px) 100vw, 5184px" /></a></section><section id="custom_html-3" class="widget_text widget widget_custom_html"><div class="textwidget custom-html-widget"><br> <br> <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script> <!-- Square Sidebar Ads --> <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4147988245985195" data-ad-slot="3465947961" data-ad-format="auto" data-full-width-responsive="true"></ins> <script> (adsbygoogle = window.adsbygoogle || []).push({}); </script> <br> <br> </div></section></aside><!-- #secondary -->
+        </div>
+    
+        </div>
+    </div>
+</div>
+
+    </div><!-- #content -->
+            <div id="footer-widget" class="footer-widgets-section row m-0 section_padding ">
+            <div class="c">
+                <div class="row">
+                                            <div class="col-sm-12 col-md-3"><section id="text-2" class="widget widget_text"><h3 class="widget-title">Contact Us</h3>			<div class="textwidget"><p><a href="/cdn-cgi/l/email-protection#e0a481968984a0b4858388b28f958e84ce838fce958b"><b><span class="__cf_email__" data-cfemail="f4b095829d90b4a091979ca69b819a90da979bda819f">[email&#160;protected]</span></b></a></p>
+<p><strong><br />
+TechRound</strong></p>
+<p>83 Charlotte Street</p>
+<p>London W1T 4PR</p>
+<p>&nbsp;</p>
+<p><a class="w-full button normal-case" href="/download-our-media-pack/">Download our media pack</a></p>
+</div>
+		</section></div>
+                                                                <div class="col-sm-12 offset-md-1 col-md-5"><section id="mc4wp_form_widget-3" class="widget widget_mc4wp_form_widget"><h3 class="widget-title">Sign up to our newsletter&#8230;</h3><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.14.1 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-2" class="mc4wp-form mc4wp-form-153806 mc4wp-form-theme mc4wp-form-theme-light" method="post" data-id="153806" data-name="Newsletter" ><div class="mc4wp-form-fields"><input type="email" id="email" name="EMAIL" placeholder="Your e-mail address" autocomplete="email" style="width: 100% !important;" required>
+
+<p>
+	<input type="submit" value="Sign up" style="margin-top: 10px; width: 100%; background-color: #36F1CD !important; border:0px !important;">
+</p></div><label style="display: none !important;">Leave this field empty if you&#039;re human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off" /></label><input type="hidden" name="_mc4wp_timestamp" value="1792801826" /><input type="hidden" name="_mc4wp_form_id" value="153806" /><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-2" /><div class="mc4wp-response"></div></form><!-- / Mailchimp for WordPress Plugin --></section></div>
+                                                                <div class="col-sm-12 offset-md-1 col-md-2"><section id="text-16" class="widget widget_text"><h3 class="widget-title">Follow us</h3>			<div class="textwidget"><div class="social-media-icons"><a href="https://www.facebook.com/TechRoundUK" target="_blank" rel="noopener noreferrer"><img decoding="async" src="/wp-content/themes/techround-theme-child/assets/img/icon-facebook.svg" /></a><br />
+<a href="https://twitter.com/techrounduk" target="_blank" rel="noopener noreferrer"><img decoding="async" src="/wp-content/themes/techround-theme-child/assets/img/icon-twitter.svg" /></a><br />
+<a href="https://www.linkedin.com/company/techround/" target="_blank" rel="noopener noreferrer"><img decoding="async" src="/wp-content/themes/techround-theme-child/assets/img/icon-linkedin.svg" /></a><br />
+<a href="https://www.instagram.com/techrounduk/" target="_blank" rel="noopener noreferrer"><img decoding="async" src="/wp-content/themes/techround-theme-child/assets/img/icon-instagram.svg" /></a></div>
+</div>
+		</section></div>
+                                    </div>
+            </div>
+        </div>
+
+    <footer id="colophon" class="site-footer navbar-light bg-light" role="contentinfo">
+        <div class="pt-3 pb-3">
+            <div class="site-info">
+                <div class="c">
+                    <div class="row">
+                        <div class="text-left col-sm">
+                            <span>TechRound</span> &copy; Copyright 2026, <span>techround.co.uk </span>
+                        </div>
+						 <div class="text-center col-sm">
+                            <!--<a href="https://techround.co.uk/sitemap/"><span>Sitemap</span></a>-->
+                        </div>
+                        <div class="text-center col-sm">
+                            <a href="https://techround.co.uk/advertising-terms-conditions/"><span>Terms & Conditions</span></a>
+                        </div>
+                        <div class="text-right col-sm">
+                            <span>Celebrating Startups and Tech News in London and the UK</span>
+                        </div></div></div>
+            </div><!-- close .site-info -->
+        </div>
+    </footer><!-- #colophon -->
+</div><!-- #page -->
+
+        <!-- Meta Pixel Event Code -->
+        <script type='text/javascript'>
+        (function () {
+            function runPixelCode( response ) {
+                if ( ! response || ! response.data || ! response.data.fb_pxl_code ) {
+                    return;
+                }
+
+                try {
+                    new Function( response.data.fb_pxl_code )();
+                } catch ( e ) {
+                    console && console.warn
+                        && console.warn( 'Meta Pixel response parsing failed. Please check if your pixel is connected.', e );
+                }
+            }
+
+            var radio = window.nfRadio
+                || ( window.Backbone && window.Backbone.Radio );
+            if ( radio && radio.channel ) {
+                radio.channel( 'forms' ).on( 'submit:response', runPixelCode );
+            }
+
+            if ( window.jQuery ) {
+                window.jQuery( document ).on(
+                    'nfFormSubmitResponse',
+                    function ( event, data ) {
+                        if ( data && data.response ) {
+                            runPixelCode( data.response );
+                        }
+                    }
+                );
+            }
+        })();
+        </script>
+        <!-- End Meta Pixel Event Code -->
+                <!-- Meta Pixel Event Code -->
+        <script type='text/javascript'>
+        (function ( $ ) {
+            if ( ! $ || typeof document === 'undefined' ) {
+                return;
+            }
+            // WPForms triggers this jQuery event and passes the AJAX response object.
+            $( document ).on( 'wpformsAjaxSubmitSuccess', function ( event, data ) {
+                if ( data && data.data && data.data.fb_pxl_code ) {
+                    try {
+                        new Function( data.data.fb_pxl_code )();
+                    } catch ( e ) {
+                        console && console.warn && console.warn( 'Meta Pixel eval failed', e );
+                    }
+                }
+            } );
+        })( window.jQuery );
+        </script>
+        <!-- End Meta Pixel Event Code -->
+        <script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/techround-theme-child/*","/wp-content/themes/techround-theme/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<script>(function() {function maybePrefixUrlField () {
+  const value = this.value.trim()
+  if (value !== '' && value.indexOf('http') !== 0) {
+    this.value = 'http://' + value
+  }
+}
+
+const urlFields = document.querySelectorAll('.mc4wp-form input[type="url"]')
+for (let j = 0; j < urlFields.length; j++) {
+  urlFields[j].addEventListener('blur', maybePrefixUrlField)
+}
+})();</script><script id='kirki-viewport-lists'>var kirkiViewports = {"md":{"value":1200,"scale":1,"minWidth":1200,"maxWidth":1200,"title":"Desktop","icon":"desktop","activeIcon":"desktop-hover","id":"md","type":"max"},"tablet":{"value":991,"scale":1,"minWidth":991,"maxWidth":991,"title":"Tablet","icon":"tablet-default","activeIcon":"tablet-hover","type":"max","id":"tablet"},"mobileLandscape":{"value":767,"scale":1,"minWidth":767,"maxWidth":767,"title":"Landscape","icon":"phone-hr-default","activeIcon":"phone-hr-hover","type":"max","id":"mobileLandscape"},"mobile":{"value":575,"scale":1,"minWidth":575,"maxWidth":575,"title":"Mobile","icon":"phone-vr-default","activeIcon":"phone-vr-hover","type":"max","id":"mobile"}};</script><script id='kirki-variable-lists'>var kirkiCSSVariable = {"data":[{"title":"Colors","key":"color","modes":[{"title":"Default","key":"default"}],"variables":[]},{"title":"Numbers","key":"size","modes":[{"title":"Default","key":"default"}],"variables":[]},{"title":"Text Styles","key":"text-style","modes":[{"title":"Default","key":"default"}],"variables":[]},{"title":"Font Family","key":"font-family","modes":[{"title":"Default","key":"default"}],"variables":[]}]};</script><script id="kirki-api-and-nonce">
+    window.wp_kirki = {
+        ajaxUrl: "https://techround.co.uk/wp-admin/admin-ajax.php",
+        restUrl: "https://techround.co.uk/wp-json/",
+        siteUrl: "https://techround.co.uk",
+        apiVersion: "v1",
+        postId: "161365",
+        nonce: "85c3d1f9ff",
+        call_from: "",
+        templateId: "",
+        context: {"id":161365,"type":"post"}
+    };
+    </script>    <!-- Meta Pixel Event Code -->
+    <script type='text/javascript'>
+        document.addEventListener( 'wpcf7mailsent', function( event ) {
+        if( "fb_pxl_code" in event.detail.apiResponse){
+            eval(event.detail.apiResponse.fb_pxl_code);
+        }
+        }, false );
+    </script>
+    <!-- End Meta Pixel Event Code -->
+        <div id="fb-pxl-ajax-code"></div><div
+				id="hustle-popup-id-22"
+				class="hustle-ui hustle-popup hustle-palette--gray_slate hustle_module_id_22 module_id_22  "
+				
+			data-id="22"
+			data-render-id="0"
+			data-tracking="disabled"
+			
+				role="dialog"
+				aria-modal="true"
+				data-intro="no_animation"
+				data-outro="no_animation"
+				data-overlay-close="1"
+				data-close-delay="false"
+				
+				style="opacity: 0;"
+				aria-label="Calling all startups &amp; businesses... popup"
+			><div class="hustle-popup-mask hustle-optin-mask" aria-hidden="true"></div><div class="hustle-popup-content"><div class="hustle-info hustle-info--compact"><div class="hustle-main-wrapper"><div class="hustle-layout"><button class="hustle-button-icon hustle-button-close has-background">
+			<span class="hustle-icon-close" aria-hidden="true"></span>
+			<span class="hustle-screen-reader">Close this module</span>
+		</button><div class="hustle-image hustle-image-fit--cover" aria-hidden="true"><img src="https://techround.co.uk/wp-content/uploads/2022/11/techround-competitions-3.jpg" alt="" class="hustle-image-position--centercenter" /></div><div class="hustle-content"><div class="hustle-content-wrap"><div class="hustle-group-title"><h3 class="hustle-title">Calling all startups &amp; businesses...</h3><h4 class="hustle-subtitle">Competition season is here!</h4></div><div class="hustle-group-content"><p>We are delighted to announce that award submissions for 2022 are open. We are running the <span style="color: #339966"><strong><a style="color: #339966" href="https://techround.co.uk/guides/enter-the-techround-100/"><span style="text-decoration: underline">Techround 100</span></a></strong></span>, <strong><span style="color: #339966"><a style="color: #339966" href="https://techround.co.uk/bame-50/enter-the-techround-top-bame-50-under-50-entrepreneurs-2022/"><span style="text-decoration: underline">BAME 50</span></a></span></strong> and the <span style="color: #339966"><strong><a style="color: #339966" href="https://techround.co.uk/startups/enter-the-techround-top-29-under-29-entrepreneurs/"><span style="text-decoration: underline">29 under 29</span></a></strong></span> competitions.</p>
+<p>Enter now and get your business in front of an influential audience of over 300,000 monthly visitors.</p>
+</div><div class="hustle-cta-container"><a class="hustle-button hustle-button-cta " href="https://techround.co.uk/competitions/competitions-2022/" target="_blank" data-cta-type="cta">Enter Now</a></div></div></div></div></div><p class="hustle-nsa-link"><a href="#">No thanks, I’m not interested!</a></p></div></div></div><div class="hustle-ui hustle-float hustle_module_id_4 " 
+			data-id="4"
+			data-render-id="0"
+			data-tracking="disabled"
+			data-sub-type="floating"
+			
+					data-desktop="true"
+					data-desktop-offset="screen"
+					data-desktop-selector=""
+					data-desktop-positionX="right"
+					data-desktop-positionY="bottom"
+					
+					data-mobiles="true"
+					data-mobiles-offset="screen"
+					data-mobiles-selector=""
+					data-mobiles-positionX="left"
+					data-mobiles-positionY="bottom"
+					 style="opacity:0;"><div class="hustle-float-content"><div class="hustle-social hustle-social--default" data-custom="false" data-grid-desktop="stacked" data-grid-mobiles="stacked"><ul class="hustle-counter--none hustle-animated" data-animation="zoom"><li><a href="https://www.facebook.com/TechRoundUK" target="_blank" rel="noopener" class="hustle-share-icon hustle-share--facebook" data-network="facebook" data-counter="none" data-link="custom" data-count="0"><i class="hustle-icon-social-facebook" aria-hidden="true"></i><span class="hustle-screen-reader">Share on Facebook</span></a></li><li><a href="https://twitter.com/techrounduk" target="_blank" rel="noopener" class="hustle-share-icon hustle-share--twitter" data-network="twitter" data-counter="none" data-link="custom" data-count="0"><i class="hustle-icon-social-twitter" aria-hidden="true"></i><span class="hustle-screen-reader">Share on Twitter</span></a></li><li><a href="https://www.linkedin.com/company/techround/" target="_blank" rel="noopener" class="hustle-share-icon hustle-share--linkedin" data-network="linkedin" data-counter="none" data-link="custom" data-count="0"><i class="hustle-icon-social-linkedin" aria-hidden="true"></i><span class="hustle-screen-reader">Share on LinkedIn</span></a></li><li><a href="https://www.instagram.com/techrounduk/" target="_blank" rel="noopener" class="hustle-share-icon hustle-share--instagram" data-network="instagram" data-counter="none" data-link="custom" data-count="0"><i class="hustle-icon-social-instagram" aria-hidden="true"></i><span class="hustle-screen-reader">Share on Instagram</span></a></li></ul></div></div></div><script id="jquery-ui-core-js-before">
+jQuery.uiBackCompat = true;
+//# sourceURL=jquery-ui-core-js-before
+</script>
+<script id="jquery-ui-core-js" src="https://techround.co.uk/wp-includes/js/jquery/ui/core.min.js?ver=1.14.2"></script>
+<script id="jquery-ui-menu-js" src="https://techround.co.uk/wp-includes/js/jquery/ui/menu.min.js?ver=1.14.2"></script>
+<script id="wp-dom-ready-js" src="https://techround.co.uk/wp-includes/js/dist/dom-ready.min.js?ver=3fe927cab37bf38d6a23"></script>
+<script id="wp-hooks-js" src="https://techround.co.uk/wp-includes/js/dist/hooks.min.js?ver=f0f188028580e8dc1255"></script>
+<script id="wp-i18n-js" src="https://techround.co.uk/wp-includes/js/dist/i18n.min.js?ver=1dfe7db3940c23ea9216"></script>
+<script id="wp-i18n-js-after">
+wp.i18n.setLocaleData( { 'text direction\u0004ltr': [ 'ltr' ] } );
+//# sourceURL=wp-i18n-js-after
+</script>
+<script id="wp-a11y-js-translations">
+( function( domain, translations ) {
+	var localeData = translations.locale_data[ domain ] || translations.locale_data.messages;
+	localeData[""].domain = domain;
+	wp.i18n.setLocaleData( localeData, domain );
+} )( "default", {"translation-revision-date":"2026-08-13 19:20:04+0000","generator":"GlotPress\/4.1.0","domain":"messages","locale_data":{"messages":{"":{"domain":"messages","plural-forms":"nplurals=2; plural=n != 1;","lang":"en_GB"},"Notifications":["Notifications"]}},"comment":{"reference":"wp-includes\/js\/dist\/a11y.js"}} );
+//# sourceURL=wp-a11y-js-translations
+</script>
+<script id="wp-a11y-js" src="https://techround.co.uk/wp-includes/js/dist/a11y.min.js?ver=31c6cec5a4ff7aff483d"></script>
+<script id="jquery-ui-autocomplete-js" src="https://techround.co.uk/wp-includes/js/jquery/ui/autocomplete.min.js?ver=1.14.2"></script>
+<script id="theme-my-login-js-extra">
+var themeMyLogin = {"action":"","errors":[],"autofocus":"1","showPasswordLabel":"Show password","hidePasswordLabel":"Hide password","ajaxErrorMessage":"An error occurred while processing your request. Please try again later."};
+//# sourceURL=theme-my-login-js-extra
+</script>
+<script id="theme-my-login-js" src="https://techround.co.uk/wp-content/plugins/theme-my-login/assets/scripts/theme-my-login.min.js?ver=7.3.1"></script>
+<script id="wp-bootstrap-starter-popper-js" src="https://techround.co.uk/wp-content/themes/techround-theme/inc/assets/js/popper.min.js?ver=7.1.3"></script>
+<script id="wp-bootstrap-starter-bootstrapjs-js" src="https://techround.co.uk/wp-content/themes/techround-theme/inc/assets/js/bootstrap.min.js?ver=7.1.3"></script>
+<script id="wp-bootstrap-starter-themejs-js" src="https://techround.co.uk/wp-content/themes/techround-theme/inc/assets/js/theme-script.min.js?ver=7.1.3"></script>
+<script id="wp-bootstrap-starter-skip-link-focus-fix-js" src="https://techround.co.uk/wp-content/themes/techround-theme/inc/assets/js/skip-link-focus-fix.min.js?ver=20151215"></script>
+<script id="hui_scripts-js-extra">
+var hustleSettings = {"mobile_breakpoint":"782"};
+//# sourceURL=hui_scripts-js-extra
+</script>
+<script id="hui_scripts-js" src="https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/hustle-ui/js/hustle-ui.min.js?ver=7.8.14"></script>
+<script id="underscore-js" src="https://techround.co.uk/wp-includes/js/underscore.min.js?ver=1.13.8"></script>
+<script id="hustle_front-js-extra">
+var Modules = [{"settings":{"auto_close_success_message":"0","triggers":{"on_time_delay":"","on_time_unit":"seconds","on_scroll":"scrolled","on_scroll_page_percent":20,"on_scroll_css_selector":"","enable_on_click_element":"1","on_click_element":"","enable_on_click_shortcode":"1","on_exit_intent_per_session":"1","on_exit_intent_delayed_time":"0","on_exit_intent_delayed_unit":"seconds","on_adblock_delay":"0","on_adblock_delay_unit":"seconds","trigger":[]},"animation_in":"no_animation","animation_out":"no_animation","after_close":"no_show_all","expiration":"1","expiration_unit":"days","after_optin_expiration":365,"after_optin_expiration_unit":"days","after_cta_expiration":365,"after_cta2_expiration":365,"after_cta_expiration_unit":"days","after_cta2_expiration_unit":"days","on_submit":"nothing","on_submit_delay":"5","on_submit_delay_unit":"seconds","close_cta":"0","close_cta_time":"0","close_cta_unit":"seconds","hide_after_cta":"no_show_all","hide_after_cta2":"keep_show","hide_after_subscription":"no_show_all","is_schedule":"0","schedule":{"not_schedule_start":"1","start_date":"12/16/2021","start_hour":"12","start_minute":"00","start_meridiem_offset":"am","not_schedule_end":"1","end_date":"12/22/2021","end_hour":"11","end_minute":"59","end_meridiem_offset":"pm","active_days":"all","week_days":[],"is_active_all_day":"1","day_start_hour":"00","day_start_minute":"00","day_start_meridiem_offset":"am","day_end_hour":"11","day_end_minute":"59","day_end_meridiem_offset":"pm","time_to_use":"server","custom_timezone":"UTC"},"allow_scroll_page":"0","close_on_background_click":"1","auto_hide":"0","auto_hide_unit":"seconds","auto_hide_time":"5","after_close_trigger":["click_close_icon","click_outside"]},"module_id":"22","blog_id":"0","module_name":"2022 Competitions","module_type":"popup","active":"1","module_mode":"informational"},{"module_id":"4","blog_id":"0","module_name":"Social media","module_type":"social_sharing","active":"1","module_mode":""}];
+var incOpt = {"conditional_tags":{"is_single":true,"is_singular":true,"is_tag":false,"is_category":false,"is_author":false,"is_date":false,"is_post_type_archive":false,"is_404":false,"is_front_page":false,"is_search":false},"is_admin":"","real_page_id":"","thereferrer":"","actual_url":"http://techround.co.uk/startups/meet-the-startups-crowdfunding-w-c-12-10-2026/","full_actual_url":"https://techround.co.uk/startups/meet-the-startups-crowdfunding-w-c-12-10-2026/","native_share_enpoints":{"facebook":"https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026","twitter":"https://twitter.com/intent/tweet?url=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026&text=Meet%20The%20Startups%20Crowdfunding%20w%2Fc%2012.10.2026","pinterest":"https://www.pinterest.com/pin/create/button/?url=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026","reddit":"https://www.reddit.com/submit?url=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026","linkedin":"https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026","vkontakte":"https://vk.com/share.php?url=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026","whatsapp":"https://api.whatsapp.com/send?text=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026","telegram":"https://t.me/share/url?url=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026&text=Meet%20The%20Startups%20Crowdfunding%20w%2Fc%2012.10.2026","email":"mailto:?subject=Meet%20The%20Startups%20Crowdfunding%20w%2Fc%2012.10.2026&body=https%3A%2F%2Ftechround.co.uk%2Fstartups%2Fmeet-the-startups-crowdfunding-w-c-12-10-2026"},"ajaxurl":"https://techround.co.uk/wp-admin/admin-ajax.php","page_id":"161365","page_slug":"startups-meet-the-startups-crowdfunding-w-c-12-10-2026","is_upfront":"","script_delay":"3000","display_check_nonce":"23e9f8a5c4","conversion_nonce":"24cde51938","form_submit_nonce":"be9c642877"};
+//# sourceURL=hustle_front-js-extra
+</script>
+<script id="hustle_front-js" src="https://techround.co.uk/wp-content/plugins/wordpress-popup/assets/js/front.min.js?ver=7.8.14"></script>
+<script id="mc4wp-forms-api-js" defer src="https://techround.co.uk/wp-content/plugins/mailchimp-for-wp/assets/js/forms.js?ver=4.14.1"></script>
+<script id="wp-emoji-settings" type="application/json">
+{"baseUrl":"https://s.w.org/images/core/emoji/17.0.2/72x72/","ext":".png","svgUrl":"https://s.w.org/images/core/emoji/17.0.2/svg/","svgExt":".svg","source":{"concatemoji":"https://techround.co.uk/wp-includes/js/wp-emoji-release.min.js?ver=7.1.3"}}
+</script>
+<script type="module">
+/*! This file is auto-generated */
+var e="script#wp-emoji-settings",t=document.querySelector(e);if(!(t instanceof HTMLScriptElement))throw new Error("Element missing: "+e);const r=JSON.parse(t.text),s=(window._wpemojiSettings=r,"wpEmojiSettingsSupports"),o=["flag","emoji"];function i(e){try{var t={supportTests:e,timestamp:(new Date).valueOf()};sessionStorage.setItem(s,JSON.stringify(t))}catch(e){}}function c(e,t,n){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);t=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(n,0,0);const r=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);return t.every((e,t)=>e===r[t])}function p(e,t){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);var n=e.getImageData(16,16,1,1);for(let e=0;e<n.data.length;e++)if(0!==n.data[e])return!1;return!0}function u(e,t,n,r){switch(t){case"flag":return n(e,"\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!n(e,"\ud83c\udde8\ud83c\uddf6","\ud83c\udde8\u200b\ud83c\uddf6")&&!n(e,"\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!r(e,"\ud83e\u1fac8")}return!1}function f(e,t,n,r){let a;const s=(a="undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):document.createElement("canvas")).getContext("2d",{willReadFrequently:!0}),o=(s.textBaseline="top",s.font="600 32px Arial",{});return e.forEach(e=>{o[e]=t(s,e,n,r)}),o}function a(e){var t=document.createElement("script");t.src=e,t.defer=!0,document.head.appendChild(t)}r.supports={everything:!0,everythingExceptFlag:!0},new Promise(t=>{let n=function(){try{var e=JSON.parse(sessionStorage.getItem(s));if("object"==typeof e&&"number"==typeof e.timestamp&&(new Date).valueOf()<e.timestamp+604800&&"object"==typeof e.supportTests)return e.supportTests}catch(e){}return null}();if(!n){if("undefined"!=typeof Worker&&"undefined"!=typeof OffscreenCanvas&&"undefined"!=typeof URL&&URL.createObjectURL&&"undefined"!=typeof Blob)try{var e="postMessage("+f.toString()+"("+[JSON.stringify(o),u.toString(),c.toString(),p.toString()].join(",")+"));",r=new Blob([e],{type:"text/javascript"});const a=new Worker(URL.createObjectURL(r),{name:"wpTestEmojiSupports"});return void(a.onmessage=e=>{i(n=e.data),a.terminate(),t(n)})}catch(e){}i(n=f(o,u,c,p))}t(n)}).then(e=>{for(const n in e)r.supports[n]=e[n],r.supports.everything=r.supports.everything&&r.supports[n],"flag"!==n&&(r.supports.everythingExceptFlag=r.supports.everythingExceptFlag&&r.supports[n]);var t;r.supports.everythingExceptFlag=r.supports.everythingExceptFlag&&!r.supports.flag,r.supports.everything||((t=r.source||{}).concatemoji?a(t.concatemoji):t.wpemoji&&t.twemoji&&(a(t.twemoji),a(t.wpemoji)))});
+//# sourceURL=https://techround.co.uk/wp-includes/js/wp-emoji-loader.min.js
+</script>
+
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function() {
+  var openBtn = document.getElementById("openSearch");
+  var closeBtn = document.getElementById("closeSearch");
+  var overlay = document.getElementById("searchBox");
+  var input = overlay.querySelector("input");
+
+  // Open overlay
+  openBtn.addEventListener("click", function() {
+    overlay.style.display = "flex";
+    setTimeout(() => {
+      input.focus();
+    }, 100);
+  });
+
+  // Close overlay (button)
+  closeBtn.addEventListener("click", function() {
+    overlay.style.display = "none";
+  });
+
+  // Close on ESC
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+      overlay.style.display = "none";
+    }
+  });
+
+  // Close when clicking outside the input/button
+  overlay.addEventListener("click", function(e) {
+    // if clicked directly on overlay (not on input or its children)
+    if (e.target === overlay) {
+
+      overlay.style.display = "none";
+    }
+  });
+});
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4f4df734ba7ed75',t:'MTc5MjgwMTgyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

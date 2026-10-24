@@ -11,7 +11,13 @@ import spinouts from "@/data/research-pool/2026-10-23-spinouts.json";
 import news from "@/data/research-pool/2026-10-23-news.json";
 import angelNetworks from "@/data/research-pool/2026-10-23-angel-networks.json";
 import eisPlatforms from "@/data/research-pool/2026-10-23-eis-platforms.json";
+import deepA from "@/data/research-pool/2026-10-24-deep-A.json";
+import deepB from "@/data/research-pool/2026-10-24-deep-B.json";
+import deepC from "@/data/research-pool/2026-10-24-deep-C.json";
+import deepD from "@/data/research-pool/2026-10-24-deep-D.json";
+import deepE from "@/data/research-pool/2026-10-24-deep-E.json";
+import deepF from "@/data/research-pool/2026-10-24-deep-F.json";
 
 type PoolFile = { label: string; payload: unknown };
 
-export const RESEARCH_POOL: { label: string; data: unknown }[] = ([eisPlatforms, angelNetworks, accelerators, spinouts, crowdfunding, news] as PoolFile[]).map((f) => ({ label: f.label, data: f.payload }));
+export const RESEARCH_POOL: { label: string; data: unknown }[] = ([eisPlatforms, angelNetworks, accelerators, spinouts, crowdfunding, news, deepA, deepB, deepC, deepD, deepE, deepF] as PoolFile[]).map((f) => ({ label: f.label, data: f.payload }));
